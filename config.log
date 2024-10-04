@@ -151,136 +151,86 @@ configure:4205: checking dependency style of gcc
 configure:4317: result: none
 configure:4332: checking whether make sets $(MAKE)
 configure:4355: result: yes
-configure:4412: checking for a Python interpreter with version >= 2.6
-configure:4430: python -c import sys # split strings by '.' and convert to numeric. Append some zeros # because we need at least 4 digits for the hex conversion. # map returns an iterator in Python 3.0 and a list in 2.x minver = list(map(int, '2.6'.split('.'))) + [0, 0, 0] minverhex = 0 # xrange is not present in Python 3.0 and range returns an iterator for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i] sys.exit(sys.hexversion < minverhex)
-configure:4433: $? = 0
-configure:4440: result: python
-configure:4448: checking for python
-configure:4471: found /usr/bin/python
-configure:4483: result: /usr/bin/python
-configure:4500: checking for python version
-configure:4508: result: 3.10
-configure:4513: checking for python platform
-configure:4521: result: linux
-configure:4582: checking for GNU default python prefix
-configure:4584: result: ${prefix}
-configure:4650: checking for GNU default python exec_prefix
-configure:4652: result: ${exec_prefix}
-configure:4683: checking for python script directory (pythondir)
-configure:4725: result: ${PYTHON_PREFIX}/lib/python3.10/site-packages
-configure:4733: checking for python extension module directory (pyexecdir)
-configure:4775: result: ${PYTHON_EXEC_PREFIX}/lib/python3.10/site-packages
-configure:4792: checking for stdio.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for stdlib.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for string.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for inttypes.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for stdint.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for strings.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for sys/stat.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for sys/types.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4792: checking for unistd.h
-configure:4792: gcc -c -g -O2  conftest.c >&5
-configure:4792: $? = 0
-configure:4792: result: yes
-configure:4820: checking for /usr/include/python3.10/Python.h
-configure:4820: gcc -c -g -O2  conftest.c >&5
-configure:4820: $? = 0
-configure:4820: result: yes
-configure:4890: checking for pkg-config
-configure:4913: found /usr/bin/pkg-config
-configure:4925: result: /usr/bin/pkg-config
-configure:4950: checking pkg-config is at least version 0.9.0
-configure:4953: result: yes
-configure:5042: checking for pkg-config
-configure:5077: result: /usr/bin/pkg-config
-configure:5102: checking pkg-config is at least version 0.7
-configure:5105: result: yes
-configure:5115: checking for GTK+ - version >= 2.0.0
-configure:5226: gcc -o conftest -g -O2 -pthread -I/usr/include/gtk-2.0 -I/usr/lib/x86_64-linux-gnu/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/x86_64-linux-gnu -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/fribidi -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/libpng16   conftest.c -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lharfbuzz -lfontconfig -lfreetype  >&5
-In file included from /usr/include/gtk-2.0/gtk/gtkobject.h:37,
-                 from /usr/include/gtk-2.0/gtk/gtkwidget.h:36,
-                 from /usr/include/gtk-2.0/gtk/gtkcontainer.h:35,
-                 from /usr/include/gtk-2.0/gtk/gtkbin.h:35,
-                 from /usr/include/gtk-2.0/gtk/gtkwindow.h:36,
-                 from /usr/include/gtk-2.0/gtk/gtkdialog.h:35,
-                 from /usr/include/gtk-2.0/gtk/gtkaboutdialog.h:32,
-                 from /usr/include/gtk-2.0/gtk/gtk.h:33,
-                 from conftest.c:23:
-/usr/include/gtk-2.0/gtk/gtktypeutils.h:236:1: warning: 'GTypeDebugFlags' is deprecated [-Wdeprecated-declarations]
-  236 | void            gtk_type_init   (GTypeDebugFlags    debug_flags);
-      | ^~~~
-In file included from /usr/include/glib-2.0/gobject/gobject.h:24,
-                 from /usr/include/glib-2.0/gobject/gbinding.h:29,
-                 from /usr/include/glib-2.0/glib-object.h:22,
-                 from /usr/include/glib-2.0/gio/gioenums.h:28,
-                 from /usr/include/glib-2.0/gio/giotypes.h:28,
-                 from /usr/include/glib-2.0/gio/gio.h:26,
-                 from /usr/include/gtk-2.0/gdk/gdkapplaunchcontext.h:30,
-                 from /usr/include/gtk-2.0/gdk/gdk.h:32,
-                 from /usr/include/gtk-2.0/gtk/gtk.h:32,
-                 from conftest.c:23:
-/usr/include/glib-2.0/gobject/gtype.h:698:1: note: declared here
-  698 | {
-      | ^
-In file included from /usr/include/gtk-2.0/gtk/gtktoolitem.h:31,
-                 from /usr/include/gtk-2.0/gtk/gtktoolbutton.h:30,
-                 from /usr/include/gtk-2.0/gtk/gtkmenutoolbutton.h:30,
-                 from /usr/include/gtk-2.0/gtk/gtk.h:126,
-                 from conftest.c:23:
-/usr/include/gtk-2.0/gtk/gtktooltips.h:73:3: warning: 'GTimeVal' is deprecated: Use 'GDateTime' instead [-Wdeprecated-declarations]
-   73 |   GTimeVal last_popdown;
-      |   ^~~~~~~~
-In file included from /usr/include/glib-2.0/glib/galloca.h:32,
-                 from /usr/include/glib-2.0/glib.h:30,
-                 from /usr/include/glib-2.0/gobject/gbinding.h:28,
-                 from /usr/include/glib-2.0/glib-object.h:22,
-                 from /usr/include/glib-2.0/gio/gioenums.h:28,
-                 from /usr/include/glib-2.0/gio/giotypes.h:28,
-                 from /usr/include/glib-2.0/gio/gio.h:26,
-                 from /usr/include/gtk-2.0/gdk/gdkapplaunchcontext.h:30,
-                 from /usr/include/gtk-2.0/gdk/gdk.h:32,
-                 from /usr/include/gtk-2.0/gtk/gtk.h:32,
-                 from conftest.c:23:
-/usr/include/glib-2.0/glib/gtypes.h:553:8: note: declared here
-  553 | struct _GTimeVal
-      |        ^~~~~~~~~
-configure:5226: $? = 0
-configure:5226: ./conftest
-configure:5226: $? = 0
-configure:5241: result: yes (version 2.24.33)
-configure:5372: checking for pkg-config
-configure:5407: result: /usr/bin/pkg-config
-configure:5432: checking pkg-config is at least version 0.16
-configure:5435: result: yes
-configure:5452: checking for PyGOBJ - version >= 3.0
-configure:5479: result: no
-configure:5589: checking that generated files are newer than configure
-configure:5595: result: done
-configure:5618: creating ./config.status
+configure:4429: checking for a Python interpreter with version >= 3.10
+configure:4447: python -c import sys # split strings by '.' and convert to numeric. Append some zeros # because we need at least 4 digits for the hex conversion. # map returns an iterator in Python 3.0 and a list in 2.x minver = list(map(int, '3.10'.split('.'))) + [0, 0, 0] minverhex = 0 # xrange is not present in Python 3.0 and range returns an iterator for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i] sys.exit(sys.hexversion < minverhex)
+configure:4450: $? = 0
+configure:4457: result: python
+configure:4465: checking for python
+configure:4488: found /usr/bin/python
+configure:4500: result: /usr/bin/python
+configure:4517: checking for python version
+configure:4525: result: 3.10
+configure:4530: checking for python platform
+configure:4538: result: linux
+configure:4599: checking for GNU default python prefix
+configure:4601: result: ${prefix}
+configure:4667: checking for GNU default python exec_prefix
+configure:4669: result: ${exec_prefix}
+configure:4700: checking for python script directory (pythondir)
+configure:4742: result: ${PYTHON_PREFIX}/lib/python3.10/site-packages
+configure:4750: checking for python extension module directory (pyexecdir)
+configure:4792: result: ${PYTHON_EXEC_PREFIX}/lib/python3.10/site-packages
+configure:4803: result: Python Version is 3.10
+configure:4810: checking for stdio.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for stdlib.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for string.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for inttypes.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for stdint.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for strings.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for sys/stat.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for sys/types.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4810: checking for unistd.h
+configure:4810: gcc -c -g -O2  conftest.c >&5
+configure:4810: $? = 0
+configure:4810: result: yes
+configure:4838: checking for /usr/include/python3.10/Python.h
+configure:4838: gcc -c -g -O2  conftest.c >&5
+configure:4838: $? = 0
+configure:4838: result: yes
+configure:4931: checking for pkg-config
+configure:4954: found /usr/bin/pkg-config
+configure:4966: result: /usr/bin/pkg-config
+configure:4991: checking pkg-config is at least version 0.16
+configure:4994: result: yes
+configure:5007: checking for GTK+ - version >= 3.0.0
+configure:5115: gcc -o conftest -g -O2 -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/harfbuzz -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/x86_64-linux-gnu -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include   conftest.c -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0  >&5
+configure:5115: $? = 0
+configure:5115: ./conftest
+configure:5115: $? = 0
+configure:5130: result: yes (version 3.24.33)
+configure:5261: checking for pkg-config
+configure:5296: result: /usr/bin/pkg-config
+configure:5321: checking pkg-config is at least version 0.16
+configure:5324: result: yes
+configure:5341: checking for PyGOBJ - version >= 3.0
+configure:5368: result: no
+configure:5478: checking that generated files are newer than configure
+configure:5484: result: done
+configure:5507: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -300,6 +250,7 @@ on dell007
 config.status:868: creating Makefile
 config.status:868: creating pyimgrec/Makefile
 config.status:868: creating config.h
+config.status:1049: config.h is unchanged
 config.status:1097: executing depfiles commands
 
 ## ---------------- ##
@@ -365,7 +316,7 @@ am_cv_python_version=3.10
 ## Output variables. ##
 ## ----------------- ##
 
-ACLOCAL='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing'\'' aclocal-1.16'
+ACLOCAL='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/missing'\'' aclocal-1.16'
 AMDEPBACKSLASH='\'
 AMDEP_FALSE='#'
 AMDEP_TRUE=''
@@ -374,9 +325,9 @@ AM_BACKSLASH='\'
 AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
 AM_DEFAULT_VERBOSITY='1'
 AM_V='$(V)'
-AUTOCONF='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing'\'' autoconf'
-AUTOHEADER='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing'\'' autoheader'
-AUTOMAKE='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing'\'' automake-1.16'
+AUTOCONF='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/missing'\'' autoconf'
+AUTOHEADER='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/missing'\'' autoheader'
+AUTOMAKE='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/missing'\'' automake-1.16'
 AWK='gawk'
 CC='gcc'
 CCDEPMODE='depmode=none'
@@ -392,8 +343,8 @@ ECHO_N='-n'
 ECHO_T=''
 ETAGS='etags'
 EXEEXT=''
-GTK_CFLAGS='-pthread -I/usr/include/gtk-2.0 -I/usr/lib/x86_64-linux-gnu/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/x86_64-linux-gnu -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/fribidi -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/libpng16'
-GTK_LIBS='-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lharfbuzz -lfontconfig -lfreetype'
+GTK_CFLAGS='-pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/harfbuzz -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/x86_64-linux-gnu -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include'
+GTK_LIBS='-lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0'
 INSTALL_DATA='${INSTALL} -m 644'
 INSTALL_PROGRAM='${INSTALL}'
 INSTALL_SCRIPT='${INSTALL}'
@@ -402,7 +353,7 @@ LDFLAGS=''
 LIBOBJS=''
 LIBS=''
 LTLIBOBJS=''
-MAKEINFO='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing'\'' makeinfo'
+MAKEINFO='${SHELL} '\''/home/peterglen/pgpygtk/pyimgrec/missing'\'' makeinfo'
 MKDIR_P='/usr/bin/mkdir -p'
 OBJEXT='o'
 PACKAGE='image-recognition'
@@ -450,7 +401,7 @@ host_alias=''
 htmldir='${docdir}'
 includedir='${prefix}/include'
 infodir='${datarootdir}/info'
-install_sh='${SHELL} /home/peterglen/pgpygtk/pyimgrec/pyimgrec/install-sh'
+install_sh='${SHELL} /home/peterglen/pgpygtk/pyimgrec/install-sh'
 libdir='${exec_prefix}/lib'
 libexecdir='${exec_prefix}/libexec'
 localedir='${datarootdir}/locale'
@@ -498,3 +449,38 @@ target_alias=''
 #define HAVE__USR_INCLUDE_PYTHON3_10_PYTHON_H 1
 
 configure: exit 0
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by Image Recognition config.status 1.0, which was
+generated by GNU Autoconf 2.71.  Invocation command line was
+
+  CONFIG_FILES    = 
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status config.h
+
+on dell007
+
+config.status:868: creating config.h
+config.status:1049: config.h is unchanged
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by Image Recognition config.status 1.0, which was
+generated by GNU Autoconf 2.71.  Invocation command line was
+
+  CONFIG_FILES    = 
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status Makefile
+
+on dell007
+
+config.status:868: creating Makefile

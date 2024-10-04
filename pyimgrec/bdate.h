@@ -1,1 +1,1 @@
-char *bdate = "1/1/1/ 2:2:2";
+char *bdate="Fri Oct  4 09:26:23 2024";

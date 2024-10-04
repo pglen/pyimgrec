@@ -161,12 +161,12 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing' aclocal-1.16
+ACLOCAL = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/missing' aclocal-1.16
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing' autoconf
-AUTOHEADER = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing' autoheader
-AUTOMAKE = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing' automake-1.16
+AUTOCONF = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/missing' autoconf
+AUTOHEADER = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/missing' autoheader
+AUTOMAKE = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/missing' automake-1.16
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=none
@@ -182,8 +182,8 @@ ECHO_N = -n
 ECHO_T = 
 ETAGS = etags
 EXEEXT = 
-GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/x86_64-linux-gnu/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/x86_64-linux-gnu -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/fribidi -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/libpng16
-GTK_LIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lharfbuzz -lfontconfig -lfreetype
+GTK_CFLAGS = -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/harfbuzz -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/x86_64-linux-gnu -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+GTK_LIBS = -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
@@ -193,7 +193,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/pyimgrec/missing' makeinfo
+MAKEINFO = ${SHELL} '/home/peterglen/pgpygtk/pyimgrec/missing' makeinfo
 MKDIR_P = /usr/bin/mkdir -p
 OBJEXT = o
 PACKAGE = image-recognition
@@ -218,10 +218,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 1.0
-abs_builddir = /home/peterglen/pgpygtk/pyimgrec/pyimgrec
-abs_srcdir = /home/peterglen/pgpygtk/pyimgrec/pyimgrec
-abs_top_builddir = /home/peterglen/pgpygtk/pyimgrec/pyimgrec
-abs_top_srcdir = /home/peterglen/pgpygtk/pyimgrec/pyimgrec
+abs_builddir = /home/peterglen/pgpygtk/pyimgrec
+abs_srcdir = /home/peterglen/pgpygtk/pyimgrec
+abs_top_builddir = /home/peterglen/pgpygtk/pyimgrec
+abs_top_srcdir = /home/peterglen/pgpygtk/pyimgrec
 ac_ct_CC = gcc
 am__include = include
 am__leading_dot = .
@@ -240,7 +240,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/peterglen/pgpygtk/pyimgrec/pyimgrec/install-sh
+install_sh = ${SHELL} /home/peterglen/pgpygtk/pyimgrec/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -676,6 +676,13 @@ all:
 
 clean:
 	make -C pyimgrec clean
+
+git:
+	git add .
+	git commit -m "Auto"
+	git push
+
+# EOF
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

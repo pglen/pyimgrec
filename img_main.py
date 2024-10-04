@@ -27,13 +27,13 @@ from norm_outline import *
 
 import  algorithm.flood     as flood
 import  algorithm.rectflood as rectflood
+import  treehand
 
-#try:
-#    import pyimgrec.imgrec as imgrec
-#except:
-#    pass
-#
-import treehand
+try:
+    import pyimgrec.imgrec as imgrec
+except:
+    pass
+
 
 MAG_FACT    = 2
 MAG_SIZE    = 300
@@ -83,7 +83,7 @@ class img_main(Gtk.DrawingArea):
         self.connect("key-press-event", self.key_press_event)
         self.connect("button-press-event", self.area_button)
         #self.connect("expose-event", self.expose)
-        self.connect("draw", self.expose)
+        self.connect("draw", self.draw)
         self.connect("motion-notify-event", self.area_motion)
 
     def add_to_dict(self, xdic, hor, ver, med):
@@ -103,32 +103,37 @@ class img_main(Gtk.DrawingArea):
             self.invalidate()
 
     # Paint the image
-    def expose(self, area, a3):
+    def draw(self, me, gc):
 
+        #print("expose:", "GC", me, gc, me.get_window())
         rc = self.get_allocation()
-        gc = Gtk.gdk.GC(self.window);
+        #print(dir(gc))
+
+        #gc = Gdk.GC(self.window);
         #colormap = Gtk.widget_get_default_colormap()
-        self.window.draw_pixbuf(gc, self.image2.get_pixbuf(), 0, 0, 0, 0)
+        #self.window.draw_pixbuf(gc, self.image2.get_pixbuf(), 0, 0, 0, 0)
+        #self.draw_pixbuf(gc, self.image2.get_pixbuf(), 0, 0, 0, 0)
 
         # Paint annotations:
         for xx, yy, txt in self.atext:
             self.pangolayout.set_text(txt)
-            self.window.draw_layout(gc, xx, yy, self.pangolayout)
+            #self.window.draw_layout(gc, xx, yy, self.pangolayout)
 
         for xx, yy, col in self.aframe:
             colormap = Gtk.widget_get_default_colormap()
             gc.set_foreground(colormap.alloc_color("#%06x" % (col & 0xffffff) ))
-            self.window.draw_rectangle(gc, False, int(xx*self.stepx), int(yy*self.stepy),
-                                int(self.stepx), int(self.stepy))
+            #self.window.draw_rectangle(gc, False, int(xx*self.stepx), int(yy*self.stepy),
+            #                    int(self.stepx), int(self.stepy))
 
         for xx, yy, col in self.bframe:
             colormap = Gtk.widget_get_default_colormap()
             gc.set_foreground(colormap.alloc_color("#%06x" % (col & 0xffffff) ))
-            self.window.draw_rectangle(gc, False, int(xx*self.stepx), int(yy*self.stepy),
-                                int(self.stepx), int(self.stepy))
+            #self.window.draw_rectangle(gc, False, int(xx*self.stepx), int(yy*self.stepy),
+            #                    int(self.stepx), int(self.stepy))
 
         for xx, yy, func in self.annote:
-            func(self.window)
+            #func(self.window)
+            pass
 
         if self.mag:
             #print(  "paint mag:", self.event_x, self.event_y)
@@ -173,15 +178,22 @@ class img_main(Gtk.DrawingArea):
                         0, 0, int(self.event_x), int(self.event_y),
                             int(magsx), int(magsy))'''
 
-            self.window.draw_pixbuf(gc, self.pb2,
-                        0, 0, int(rendx), int(rendy), int(magsx), int(magsy))
+            #gc.draw_pixbuf(gc, self.pb2,
+            #            0, 0, int(rendx), int(rendy), int(magsx), int(magsy))
+        else:
+            try:
+                Gdk.cairo_set_source_pixbuf(gc, self.pb, 0, 0)
+                gc.paint()
 
+                #    0, 0, int(rendx), int(rendy), int(magsx), int(magsy))
+            except:
+                print(sys.exc_info())
     # --------------------------------------------------------------------
     def key_press_event(self, win, event):
 
         #print( "img key_press_event", win, event)
         if event.state & Gtk.gdk.MOD1_MASK:
-            if event.keyval == Gtk.keysyms.x or event.keyval == Gtk.keysyms.X:
+            if event.keyval == Gdk.KEY_x or event.keyval == Gtk.KEY_X:
                 sys.exit(0)
 
         if event.keyval == Gtk.keysyms.Escape:
@@ -239,13 +251,16 @@ class img_main(Gtk.DrawingArea):
 
             # Set imagerec pixel buffer to image2
             pixb =  self.image2.get_pixbuf()
-            arr = pixb.get_pixels_array()
-            imgrec.anchor(arr)
+            self.pb = pixb
+            #arr = pixb.get_pixels()
+            #print(type(arr))
+            #imgrec.anchor(arr)
 
             self.stepx = float(imgrec.width)/self.divider;
             self.stepy = float(imgrec.height)/self.divider;
         except:
-            print(sys.exc_info())
+            print("load", sys.exc_info())
+            print_exception("load")
 
 
     def refresh(self):
@@ -390,12 +405,10 @@ class img_main(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
-
     def invalidate(self):
         rc = self.get_allocation()
-        self.window.invalidate_rect(rc, False)
-
-
+        #self.window.invalidate_rect(rc, False)
+        #self.invalidate_rect(rc, False)
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
@@ -550,7 +563,8 @@ class img_main(Gtk.DrawingArea):
         #print( "inval", minx * self.stepx, miny * self.stepy,
         #                (maxx + 1)* self.stepx, (maxy+1) * self.stepy )
         rect = Gtk.gdk.Rectangle(int(minx * self.stepx), int(miny * self.stepy),
-                        int((maxx + 1) * self.stepx), int((maxy + 1)  * self.stepy))
+                        int((maxx + 1) * self.stepx),
+                                int((maxy + 1)  * self.stepy))
 
         self.window.invalidate_rect(rect, False)
         #self.invalidate()

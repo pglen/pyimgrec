@@ -1,14 +1,15 @@
-m4trace:/usr/share/aclocal/gtk-2.0.m4:12: -1- AC_DEFUN([AM_PATH_GTK_2_0], [dnl 
+m4trace:/usr/share/aclocal/gtk-3.0.m4:12: -1- AC_DEFUN([AM_PATH_GTK_3_0], [m4_warn([obsolete], [AM_PATH_GTK_3_0 is deprecated, use PKG_CHECK_MODULES([GTK], [gtk+-3.0]) instead])
 dnl Get the cflags and libraries from pkg-config
 dnl
 AC_ARG_ENABLE(gtktest, [  --disable-gtktest       do not try to compile and run a test GTK+ program],
 		    , enable_gtktest=yes)
+  min_gtk_version=ifelse([$1], [], [3.0.0], [$1])
 
-  pkg_config_args=gtk+-2.0
+  pkg_config_args="gtk+-3.0 >= $min_gtk_version"
   for module in . $4
   do
       case "$module" in
-         gthread) 
+         gthread)
              pkg_config_args="$pkg_config_args gthread-2.0"
          ;;
       esac
@@ -16,20 +17,22 @@ AC_ARG_ENABLE(gtktest, [  --disable-gtktest       do not try to compile and run 
 
   no_gtk=""
 
-  AC_REQUIRE([PKG_PROG_PKG_CONFIG])
-  PKG_PROG_PKG_CONFIG([0.7])
+  PKG_PROG_PKG_CONFIG([0.16])
 
-  min_gtk_version=ifelse([$1], ,2.0.0,$1)
+  if test -z "$PKG_CONFIG"; then
+    no_gtk=yes
+  fi
+
   AC_MSG_CHECKING(for GTK+ - version >= $min_gtk_version)
 
-  if test x$PKG_CONFIG != xno ; then
+  if test -n "$PKG_CONFIG"; then
     ## don't try to run the test against uninstalled libtool libs
     if $PKG_CONFIG --uninstalled $pkg_config_args; then
 	  echo "Will use uninstalled version of GTK+ found in PKG_CONFIG_PATH"
 	  enable_gtktest=no
     fi
 
-    if $PKG_CONFIG --atleast-version $min_gtk_version $pkg_config_args; then
+    if $PKG_CONFIG $pkg_config_args; then
 	  :
     else
 	  no_gtk=yes
@@ -39,11 +42,11 @@ AC_ARG_ENABLE(gtktest, [  --disable-gtktest       do not try to compile and run 
   if test x"$no_gtk" = x ; then
     GTK_CFLAGS=`$PKG_CONFIG $pkg_config_args --cflags`
     GTK_LIBS=`$PKG_CONFIG $pkg_config_args --libs`
-    gtk_config_major_version=`$PKG_CONFIG --modversion gtk+-2.0 | \
+    gtk_config_major_version=`$PKG_CONFIG --modversion gtk+-3.0 | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    gtk_config_minor_version=`$PKG_CONFIG --modversion gtk+-2.0 | \
+    gtk_config_minor_version=`$PKG_CONFIG --modversion gtk+-3.0 | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    gtk_config_micro_version=`$PKG_CONFIG --modversion gtk+-2.0 | \
+    gtk_config_micro_version=`$PKG_CONFIG --modversion gtk+-3.0 | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
     if test "x$enable_gtktest" = "xyes" ; then
       ac_save_CFLAGS="$CFLAGS"
@@ -63,14 +66,11 @@ dnl
 int 
 main ()
 {
-  int major, minor, micro;
-  char *tmp_version;
+  unsigned int major, minor, micro;
 
   fclose (fopen ("conf.gtktest", "w"));
 
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = g_strdup("$min_gtk_version");
-  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
+  if (sscanf("$min_gtk_version", "%u.%u.%u", &major, &minor, &micro) != 3) {
      printf("%s, bad version string\n", "$min_gtk_version");
      exit(1);
    }
@@ -79,7 +79,7 @@ main ()
       (gtk_minor_version != $gtk_config_minor_version) ||
       (gtk_micro_version != $gtk_config_micro_version))
     {
-      printf("\n*** 'pkg-config --modversion gtk+-2.0' returned %d.%d.%d, but GTK+ (%d.%d.%d)\n", 
+      printf("\n*** 'pkg-config --modversion gtk+-3.0' returned %d.%d.%d, but GTK+ (%d.%d.%d)\n", 
              $gtk_config_major_version, $gtk_config_minor_version, $gtk_config_micro_version,
              gtk_major_version, gtk_minor_version, gtk_micro_version);
       printf ("*** was found! If pkg-config was correct, then it is best\n");
@@ -109,9 +109,9 @@ main ()
        }
      else
       {
-        printf("\n*** An old version of GTK+ (%d.%d.%d) was found.\n",
+        printf("\n*** An old version of GTK+ (%u.%u.%u) was found.\n",
                gtk_major_version, gtk_minor_version, gtk_micro_version);
-        printf("*** You need a version of GTK+ newer than %d.%d.%d. The latest version of\n",
+        printf("*** You need a version of GTK+ newer than %u.%u.%u. The latest version of\n",
 	       major, minor, micro);
         printf("*** GTK+ is always available from ftp://ftp.gtk.org.\n");
         printf("***\n");
@@ -133,10 +133,10 @@ main ()
   fi
   if test "x$no_gtk" = x ; then
      AC_MSG_RESULT(yes (version $gtk_config_major_version.$gtk_config_minor_version.$gtk_config_micro_version))
-     ifelse([$2], , :, [$2])     
+     ifelse([$2], , :, [$2])
   else
      AC_MSG_RESULT(no)
-     if test "$PKG_CONFIG" = "no" ; then
+     if test -z "$PKG_CONFIG"; then
        echo "*** A new enough version of pkg-config was not found."
        echo "*** See http://pkgconfig.sourceforge.net"
      else
@@ -162,7 +162,7 @@ main ()
           echo "*** If you have an old version installed, it is best to remove it, although"
           echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH" ],
         [ echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means GTK+ is incorrectly installed."])
+          echo "*** exact error that occurred. This usually means GTK+ is incorrectly installed."])
           CFLAGS="$ac_save_CFLAGS"
           LIBS="$ac_save_LIBS"
        fi
@@ -174,6 +174,26 @@ main ()
   AC_SUBST(GTK_CFLAGS)
   AC_SUBST(GTK_LIBS)
   rm -f conf.gtktest
+])
+m4trace:/usr/share/aclocal/gtk-3.0.m4:194: -1- AC_DEFUN([GTK_CHECK_BACKEND], [m4_warn([obsolete], [GTK_CHECK_BACKEND is deprecated, use PKG_CHECK_MODULES([GTK_X11], [gtk+-x11-3.0]) or similar instead])
+  pkg_config_args=ifelse([$1],,gtk+-3.0, gtk+-$1-3.0)
+  min_gtk_version=ifelse([$2],,3.0.0,$2)
+  pkg_config_args="$pkg_config_args >= $min_gtk_version"
+
+  PKG_PROG_PKG_CONFIG([0.16])
+  AS_IF([test -z "$PKG_CONFIG"], [AC_MSG_ERROR([No pkg-config found])])
+
+  if $PKG_CONFIG $pkg_config_args ; then
+    target_found=yes
+  else
+    target_found=no
+  fi
+
+  if test "x$target_found" = "xno"; then
+    ifelse([$4],,[AC_MSG_ERROR([Backend $backend not found.])],[$4])
+  else
+    ifelse([$3],,[:],[$3])
+  fi
 ])
 m4trace:/usr/share/aclocal/pkg.m4:58: -1- AC_DEFUN([PKG_PROG_PKG_CONFIG], [m4_pattern_forbid([^_?PKG_[A-Z_]+$])
 m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
@@ -801,6 +821,324 @@ if test "$am_cv_prog_cc_c_o" != yes; then
 fi
 AC_LANG_POP([C])])
 m4trace:/usr/share/aclocal-1.16/prog-cc-c-o.m4:47: -1- AC_DEFUN_ONCE([AM_PROG_CC_C_O], [AC_REQUIRE([AC_PROG_CC])])
+m4trace:/usr/share/aclocal-1.16/python.m4:35: -1- AC_DEFUN([AM_PATH_PYTHON], [
+  dnl Find a Python interpreter.  Python versions prior to 2.0 are not
+  dnl supported. (2.0 was released on October 16, 2000).
+  m4_define_default([_AM_PYTHON_INTERPRETER_LIST],
+[python python2 python3 dnl
+ python3.11 python3.10 dnl
+ python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 dnl
+ python3.2 python3.1 python3.0 dnl
+ python2.7 python2.6 python2.5 python2.4 python2.3 python2.2 python2.1 dnl
+ python2.0])
+
+  AC_ARG_VAR([PYTHON], [the Python interpreter])
+
+  m4_if([$1],[],[
+    dnl No version check is needed.
+    # Find any Python interpreter.
+    if test -z "$PYTHON"; then
+      AC_PATH_PROGS([PYTHON], _AM_PYTHON_INTERPRETER_LIST, :)
+    fi
+    am_display_PYTHON=python
+  ], [
+    dnl A version check is needed.
+    if test -n "$PYTHON"; then
+      # If the user set $PYTHON, use it and don't search something else.
+      AC_MSG_CHECKING([whether $PYTHON version is >= $1])
+      AM_PYTHON_CHECK_VERSION([$PYTHON], [$1],
+			      [AC_MSG_RESULT([yes])],
+			      [AC_MSG_RESULT([no])
+			       AC_MSG_ERROR([Python interpreter is too old])])
+      am_display_PYTHON=$PYTHON
+    else
+      # Otherwise, try each interpreter until we find one that satisfies
+      # VERSION.
+      AC_CACHE_CHECK([for a Python interpreter with version >= $1],
+	[am_cv_pathless_PYTHON],[
+	for am_cv_pathless_PYTHON in _AM_PYTHON_INTERPRETER_LIST none; do
+	  test "$am_cv_pathless_PYTHON" = none && break
+	  AM_PYTHON_CHECK_VERSION([$am_cv_pathless_PYTHON], [$1], [break])
+	done])
+      # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
+      if test "$am_cv_pathless_PYTHON" = none; then
+	PYTHON=:
+      else
+        AC_PATH_PROG([PYTHON], [$am_cv_pathless_PYTHON])
+      fi
+      am_display_PYTHON=$am_cv_pathless_PYTHON
+    fi
+  ])
+
+  if test "$PYTHON" = :; then
+    dnl Run any user-specified action, or abort.
+    m4_default([$3], [AC_MSG_ERROR([no suitable Python interpreter found])])
+  else
+
+  dnl Query Python for its version number.  Although site.py simply uses
+  dnl sys.version[:3], printing that failed with Python 3.10, since the
+  dnl trailing zero was eliminated. So now we output just the major
+  dnl and minor version numbers, as numbers. Apparently the tertiary
+  dnl version is not of interest.
+  dnl
+  AC_CACHE_CHECK([for $am_display_PYTHON version], [am_cv_python_version],
+    [am_cv_python_version=`$PYTHON -c "import sys; print ('%u.%u' % sys.version_info[[:2]])"`])
+  AC_SUBST([PYTHON_VERSION], [$am_cv_python_version])
+
+  dnl At times, e.g., when building shared libraries, you may want
+  dnl to know which OS platform Python thinks this is.
+  dnl
+  AC_CACHE_CHECK([for $am_display_PYTHON platform], [am_cv_python_platform],
+    [am_cv_python_platform=`$PYTHON -c "import sys; sys.stdout.write(sys.platform)"`])
+  AC_SUBST([PYTHON_PLATFORM], [$am_cv_python_platform])
+
+  dnl emacs-page
+  dnl If --with-python-sys-prefix is given, use the values of sys.prefix
+  dnl and sys.exec_prefix for the corresponding values of PYTHON_PREFIX
+  dnl and PYTHON_EXEC_PREFIX. Otherwise, use the GNU ${prefix} and
+  dnl ${exec_prefix} variables.
+  dnl
+  dnl The two are made distinct variables so they can be overridden if
+  dnl need be, although general consensus is that you shouldn't need
+  dnl this separation.
+  dnl
+  dnl Also allow directly setting the prefixes via configure options,
+  dnl overriding any default.
+  dnl
+  if test "x$prefix" = xNONE; then
+    am__usable_prefix=$ac_default_prefix
+  else
+    am__usable_prefix=$prefix
+  fi
+
+  # Allow user to request using sys.* values from Python,
+  # instead of the GNU $prefix values.
+  AC_ARG_WITH([python-sys-prefix],
+  [AS_HELP_STRING([--with-python-sys-prefix],
+                  [use Python's sys.prefix and sys.exec_prefix values])],
+  [am_use_python_sys=:],
+  [am_use_python_sys=false])
+
+  # Allow user to override whatever the default Python prefix is.
+  AC_ARG_WITH([python_prefix],
+  [AS_HELP_STRING([--with-python_prefix],
+                  [override the default PYTHON_PREFIX])],
+  [am_python_prefix_subst=$withval
+   am_cv_python_prefix=$withval
+   AC_MSG_CHECKING([for explicit $am_display_PYTHON prefix])
+   AC_MSG_RESULT([$am_cv_python_prefix])],
+  [
+   if $am_use_python_sys; then
+     # using python sys.prefix value, not GNU
+     AC_CACHE_CHECK([for python default $am_display_PYTHON prefix],
+     [am_cv_python_prefix],
+     [am_cv_python_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.prefix)"`])
+
+     dnl If sys.prefix is a subdir of $prefix, replace the literal value of
+     dnl $prefix with a variable reference so it can be overridden.
+     case $am_cv_python_prefix in
+     $am__usable_prefix*)
+       am__strip_prefix=`echo "$am__usable_prefix" | sed 's|.|.|g'`
+       am_python_prefix_subst=`echo "$am_cv_python_prefix" | sed "s,^$am__strip_prefix,\\${prefix},"`
+       ;;
+     *)
+       am_python_prefix_subst=$am_cv_python_prefix
+       ;;
+     esac
+   else # using GNU prefix value, not python sys.prefix
+     am_python_prefix_subst='${prefix}'
+     am_python_prefix=$am_python_prefix_subst
+     AC_MSG_CHECKING([for GNU default $am_display_PYTHON prefix])
+     AC_MSG_RESULT([$am_python_prefix])
+   fi])
+  # Substituting python_prefix_subst value.
+  AC_SUBST([PYTHON_PREFIX], [$am_python_prefix_subst])
+
+  # emacs-page Now do it all over again for Python exec_prefix, but with yet
+  # another conditional: fall back to regular prefix if that was specified.
+  AC_ARG_WITH([python_exec_prefix],
+  [AS_HELP_STRING([--with-python_exec_prefix],
+                  [override the default PYTHON_EXEC_PREFIX])],
+  [am_python_exec_prefix_subst=$withval
+   am_cv_python_exec_prefix=$withval
+   AC_MSG_CHECKING([for explicit $am_display_PYTHON exec_prefix])
+   AC_MSG_RESULT([$am_cv_python_exec_prefix])],
+  [
+   # no explicit --with-python_exec_prefix, but if
+   # --with-python_prefix was given, use its value for python_exec_prefix too.
+   AS_IF([test -n "$with_python_prefix"],
+   [am_python_exec_prefix_subst=$with_python_prefix
+    am_cv_python_exec_prefix=$with_python_prefix
+    AC_MSG_CHECKING([for python_prefix-given $am_display_PYTHON exec_prefix])
+    AC_MSG_RESULT([$am_cv_python_exec_prefix])],
+   [
+    # Set am__usable_exec_prefix whether using GNU or Python values,
+    # since we use that variable for pyexecdir.
+    if test "x$exec_prefix" = xNONE; then
+      am__usable_exec_prefix=$am__usable_prefix
+    else
+      am__usable_exec_prefix=$exec_prefix
+    fi
+    #
+    if $am_use_python_sys; then # using python sys.exec_prefix, not GNU
+      AC_CACHE_CHECK([for python default $am_display_PYTHON exec_prefix],
+      [am_cv_python_exec_prefix],
+      [am_cv_python_exec_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.exec_prefix)"`])
+      dnl If sys.exec_prefix is a subdir of $exec_prefix, replace the
+      dnl literal value of $exec_prefix with a variable reference so it can
+      dnl be overridden.
+      case $am_cv_python_exec_prefix in
+      $am__usable_exec_prefix*)
+        am__strip_prefix=`echo "$am__usable_exec_prefix" | sed 's|.|.|g'`
+        am_python_exec_prefix_subst=`echo "$am_cv_python_exec_prefix" | sed "s,^$am__strip_prefix,\\${exec_prefix},"`
+        ;;
+      *)
+        am_python_exec_prefix_subst=$am_cv_python_exec_prefix
+        ;;
+     esac
+   else # using GNU $exec_prefix, not python sys.exec_prefix
+     am_python_exec_prefix_subst='${exec_prefix}'
+     am_python_exec_prefix=$am_python_exec_prefix_subst
+     AC_MSG_CHECKING([for GNU default $am_display_PYTHON exec_prefix])
+     AC_MSG_RESULT([$am_python_exec_prefix])
+   fi])])
+  # Substituting python_exec_prefix_subst.
+  AC_SUBST([PYTHON_EXEC_PREFIX], [$am_python_exec_prefix_subst])
+
+  # Factor out some code duplication into this shell variable.
+  am_python_setup_sysconfig="\
+import sys
+# Prefer sysconfig over distutils.sysconfig, for better compatibility
+# with python 3.x.  See automake bug#10227.
+try:
+    import sysconfig
+except ImportError:
+    can_use_sysconfig = 0
+else:
+    can_use_sysconfig = 1
+# Can't use sysconfig in CPython 2.7, since it's broken in virtualenvs:
+# <https://github.com/pypa/virtualenv/issues/118>
+try:
+    from platform import python_implementation
+    if python_implementation() == 'CPython' and sys.version[[:3]] == '2.7':
+        can_use_sysconfig = 0
+except ImportError:
+    pass"
+
+  dnl emacs-page Set up 4 directories:
+
+  dnl 1. pythondir: where to install python scripts.  This is the
+  dnl    site-packages directory, not the python standard library
+  dnl    directory like in previous automake betas.  This behavior
+  dnl    is more consistent with lispdir.m4 for example.
+  dnl Query distutils for this directory.
+  dnl
+  AC_CACHE_CHECK([for $am_display_PYTHON script directory (pythondir)],
+  [am_cv_python_pythondir],
+  [if test "x$am_cv_python_prefix" = x; then
+     am_py_prefix=$am__usable_prefix
+   else
+     am_py_prefix=$am_cv_python_prefix
+   fi
+   am_cv_python_pythondir=`$PYTHON -c "
+$am_python_setup_sysconfig
+if can_use_sysconfig:
+  if hasattr(sysconfig, 'get_default_scheme'):
+    scheme = sysconfig.get_default_scheme()
+  else:
+    scheme = sysconfig._get_default_scheme()
+  if scheme == 'posix_local':
+    # Debian's default scheme installs to /usr/local/ but we want to find headers in /usr/
+    scheme = 'posix_prefix'
+  sitedir = sysconfig.get_path('purelib', scheme, vars={'base':'$am_py_prefix'})
+else:
+  from distutils import sysconfig
+  sitedir = sysconfig.get_python_lib(0, 0, prefix='$am_py_prefix')
+sys.stdout.write(sitedir)"`
+   #
+   case $am_cv_python_pythondir in
+   $am_py_prefix*)
+     am__strip_prefix=`echo "$am_py_prefix" | sed 's|.|.|g'`
+     am_cv_python_pythondir=`echo "$am_cv_python_pythondir" | sed "s,^$am__strip_prefix,\\${PYTHON_PREFIX},"`
+     ;;
+   *)
+     case $am_py_prefix in
+       /usr|/System*) ;;
+       *) am_cv_python_pythondir="\${PYTHON_PREFIX}/lib/python$PYTHON_VERSION/site-packages"
+          ;;
+     esac
+     ;;
+   esac
+  ])
+  AC_SUBST([pythondir], [$am_cv_python_pythondir])
+
+  dnl 2. pkgpythondir: $PACKAGE directory under pythondir.  Was
+  dnl    PYTHON_SITE_PACKAGE in previous betas, but this naming is
+  dnl    more consistent with the rest of automake.
+  dnl
+  AC_SUBST([pkgpythondir], [\${pythondir}/$PACKAGE])
+
+  dnl 3. pyexecdir: directory for installing python extension modules
+  dnl    (shared libraries).
+  dnl Query distutils for this directory.
+  dnl
+  AC_CACHE_CHECK([for $am_display_PYTHON extension module directory (pyexecdir)],
+  [am_cv_python_pyexecdir],
+  [if test "x$am_cv_python_exec_prefix" = x; then
+     am_py_exec_prefix=$am__usable_exec_prefix
+   else
+     am_py_exec_prefix=$am_cv_python_exec_prefix
+   fi
+   am_cv_python_pyexecdir=`$PYTHON -c "
+$am_python_setup_sysconfig
+if can_use_sysconfig:
+  if hasattr(sysconfig, 'get_default_scheme'):
+    scheme = sysconfig.get_default_scheme()
+  else:
+    scheme = sysconfig._get_default_scheme()
+  if scheme == 'posix_local':
+    # Debian's default scheme installs to /usr/local/ but we want to find headers in /usr/
+    scheme = 'posix_prefix'
+  sitedir = sysconfig.get_path('platlib', scheme, vars={'platbase':'$am_py_exec_prefix'})
+else:
+  from distutils import sysconfig
+  sitedir = sysconfig.get_python_lib(1, 0, prefix='$am_py_exec_prefix')
+sys.stdout.write(sitedir)"`
+   #
+   case $am_cv_python_pyexecdir in
+   $am_py_exec_prefix*)
+     am__strip_prefix=`echo "$am_py_exec_prefix" | sed 's|.|.|g'`
+     am_cv_python_pyexecdir=`echo "$am_cv_python_pyexecdir" | sed "s,^$am__strip_prefix,\\${PYTHON_EXEC_PREFIX},"`
+     ;;
+   *)
+     case $am_py_exec_prefix in
+       /usr|/System*) ;;
+       *) am_cv_python_pyexecdir="\${PYTHON_EXEC_PREFIX}/lib/python$PYTHON_VERSION/site-packages"
+          ;;
+     esac
+     ;;
+   esac
+  ])
+  AC_SUBST([pyexecdir], [$am_cv_python_pyexecdir])
+
+  dnl 4. pkgpyexecdir: $(pyexecdir)/$(PACKAGE)
+  dnl
+  AC_SUBST([pkgpyexecdir], [\${pyexecdir}/$PACKAGE])
+
+  dnl Run any user-specified action.
+  $2
+  fi
+])
+m4trace:/usr/share/aclocal-1.16/python.m4:353: -1- AC_DEFUN([AM_PYTHON_CHECK_VERSION], [prog="import sys
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+# map returns an iterator in Python 3.0 and a list in 2.x
+minver = list(map(int, '$2'.split('.'))) + [[0, 0, 0]]
+minverhex = 0
+# xrange is not present in Python 3.0 and range returns an iterator
+for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[[i]]
+sys.exit(sys.hexversion < minverhex)"
+  AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
 m4trace:/usr/share/aclocal-1.16/runlog.m4:12: -1- AC_DEFUN([AM_RUN_LOG], [{ echo "$as_me:$LINENO: $1" >&AS_MESSAGE_LOG_FD
    ($1) >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD
    ac_status=$?
@@ -1231,124 +1569,134 @@ m4trace:configure.ac:8: -1- m4_pattern_allow([^AM_BACKSLASH$])
 m4trace:configure.ac:8: -1- _AM_SUBST_NOTMAKE([AM_BACKSLASH])
 m4trace:configure.ac:10: -1- AC_CONFIG_MACRO_DIR([m4])
 m4trace:configure.ac:10: -1- AC_CONFIG_MACRO_DIR_TRACE([m4])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CFLAGS$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^LDFLAGS$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^LIBS$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CPPFLAGS$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^ac_ct_CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CC$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^EXEEXT$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^OBJEXT$])
-m4trace:configure.ac:17: -1- _AM_PROG_CC_C_O
-m4trace:configure.ac:17: -1- AM_RUN_LOG([$CC -c conftest.$ac_ext -o conftest2.$ac_objext])
-m4trace:configure.ac:17: -1- _AM_DEPENDENCIES([CC])
-m4trace:configure.ac:17: -1- AM_SET_DEPDIR
-m4trace:configure.ac:17: -1- m4_pattern_allow([^DEPDIR$])
-m4trace:configure.ac:17: -1- AM_OUTPUT_DEPENDENCY_COMMANDS
-m4trace:configure.ac:17: -1- AM_MAKE_INCLUDE
-m4trace:configure.ac:17: -1- AM_RUN_LOG([${MAKE-make} -f confmf.$s && cat confinc.out])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^am__include$])
-m4trace:configure.ac:17: -1- AM_DEP_TRACK
-m4trace:configure.ac:17: -1- AM_CONDITIONAL([AMDEP], [test "x$enable_dependency_tracking" != xno])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^AMDEP_TRUE$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^AMDEP_FALSE$])
-m4trace:configure.ac:17: -1- _AM_SUBST_NOTMAKE([AMDEP_TRUE])
-m4trace:configure.ac:17: -1- _AM_SUBST_NOTMAKE([AMDEP_FALSE])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^AMDEPBACKSLASH$])
-m4trace:configure.ac:17: -1- _AM_SUBST_NOTMAKE([AMDEPBACKSLASH])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^am__nodep$])
-m4trace:configure.ac:17: -1- _AM_SUBST_NOTMAKE([am__nodep])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^CCDEPMODE$])
-m4trace:configure.ac:17: -1- AM_CONDITIONAL([am__fastdepCC], [
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CFLAGS$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^LDFLAGS$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CPPFLAGS$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^ac_ct_CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^EXEEXT$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^OBJEXT$])
+m4trace:configure.ac:14: -1- _AM_PROG_CC_C_O
+m4trace:configure.ac:14: -1- AM_RUN_LOG([$CC -c conftest.$ac_ext -o conftest2.$ac_objext])
+m4trace:configure.ac:14: -1- _AM_DEPENDENCIES([CC])
+m4trace:configure.ac:14: -1- AM_SET_DEPDIR
+m4trace:configure.ac:14: -1- m4_pattern_allow([^DEPDIR$])
+m4trace:configure.ac:14: -1- AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:14: -1- AM_MAKE_INCLUDE
+m4trace:configure.ac:14: -1- AM_RUN_LOG([${MAKE-make} -f confmf.$s && cat confinc.out])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^am__include$])
+m4trace:configure.ac:14: -1- AM_DEP_TRACK
+m4trace:configure.ac:14: -1- AM_CONDITIONAL([AMDEP], [test "x$enable_dependency_tracking" != xno])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^AMDEP_TRUE$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^AMDEP_FALSE$])
+m4trace:configure.ac:14: -1- _AM_SUBST_NOTMAKE([AMDEP_TRUE])
+m4trace:configure.ac:14: -1- _AM_SUBST_NOTMAKE([AMDEP_FALSE])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^AMDEPBACKSLASH$])
+m4trace:configure.ac:14: -1- _AM_SUBST_NOTMAKE([AMDEPBACKSLASH])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^am__nodep$])
+m4trace:configure.ac:14: -1- _AM_SUBST_NOTMAKE([am__nodep])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^CCDEPMODE$])
+m4trace:configure.ac:14: -1- AM_CONDITIONAL([am__fastdepCC], [
   test "x$enable_dependency_tracking" != xno \
   && test "$am_cv_CC_dependencies_compiler_type" = gcc3])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^am__fastdepCC_TRUE$])
-m4trace:configure.ac:17: -1- m4_pattern_allow([^am__fastdepCC_FALSE$])
-m4trace:configure.ac:17: -1- _AM_SUBST_NOTMAKE([am__fastdepCC_TRUE])
-m4trace:configure.ac:17: -1- _AM_SUBST_NOTMAKE([am__fastdepCC_FALSE])
-m4trace:configure.ac:18: -1- m4_pattern_allow([^SET_MAKE$])
-m4trace:configure.ac:35: -1- _m4_warn([syntax], [AC_CHECK_HEADERS(/usr/include/python$PYTHON_VERSION/Python.h): you should use literals], [./lib/autoconf/headers.m4:217: AC_CHECK_HEADERS is expanded from...
-configure.ac:35: the top level])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_stdio_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:14: -1- m4_pattern_allow([^am__fastdepCC_TRUE$])
+m4trace:configure.ac:14: -1- m4_pattern_allow([^am__fastdepCC_FALSE$])
+m4trace:configure.ac:14: -1- _AM_SUBST_NOTMAKE([am__fastdepCC_TRUE])
+m4trace:configure.ac:14: -1- _AM_SUBST_NOTMAKE([am__fastdepCC_FALSE])
+m4trace:configure.ac:15: -1- m4_pattern_allow([^SET_MAKE$])
+m4trace:configure.ac:32: -1- AM_PATH_PYTHON([$PYTHON_VERSION])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^PYTHON$])
+m4trace:configure.ac:32: -1- AM_PYTHON_CHECK_VERSION([$PYTHON], [$PYTHON_VERSION], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no])
+			       AC_MSG_ERROR([Python interpreter is too old])])
+m4trace:configure.ac:32: -1- AM_RUN_LOG([$PYTHON -c "$prog"])
+m4trace:configure.ac:32: -1- AM_PYTHON_CHECK_VERSION([$am_cv_pathless_PYTHON], [$PYTHON_VERSION], [break])
+m4trace:configure.ac:32: -1- AM_RUN_LOG([$am_cv_pathless_PYTHON -c "$prog"])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^PYTHON$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^PYTHON_VERSION$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^PYTHON_PLATFORM$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^PYTHON_PREFIX$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^PYTHON_EXEC_PREFIX$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^pythondir$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^pkgpythondir$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^pyexecdir$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^pkgpyexecdir$])
+m4trace:configure.ac:34: -1- _m4_warn([syntax], [AC_CHECK_HEADERS(/usr/include/python$PYTHON_VERSION/Python.h): you should use literals], [./lib/autoconf/headers.m4:217: AC_CHECK_HEADERS is expanded from...
+configure.ac:34: the top level])
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_stdio_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" stdio.h ]AS_TR_SH([stdio.h]) AS_TR_CPP([HAVE_stdio.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_stdlib_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_stdlib_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" stdlib.h ]AS_TR_SH([stdlib.h]) AS_TR_CPP([HAVE_stdlib.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_string_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_string_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" string.h ]AS_TR_SH([string.h]) AS_TR_CPP([HAVE_string.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_inttypes_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_inttypes_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" inttypes.h ]AS_TR_SH([inttypes.h]) AS_TR_CPP([HAVE_inttypes.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_stdint_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_stdint_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" stdint.h ]AS_TR_SH([stdint.h]) AS_TR_CPP([HAVE_stdint.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_strings_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_strings_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" strings.h ]AS_TR_SH([strings.h]) AS_TR_CPP([HAVE_strings.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_sys_stat_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_sys_stat_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" sys/stat.h ]AS_TR_SH([sys/stat.h]) AS_TR_CPP([HAVE_sys/stat.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_sys_types_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_sys_types_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" sys/types.h ]AS_TR_SH([sys/types.h]) AS_TR_CPP([HAVE_sys/types.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- AC_DEFUN([_AC_Header_unistd_h], [m4_divert_text([INIT_PREPARE],
+m4trace:configure.ac:34: -1- AC_DEFUN([_AC_Header_unistd_h], [m4_divert_text([INIT_PREPARE],
   [AS_VAR_APPEND([ac_header_]]_AC_LANG_ABBREV[[_list],
   [" unistd.h ]AS_TR_SH([unistd.h]) AS_TR_CPP([HAVE_unistd.h])["])])_AC_HEADERS_EXPANSION(_AC_LANG_ABBREV)])
-m4trace:configure.ac:35: -1- m4_pattern_allow([^STDC_HEADERS$])
-m4trace:configure.ac:37: -1- AM_PATH_GTK_2_0([2.0.0])
-m4trace:configure.ac:37: -1- PKG_PROG_PKG_CONFIG
-m4trace:configure.ac:37: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:37: -1- PKG_PROG_PKG_CONFIG([0.7])
-m4trace:configure.ac:37: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:37: -1- _m4_warn([obsolete], [The macro `AC_TRY_RUN' is obsolete.
+m4trace:configure.ac:34: -1- m4_pattern_allow([^STDC_HEADERS$])
+m4trace:configure.ac:36: -1- AM_PATH_GTK_3_0([3.0.0])
+m4trace:configure.ac:36: -1- _m4_warn([obsolete], [AM_PATH_GTK_3_0 is deprecated, use PKG_CHECK_MODULES([GTK], [gtk+-3.0]) instead], [/usr/share/aclocal/gtk-3.0.m4:12: AM_PATH_GTK_3_0 is expanded from...
+configure.ac:36: the top level])
+m4trace:configure.ac:36: -1- PKG_PROG_PKG_CONFIG([0.16])
+m4trace:configure.ac:36: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^PKG_CONFIG$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^PKG_CONFIG$])
+m4trace:configure.ac:36: -1- _m4_warn([obsolete], [The macro `AC_TRY_RUN' is obsolete.
 You should run autoupdate.], [./lib/autoconf/general.m4:2997: AC_TRY_RUN is expanded from...
-/usr/share/aclocal/gtk-2.0.m4:12: AM_PATH_GTK_2_0 is expanded from...
-configure.ac:37: the top level])
-m4trace:configure.ac:37: -1- _m4_warn([obsolete], [The macro `AC_TRY_LINK' is obsolete.
+/usr/share/aclocal/gtk-3.0.m4:12: AM_PATH_GTK_3_0 is expanded from...
+configure.ac:36: the top level])
+m4trace:configure.ac:36: -1- _m4_warn([obsolete], [The macro `AC_TRY_LINK' is obsolete.
 You should run autoupdate.], [./lib/autoconf/general.m4:2920: AC_TRY_LINK is expanded from...
-/usr/share/aclocal/gtk-2.0.m4:12: AM_PATH_GTK_2_0 is expanded from...
-configure.ac:37: the top level])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^GTK_CFLAGS$])
-m4trace:configure.ac:37: -1- m4_pattern_allow([^GTK_LIBS$])
-m4trace:configure.ac:38: -1- PYGOBJ_3_0([3.0])
-m4trace:configure.ac:38: -1- PKG_PROG_PKG_CONFIG([0.16])
-m4trace:configure.ac:38: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PYGOBJ_CFLAGS$])
-m4trace:configure.ac:38: -1- m4_pattern_allow([^PYGOBJ_LIBS$])
-m4trace:configure.ac:42: -1- m4_pattern_allow([^LIB@&t@OBJS$])
-m4trace:configure.ac:42: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.ac:42: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
-m4trace:configure.ac:42: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
-m4trace:configure.ac:42: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
-m4trace:configure.ac:42: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
-m4trace:configure.ac:42: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
-m4trace:configure.ac:42: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
-m4trace:configure.ac:42: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
-m4trace:configure.ac:42: -1- AM_RUN_LOG([cd "$am_dirpart" \
+/usr/share/aclocal/gtk-3.0.m4:12: AM_PATH_GTK_3_0 is expanded from...
+configure.ac:36: the top level])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^GTK_CFLAGS$])
+m4trace:configure.ac:36: -1- m4_pattern_allow([^GTK_LIBS$])
+m4trace:configure.ac:37: -1- PYGOBJ_3_0([3.0])
+m4trace:configure.ac:37: -1- PKG_PROG_PKG_CONFIG([0.16])
+m4trace:configure.ac:37: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PKG_CONFIG$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PYGOBJ_CFLAGS$])
+m4trace:configure.ac:37: -1- m4_pattern_allow([^PYGOBJ_LIBS$])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:41: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
+m4trace:configure.ac:41: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
+m4trace:configure.ac:41: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
+m4trace:configure.ac:41: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
+m4trace:configure.ac:41: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:41: -1- AM_RUN_LOG([cd "$am_dirpart" \
       && sed -e '/# am--include-marker/d' "$am_filepart" \
         | $MAKE -f - am--depfiles])

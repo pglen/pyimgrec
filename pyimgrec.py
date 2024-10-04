@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import os, sys, getopt, signal, array, pickle
-import time, traceback
+import time, traceback, warnings
+
+warnings.simplefilter("ignore")
 
 #import gobject, gtk, pango
 
@@ -20,11 +22,11 @@ from pyimgutils import *
 
 import treehand, img_main
 
-#try:
-#    import pyimgrec.imgrec as imgrec
-#except:
-#    print_exception("import imgrec")
-#    print( "Cannot import imgrec, using py implementation")
+try:
+    import pyimgrec.imgrec as imgrec
+except:
+    print_exception("import imgrec")
+    print( "Cannot import imgrec, using py implementation")
 
 # ------------------------------------------------------------------------
 # This is open source image recognition program. Written in python with
@@ -69,10 +71,10 @@ class MainWin():
         window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.smrc = None
         self.narr = []; self.shapes = []
-        #ic = gtk.Image(); ic.set_from_stock(gtk.STOCK_DIALOG_INFO, ICON_SIZE_BUTTON)
+        #ic = Gtk.Image(); ic.set_from_stock(Gtk.STOCK_DIALOG_INFO, ICON_SIZE_BUTTON)
         #window.set_icon(ic.get_pixbuf())
 
-        #window.set_flags(gtk.CAN_FOCUS | SENSITIVE)
+        #window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
 
         #window.set_events(  Gdk.POINTER_MOTION_MASK |
         #                    Gdk.POINTER_MOTION_HINT_MASK |
@@ -129,7 +131,6 @@ class MainWin():
         self.area = img_main.img_main(self)
         self.vport = Gtk.Viewport()
         self.scroller = Gtk.ScrolledWindow()
-
         self.vport.add(self.area)
         self.scroller.add(self.vport)
         self.mainbox.add(self.scroller)
@@ -166,13 +167,7 @@ class MainWin():
         lab2 = Gtk.Label("Test Image")
         vbox2.pack_start(lab2, False, 0, 0)
         self.img = Gtk.Image();
-        #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.ICON_SIZE_DIALOG)
-        frame = Gtk.Frame(); frame.add(self.img)
-        vbox2.pack_start(frame, True, 0, 0)
-        self.lab = Gtk.Label("idle")
-        vbox2.pack_start(self.lab, False, 0, 0)
-
-        self.mainbox.add(vbox2)
+        self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
 
         self.buttons(self.hbox, window)
         self.buttons2(self.hbox2, window)
@@ -184,13 +179,20 @@ class MainWin():
 
         self.vbox = Gtk.VBox();
 
-        self.vbox.pack_start(self.hbox_s, False, 0, 0)
+        #self.vbox.pack_start(self.hbox_s, False, 0, 0)
         self.vbox.pack_start(self.mainbox, True, 0, 0)
-        self.vbox.pack_start(self.hbox_s2, False, 0, 0)
+        #self.vbox.pack_start(self.hbox_s2, False, 0, 0)
+        self.vbox.pack_start(vbox2, False, 0, 0)
         self.vbox.pack_start(self.hbox, False, 0, 0)
         self.vbox.pack_start(self.hbox2, False, 0, 0)
         self.vbox.pack_start(self.hbox2a, False, 0, 0)
         self.vbox.pack_start(self.hbox3, False, 0, 0)
+
+        frame = Gtk.Frame(); frame.add(self.img)
+        vbox2.pack_start(frame, 1, 1, 0)
+
+        self.lab = Gtk.Label("idle")
+        self.vbox.pack_start(self.lab, False, 0, 0)
 
         window.add(self.vbox)
 
@@ -207,7 +209,7 @@ class MainWin():
             self.smrc = self.img.get_allocation()
 
         rc = self.img.get_allocation()
-        pixbuf = gtk.gdk.Pixbuf(gdk.COLORSPACE_RGB, True, 8,  rc.width, rc.height)
+        pixbuf = Gtk.gdk.Pixbuf(gdk.COLORSPACE_RGB, True, 8,  rc.width, rc.height)
         pixbuf.fill(color)
         self.img.set_from_pixbuf(pixbuf)
         rc = self.mainbox.get_allocation()
@@ -244,19 +246,19 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        self.radio1 = Gtk.RadioButton(None, " Flood ")
+        self.radio1 = Gtk.RadioButton.new_with_mnemonic_from_widget(None, " Flood ")
         self.radio1.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.radio1, False, 0, 0)
 
         self.spacer(hbox, False )
 
-        self.radio2 = Gtk.RadioButton(self.radio1, " Rect Flood ")
+        self.radio2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, " Rect Flood ")
         self.radio2.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.radio2, False, 0, 0)
 
         self.spacer(hbox, False )
 
-        self.radio3 = Gtk.RadioButton(self.radio1, " Walk ")
+        self.radio3 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, " Walk ")
         self.radio3.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.radio3, False, 0, 0)
 
@@ -443,7 +445,7 @@ class MainWin():
     def area_motion(self, area, event):
         #print(  "area_motion", event.x, event.y)
         pass
-        #gc.set_line_attributes(6, gtk.gdk.LINE_SOLID,gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
+        #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
         #gc.set_foreground(colormap.alloc_color("#aaaaaa"))
         #winn.draw_line(gc, 0, 7, rc.width, rc.height+7 )
         #gc.set_foreground(colormap.alloc_color("#ffffff"))
@@ -548,11 +550,11 @@ class MainWin():
 
     def key_press_event(self, win, event):
         #print( "main key_press_event", win, event)
-        if event.state & gdk.MOD1_MASK:
-            if event.keyval == gtk.keysyms.x or event.keyval == keysyms.X:
+        if event.state & Gdk.ModifierType.MOD1_MASK:
+            if event.keyval == Gdk.KEY_x or event.keyval == Gdk.KEY_X:
                 sys.exit(0)
 
-        if event.keyval == keysyms.Escape:
+        if event.keyval == Gdk.KEY_Escape:
             self.mag = False
             self.invalidate()
 
@@ -599,7 +601,7 @@ if __name__ == '__main__':
 
     if verbose:
         print( "PyImgRec running on", "'" + os.name + "'",
-            "GTK", gtk.gtk_version, "PyGtk", pygtk_version )
+            "GTK", Gtk.gtk_version, "PyGtk", pygtk_version )
 
     mainwin = MainWin()
     mainwin.window.show_all()

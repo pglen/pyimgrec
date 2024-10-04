@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import date
+import datetime
 
-print "char *bdate=\"",
+print ("char *bdate=\"",)
 
 
