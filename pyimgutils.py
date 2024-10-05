@@ -36,20 +36,35 @@ def print_exception(xstr):
 # pyimgutils
 # --------------------------------------------------------------------
 
+old_dir = ""
+
 class ofd():
 
-    def __init__(self, msg = "Open File",
-                mode=Gtk.FileChooserAction.OPEN):
+    def __init__(self, msg = "Open File", mode=Gtk.FileChooserAction.OPEN):
+
         self.result = None
         self.old    = os.getcwd()
-        butt =   "Cancel", Gtk.BUTTONS_CANCEL, "OK", Gtk.ButtonsType.OK
-        fc = Gtk.FileChooserDialog(msg, None, mode, butt)
-        fc.set_current_folder(self.old)
-        fc.set_default_response(Gtk.Gtk.ResponseType.OK)
+
+        global old_dir
+        if not old_dir:
+            old_dir = self.old
+        print("old_dir:", old_dir)
+
+        butts =  "OK", Gtk.ButtonsType.OK, "Cancel", Gtk.ButtonsType.CANCEL
+        fc = Gtk.FileChooserDialog(msg, None, mode, butts)
+        fc.set_current_folder(old_dir)
+
+        fc.connect("key-press-event", self.area_key, fc)
+        fc.connect("key-release-event", self.area_key, fc)
+
+        fc.set_default_response(Gtk.ResponseType.ACCEPT)
         fc.connect("response", self._done_opendlg)
         fc.run()
 
     def _done_opendlg(self, win, resp):
+
+        global old_dir
+
         os.chdir(self.old)
         if resp == Gtk.ButtonsType.OK:
             try:
@@ -58,9 +73,53 @@ class ofd():
                     msg("Must have filename")
                 else:
                     self.result = fname
+                old_dir = os.path.dirname(fname)
+
             except:
-                msg("Cannot open")
+                msg("Cannot open file", fname)
         win.destroy()
+
+
+    # Call key handler
+    def area_key(self, area, event, win):
+
+        #print ("area_key", event)
+        # Do key down:
+        if  event.type == Gdk.EventType.KEY_PRESS:
+            if event.keyval == Gdk.KEY_Escape:
+                #print "Esc"
+                return
+                #area.destroy()
+
+        if  event.type == Gdk.EventType.KEY_PRESS:
+            if event.keyval == Gdk.KEY_Return:
+                #print "Ret"
+                win.response(Gtk.ResponseType.ACCEPT)
+                #area.destroy()
+                return
+
+        if  event.type == Gdk.EventType.KEY_PRESS:
+            if event.keyval == Gdk.KEY_BackSpace:
+                os.chdir("..")
+                populate(self)
+                #print "BS"
+
+            if event.keyval == Gdk.KEY_Alt_L or \
+                    event.keyval == Gdk.KEY_Alt_R:
+                self.alt = True;
+
+            if event.keyval == Gdk.KEY_x or \
+                    event.keyval == Gdk.KEY_X:
+                if self.alt:
+                    area.destroy()
+
+        elif  event.type == Gdk.EventType.KEY_RELEASE:
+            if event.keyval == Gdk.KEY_Alt_L or \
+                  event.keyval == Gdk.KEY_Alt_R:
+                self.alt = False;
+
+        return None
+
 
 # --------------------------------------------------------------------
 

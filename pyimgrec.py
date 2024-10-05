@@ -24,9 +24,12 @@ import treehand, img_main
 
 try:
     import pyimgrec.imgrec as imgrec
+    #print("PyImgLib Version:", imgrec.version(), "Built:", imgrec.builddate())
+
 except:
     print_exception("import imgrec")
-    print( "Cannot import imgrec, using py implementation")
+    print( "Cannot import imgrec") #, using py implementation")
+    raise
 
 # ------------------------------------------------------------------------
 # This is open source image recognition program. Written in python with
@@ -112,10 +115,13 @@ class MainWin():
         if www == 0 or hhh == 0:
             www = Gdk.screen_width(); hhh = Gdk.screen_height();
 
-        if www / hhh > 2:
-            window.set_default_size(5*www/8, 7*hhh/8)
-        else:
-            window.set_default_size(7*www/8, 7*hhh/8)
+        #print("Window size", www, hhh)
+        #if www / hhh > 2:
+        #    window.set_default_size(5*www/8, 7*hhh/8)
+        #else:
+        #    window.set_default_size(7*www/8, 7*hhh/8)
+
+        window.set_default_size(6*www/8, 6*hhh/8)
 
         #print( www, hhh)
         self.wwww = 3 * www / 4;  self.hhhh = 3 * hhh / 4
@@ -142,12 +148,14 @@ class MainWin():
             #self.load("images/shapes.png")
             #self.load("images/shapex.png")
             self.load("images/Untitled.png")
+            #self.load("images/line.png")
             #self.load("images/star.png")
             #self.load("images/IMG_0827.jpg")
             #self.load("images/enrolled.pgm")
         except:
             print_exception("Load Image")
-            msg("Cannot load file " + self.fname)
+            #msg("Cannot load file " + self.fname)
+            raise
 
         pix = self.area.image.get_pixbuf()
         iww = pix.get_width(); ihh = pix.get_height()
@@ -164,14 +172,14 @@ class MainWin():
         #self.area3 = DrawingArea()
         #vbox2.pack_start(self.area3)
 
-        lab2 = Gtk.Label("Test Image")
-        vbox2.pack_start(lab2, False, 0, 0)
-        self.img = Gtk.Image();
-        self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
+        #lab2 = Gtk.Label("Test Image")
+        #vbox2.pack_start(lab2, False, 0, 0)
+        #self.img = Gtk.Image();
+        #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
 
         self.buttons(self.hbox, window)
         self.buttons2(self.hbox2, window)
-        self.buttons3(self.hbox2a, window)
+        #self.buttons3(self.hbox2a, window)
         self.checks(self.hbox3, window)
 
         self.spacer(self.hbox_s, False)
@@ -185,14 +193,14 @@ class MainWin():
         self.vbox.pack_start(vbox2, False, 0, 0)
         self.vbox.pack_start(self.hbox, False, 0, 0)
         self.vbox.pack_start(self.hbox2, False, 0, 0)
-        self.vbox.pack_start(self.hbox2a, False, 0, 0)
+        #self.vbox.pack_start(self.hbox2a, False, 0, 0)
         self.vbox.pack_start(self.hbox3, False, 0, 0)
 
-        frame = Gtk.Frame(); frame.add(self.img)
-        vbox2.pack_start(frame, 1, 1, 0)
-
-        self.lab = Gtk.Label("idle")
-        self.vbox.pack_start(self.lab, False, 0, 0)
+        #frame = Gtk.Frame(); frame.add(self.img)
+        #vbox2.pack_start(frame, 1, 1, 0)
+        #
+        #self.lab = Gtk.Label("idle")
+        #self.vbox.pack_start(self.lab, False, 0, 0)
 
         window.add(self.vbox)
 
@@ -234,13 +242,13 @@ class MainWin():
 
         self.spacer(hbox, True )
 
-        self.check1 = Gtk.CheckButton(" Draw Grid ")
+        self.check1 = Gtk.CheckButton.new_with_mnemonic(" Draw Grid ")
         self.check1.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.check1, False, 0, 0)
 
         self.spacer(hbox, False )
 
-        self.check2 = Gtk.CheckButton(" _Click heaven ")
+        self.check2 = Gtk.CheckButton.new_with_mnemonic(" _Click heaven ")
         self.check2.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.check2, False, 0, 0)
 
@@ -565,8 +573,8 @@ if __name__ == '__main__':
     global mainwin
 
     autohide = False
-    #print( "Imgrec Version", imgrec.version())
-    #print( "Imgrec Build  ", imgrec.builddate())
+    print()
+    print( "Imgrec Version", imgrec.version(), imgrec.builddate())
     #print( "Imgrec   ", imgrec.__dict__)
 
     try:
@@ -611,26 +619,3 @@ if __name__ == '__main__':
     Gtk.main()
 
 # EOF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

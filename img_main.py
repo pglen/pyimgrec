@@ -7,11 +7,11 @@
 # import warnings
 # with warnings.catch_warnings():
 #    warnings.simplefilter("ignore")
-# arr = pixb.get_pixels_array()
+# arr = pixb.get_pixels()
 
 import os, sys, getopt, signal, array, math
 import time, random
-#import gobject, gtk, pango,
+import cairo
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -33,7 +33,6 @@ try:
     import pyimgrec.imgrec as imgrec
 except:
     pass
-
 
 MAG_FACT    = 2
 MAG_SIZE    = 300
@@ -105,7 +104,7 @@ class img_main(Gtk.DrawingArea):
     # Paint the image
     def draw(self, me, gc):
 
-        #print("expose:", "GC", me, gc, me.get_window())
+        #print("expose:",  gc)
         rc = self.get_allocation()
         #print(dir(gc))
 
@@ -136,7 +135,7 @@ class img_main(Gtk.DrawingArea):
             pass
 
         if self.mag:
-            #print(  "paint mag:", self.event_x, self.event_y)
+            print(  "paint mag:", self.event_x, self.event_y)
             #iw = self.image.get_pixbuf().get_width()
             #ih = self.image.get_pixbuf().get_height()
             iw2 = self.image2.get_pixbuf().get_width()
@@ -169,8 +168,8 @@ class img_main(Gtk.DrawingArea):
 
                 pixb.copy_area(int(src_x), int(src_y),
                         MAG_SIZE/MAG_FACT, MAG_SIZE/MAG_FACT, self.pb, 0, 0)
-                self.pb2 = self.pb.scale_simple(MAG_SIZE, MAG_SIZE, Gtk.gdk.INTERP_NEAREST)
-
+                self.pb2 = self.pb.scale_simple(MAG_SIZE, MAG_SIZE,
+                                GdkPixbuf.InterpType.NEAREST)
             except:
                 print_exception("get mag")
 
@@ -180,14 +179,17 @@ class img_main(Gtk.DrawingArea):
 
             #gc.draw_pixbuf(gc, self.pb2,
             #            0, 0, int(rendx), int(rendy), int(magsx), int(magsy))
-        else:
-            try:
-                Gdk.cairo_set_source_pixbuf(gc, self.pb, 0, 0)
-                gc.paint()
 
-                #    0, 0, int(rendx), int(rendy), int(magsx), int(magsy))
-            except:
-                print(sys.exc_info())
+        try:
+            #Gdk.cairo_set_source_pixbuf(gc, self.pb2, 0, 0)
+            #gc.paint()
+            pass
+        except:
+            print("bm draw", sys.exc_info())
+
+        gc.set_source_surface(self.surface)
+        gc.paint()
+
     # --------------------------------------------------------------------
     def key_press_event(self, win, event):
 
@@ -224,16 +226,17 @@ class img_main(Gtk.DrawingArea):
         self.invalidate()
 
     def invalidate(self):
-        winn = self.window
-        ww, hh = winn.get_size()
-        rect = Gtk.gdk.Rectangle(0, 0, ww, hh)
-        winn.invalidate_rect(rect, False)
-
+        rect = self.get_allocation()
+        rect = Gdk.Rectangle(rect)
+        #winn.invalidate_rect(rect, False)
+        self.queue_draw()
+        #self.queue_draw_area(rect)
 
     # --------------------------------------------------------------------
-    # Load image
 
     def load(self, fname):
+
+        ''' Load image file '''
 
         try:
             self.fname = fname
@@ -241,33 +244,73 @@ class img_main(Gtk.DrawingArea):
             self.image.set_from_file(fname)
 
             pix = self.image.get_pixbuf()
-            iww = pix.get_width(); ihh = pix.get_height()
-            self.set_size_request(iww, ihh)
+            self.iww = pix.get_width();
+            self.ihh = pix.get_height()
+            self.set_size_request(self.iww, self.ihh)
             self.image2 = Gtk.Image()
+
             pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
-                            True, 8, iww, ihh)
-            pix.copy_area(0, 0, iww, ihh, pixbuf, 0, 0)
+                            True, 8, self.iww, self.ihh)
+            pixbuf2 = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
+                            True, 8, self.iww, self.ihh)
+            pix.copy_area(0, 0, self.iww, self.ihh, pixbuf, 0, 0)
             self.image2.set_from_pixbuf(pixbuf)
 
             # Set imagerec pixel buffer to image2
-            pixb =  self.image2.get_pixbuf()
-            self.pb = pixb
-            #arr = pixb.get_pixels()
+            self.pb =  self.image2.get_pixbuf()
+
+            # Create guest surface
+            self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.iww, self.ihh)
+            #self.surface = cairo.ImageSurface.create_from_png(fname)
+            #print("surface", self.surface, self.surface.get_width(), self.surface.get_height)
+
+            self.pb2 = pixbuf2
+            self.pb.copy_area(0, 0, self.iww, self.ihh, self.pb2, 0, 0)
+
+            ctx = cairo.Context(self.surface)
+            #ctx.scale(300, 300)  # Normalizing the canvas
+            #pat = cairo.LinearGradient(0.0, 0.0, 1.0, 1.0)
+            #pat.add_color_stop_rgba(1, 0.7, 0, 0, 0.5)  # First stop, 50% opacity
+            #pat.add_color_stop_rgba(0, 0.9, 0.7, 0.2, 1)  # Last stop, 100% opacity
+            #ctx.set_source(pat)
+            #ctx.rectangle(0, 0, 300, 300)  # Rectangle(x0, y0, x1, y1)
+            #ctx.fill()
+
+            Gdk.cairo_set_source_pixbuf(ctx, self.pb2, 0, 0)
+            ctx.paint()
+
+            #arr = self.array_from_pixbuf(self.pb2)
             #print(type(arr))
-            #imgrec.anchor(arr)
+            self.bpx = self.pb2.get_n_channels()
+            #print("lens", self.iww, self.ihh, bpx, "mul",  self.iww*self.ihh*bpx, len(buf))
+
+            #buf = self.pb2.get_pixels()
+
+            imgrec.verbose = 1
+            buf = self.surface.get_data()
+            # memory
+            imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
             self.stepx = float(imgrec.width)/self.divider;
             self.stepy = float(imgrec.height)/self.divider;
         except:
-            print("load", sys.exc_info())
+            print("exc load", fname, sys.exc_info())
             print_exception("load")
-
+            #msg("  Cannot load image:\n '%s' " % fname)
+            raise
 
     def refresh(self):
-        pix = self.image.get_pixbuf()
-        iww = pix.get_width(); ihh = pix.get_height()
-        pixbuf = self.image2.get_pixbuf()
-        pix.copy_area(0, 0, iww, ihh, pixbuf, 0, 0)
+        #pix = self.image.get_pixbuf()
+        #iww = pix.get_width(); ihh = pix.get_height()
+        #pixbuf = self.image2.get_pixbuf()
+        #pix.copy_area(0, 0, iww, ihh, pixbuf, 0, 0)
+        print("refresh")
+
+        ctx = cairo.Context(self.surface)
+        pbx = self.image.get_pixbuf()
+        Gdk.cairo_set_source_pixbuf(ctx, pbx, 0, 0)
+        ctx.paint()
+        self.invalidate()
 
     # Refresh image from original
     def get_img(self):
@@ -303,17 +346,17 @@ class img_main(Gtk.DrawingArea):
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-        arr = pixb.get_pixels_array()
+        arr = pixb.get_pixels()
 
         #imgrec.verbose = 1
-        imgrec.anchor(arr)
 
-        #print( "Norm Image")
-        #imgrec.normalize(1,2,3)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+
+        print( "Norm Image")
+        imgrec.normalize(1,2,3)
         imgrec.bw(1,2,3)
-
-        rc = self.get_allocation()
-        self.window.invalidate_rect(rc, False)
+        self.invalidate()
 
     def smooth_image(self):
 
@@ -324,10 +367,12 @@ class img_main(Gtk.DrawingArea):
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-        arr = pixb.get_pixels_array()
+        #arr = pixb.get_pixels()
+        arr = pixb.get_pixels()
 
         imgrec.verbose = 1
-        imgrec.anchor(arr)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.smooth(10)
         self.invalidate()
 
@@ -340,10 +385,11 @@ class img_main(Gtk.DrawingArea):
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-        arr = pixb.get_pixels_array()
+        arr = pixb.get_pixels()
 
         imgrec.verbose = 1
-        imgrec.anchor(arr)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.bridar(10)
 
@@ -359,10 +405,11 @@ class img_main(Gtk.DrawingArea):
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-        arr = pixb.get_pixels_array()
+        arr = pixb.get_pixels()
 
         imgrec.verbose = 1
-        imgrec.anchor(arr)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.bridar(-10)
 
@@ -371,44 +418,49 @@ class img_main(Gtk.DrawingArea):
 
     def blank_image(self):
 
-        pixb =  self.image2.get_pixbuf()
-        iw = pixb.get_width(); ih = pixb.get_height()
+        #pixb =  self.image2.get_pixbuf()
+        #iw = pixb.get_width(); ih = pixb.get_height()
         #print( "img dim", iw, ih)
 
-        import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-        arr = pixb.get_pixels_array()
+        #import warnings
+        #with warnings.catch_warnings():
+        #    warnings.simplefilter("ignore")
+        #arr = pixb.get_pixels()
 
-        imgrec.verbose = 1
-        imgrec.anchor(arr)
+        #imgrec.verbose = 1
+        buf = self.surface.get_data()
+        #ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        #imgrec.blank(color=0xffffffff)
+        iww = self.pb.get_width(); ihh = self.pb.get_height()
+        #print( "iww ihh", iww, ihh)
 
-        imgrec.blank(color=0xffffffff)
+        self.pb = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
+                            True, 8, iww, ihh)
+        self.pb2 = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
+                            True, 8, iww, ihh)
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.iww, self.ihh)
 
         self.invalidate()
 
     def walk_image(self, xx, yy):
 
         #print( "walk_image() dim =", iw, ih, "pos =", xx, yy )
-        arr = self.image2.get_pixbuf().get_pixels_array()
+        arr = self.image2.get_pixbuf().get_pixels()
         imgrec.verbose = 1
-        imgrec.anchor(arr)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.walk(int(xx), int(yy))
         self.invalidate()
 
     def edge_image(self):
 
-        arr = self.image2.get_pixbuf().get_pixels_array()
+        arr = self.image2.get_pixbuf().get_pixels()
         #imgrec.verbose = 1
-        imgrec.anchor(arr)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.edge()
         self.invalidate()
-
-    def invalidate(self):
-        rc = self.get_allocation()
-        #self.window.invalidate_rect(rc, False)
-        #self.invalidate_rect(rc, False)
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
@@ -417,11 +469,12 @@ class img_main(Gtk.DrawingArea):
 
         # Get img props.
         pixb =  self.image2.get_pixbuf()
-        arr = pixb.get_pixels_array()
+        arr = pixb.get_pixels()
         iw = pixb.get_width(); ih = pixb.get_height()
 
         #imgrec.verbose = 1
-        imgrec.anchor(arr)
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         #print( "dims", imgrec.dim1, imgrec.dim2, imgrec.dim3)
         #print( "width", imgrec.width, "height", imgrec.height)
@@ -468,7 +521,6 @@ class img_main(Gtk.DrawingArea):
         except:
             print_exception("median")
 
-
         if self.xparent.radio1.get_active():
             self.xparent.clear_small_img()
             # Set up flood fill
@@ -486,7 +538,7 @@ class img_main(Gtk.DrawingArea):
             img = Gtk.Image()
             pixbuf = Gtk.gdk.Pixbuf(Gtk.gdk.COLORSPACE_RGB, True, 8,  maxx+1, maxy+1)
             pixbuf.fill(0x000000ff)
-            arr = pixbuf.get_pixels_array()
+            arr = pixbuf.get_pixels()
 
             #print( "bounds",  fparm.bounds)
 

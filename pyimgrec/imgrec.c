@@ -45,7 +45,7 @@ PyObject *module;                   // This is us
 
 int     reent = 0;                  // Stupid sanity check
 static  char version[] = "1.0";     // Can be queried
-static  int anclen = 0;             // Length of buffer in bytes
+static  long anclen = 0;            // Length of buffer in bytes
 
 //static  Py_ssize_t anclen = 0;      // Length of buffer in bytes
 
@@ -55,74 +55,80 @@ static  int anclen = 0;             // Length of buffer in bytes
 
 static PyObject *_anchor(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "imgarr", NULL };
-    PyObject *anc = 0;
+    static char *kwlist[] = { "ptr", "shape", NULL };
+    PyObject *anc = 0, *sss = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &anc))
+    //PyObject_Print(kwargs, stdout, 0);
+    //printf("\n");
+    //PyObject_Print(args, stdout, 0);
+    //printf("\n");
+
+    //printf("args = %s len=%ld \n", (char*)PyObject_Str(args), PyObject_Size(args));
+    //printf("%24s len=%d ", (char*)
+    //PyObject_Str(kwargs), PyObject_Size(kwargs));
+
+    //printf("args: (%x) kwargs: (%x) STDOUT %x\n", args, kwargs, stdout);
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO", kwlist, &anc, &sss))
         return NULL;
 
-    char *pname = "shape";
-    if (PyObject_HasAttrString(anc, pname))
+    PyObject_Print(anc, stdout, 0);
+    printf(" was: anc\n");
+    //PyObject_Print(sss, stdout, 0);
+    //printf("was; sss\n");
+
+    Py_buffer *py_buffer = PyMemoryView_GET_BUFFER(anc);
+    printf(" pymem %p len=%ld ndim=%ld\n",
+                        py_buffer->buf, py_buffer->len, py_buffer->ndim);
+    PyObject *sxx  = py_buffer->shape;
+    printf(" %p was shape\n", sxx);
+    //PyObject_Print(sxx, stdout, 0);
+    //printf("check %d\n", PyTuple_Check(sxx));
+
+    if (!PyTuple_Check(sss))
         {
-        PyObject *res2 = PyObject_GetAttrString(anc, pname);
-        if (PyTuple_Check(res2))
-            {
-            if (PyTuple_GET_SIZE(res2) == 3)
-                {
-                PyObject *d1 = PyTuple_GetItem(res2, 0);
-                dim1 = PyLong_AsLong(d1);
-                PyObject_SetAttrString(module, "dim1", Py_BuildValue("i", dim1));
-                PyObject_SetAttrString(module, "height", Py_BuildValue("i", dim1));
-
-                PyObject *d2 = PyTuple_GetItem(res2, 1);
-                dim2 = PyLong_AsLong(d2);
-                PyObject_SetAttrString(module, "dim2",  Py_BuildValue("i", dim2));
-                PyObject_SetAttrString(module, "width", Py_BuildValue("i", dim2));
-
-                PyObject *d3 = PyTuple_GetItem(res2, 2);
-                dim3 = PyLong_AsLong(d3);
-                PyObject_SetAttrString(module, "dim3", Py_BuildValue("i", dim3));
-                }
-           else {
-                //printf("shape dim must be 3");
-                PyErr_Format(PyExc_ValueError, "%s", "shape dim must be 3");
-                return NULL;
-                }
-            }
-        else
-            {
-            //printf("shape must be tuple");
-            PyErr_Format(PyExc_ValueError, "%s", "shape must be tuple");
-            return NULL;
-            }
+        PyErr_Format(PyExc_TypeError, "%s", "expected tuple");
+        return NULL;
         }
-    else
+    if (PyTuple_GET_SIZE(sss) != 3)
         {
-        //printf("must have shape attr");
-        PyErr_Format(PyExc_ValueError, "%s", "argument must have shape property (like: arr)");
+        //printf("shape dim must be 3");
+        PyErr_Format(PyExc_ValueError, "%s", "shape dims must be 3");
         return NULL;
         }
 
-    //printf("_anchor %p %d %p\n", anc, res, res2);
+    PyObject *d1 = PyTuple_GetItem(sss, 0);
+    dim1 = PyLong_AsLong(d1);
+    PyObject_SetAttrString(module, "dim1", Py_BuildValue("i", dim1));
+    PyObject_SetAttrString(module, "height", Py_BuildValue("i", dim1));
+
+    PyObject *d2 = PyTuple_GetItem(sss, 1);
+    dim2 = PyLong_AsLong(d2);
+    PyObject_SetAttrString(module, "dim2",  Py_BuildValue("i", dim2));
+    PyObject_SetAttrString(module, "width", Py_BuildValue("i", dim2));
+
+    PyObject *d3 = PyTuple_GetItem(sss, 2);
+    dim3 = PyLong_AsLong(d3);
+    PyObject_SetAttrString(module, "dim3", Py_BuildValue("i", dim3));
+
+    printf("imgrec dims: %ld %ld %ld\n", dim1, dim2, dim3);
+
+    anchor = py_buffer->buf;
 
     // Cast it, so int * - s will not complain
-    int ret3 = PyObject_AsWriteBuffer(anc, (void**)&anchor, (Py_ssize_t*)&anclen);
+    //int ret3 = PyObject_AsWriteBuffer(anc, (void**)&anchor, (Py_ssize_t*)&anclen);
+    //int ret3 = PyObject_AsReadBuffer(anc, (void**)&anchor, (Py_ssize_t*)&anclen);
     //int ret3 = PyObject_GetBuffer(PyObject *exporter, Py_buffer *view, int flags)
     //int ret3 = PyObject_GetBuffer(anc, (void**)&anchor,  's*');
-
-    if(ret3 < 0)
-        {
-        //printf("Cannot get pointer to buffer");
-        PyErr_Format(PyExc_ValueError, "%s", "Cannot get pointer to buffer");
-        return NULL;
-        }
-
-    if(is_verbose())
-        printf("Anchor Dimensions: ww=%ld hh=%ld dd=%ld Pointer: %p\n",
-                dim2, dim1, dim3, anchor);
+    //if(ret3 < 0)
+    //    {
+    //    //printf("Cannot get pointer to buffer");
+    //    PyErr_Format(PyExc_ValueError, "%s", "Cannot get pointer to buffer");
+    //    return NULL;
+    //    }
 
     // Sanity check
-    if(dim1*dim2*dim3 != anclen)
+    if(dim1*dim2*dim3 != py_buffer->len)
         {
         PyErr_Format(PyExc_ValueError, "%s", "Buffer len != dim[1]*dim[2]*dim[3]");
         return NULL;
