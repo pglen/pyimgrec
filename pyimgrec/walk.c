@@ -15,13 +15,13 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "startx", "starty", "endx", "endy", NULL };
     int arg1 = 0;  int arg2 = 0; int arg3 = 0;  int arg4 = 0;
-    
+
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiii", kwlist, &arg1, &arg2, &arg3, &arg4))
             return NULL;
-    
+
     if( is_verbose())
         printf("Walk %d %d %d %d\n", arg1, arg2, arg3, arg4);
-    
+
     if(!anchor)
         {
         PyErr_Format(PyExc_ValueError, "%s", "anchor must be set before any operation");
@@ -42,17 +42,17 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s", "Cannot reenter");
         return NULL;
         }
-        
+
     //int loop, loop2;
-    reent = 1;    
-    
+    reent = 1;
+
     // Mark starting point
-    int cdot = RGB(255, 0, 0); 
-    int xold = RGB(0, 0, 0); 
+    int cdot = RGB(255, 0, 0);
+    int xold = RGB(0, 0, 0);
     add_item(arg1, arg2, xold, XCROSS);
 
     avg = calc_avg();
-    
+
     #if 0
     for (loop = arg2; loop < arg2 + 1; loop+= 1) // yy
         {
@@ -62,20 +62,20 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
             add_item(loop2, loop, xold, XCROSS);
             }
         }
-    #endif    
-    
+    #endif
+
     // Scan away
     int xxx = arg1, yyy = arg2;
     int *curr = anchor;
     for(;;) {
-    
+
         // Boundary exit
         if(xxx < 0 || yyy < 0)
             break;
         if(xxx > dim2 || yyy > dim1)
             break;
-            
-        int offs = yyy * dim2; 
+
+        int offs = yyy * dim2;
         int val = curr[offs + xxx];
         if ((val & 0xff) < avg)
             {
@@ -84,10 +84,11 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
             }
         else
             break;
-    }      
-        
+    }
+
+
     show_crosses();
-    
-    reent = 0;    
+
+    reent = 0;
     return Py_BuildValue("");
-} 
+}

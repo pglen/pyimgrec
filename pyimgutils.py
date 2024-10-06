@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, getopt, signal, array
+import os, sys, getopt, signal, array, time
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -9,8 +9,6 @@ from gi.repository import Gdk
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
-
-#import gobject, gtk, pango, time,
 
 import traceback
 
@@ -136,11 +134,11 @@ def  get_str(prompt):
     resp = ""
     dialog = Gtk.Dialog("Enter string",
                    None,
-                   Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DIALOG_DESTROY_WITH_PARENT,
-                   (Gtk.STOCK_CANCEL, Gtk.RESPONSE_REJECT,
-                    Gtk.STOCK_OK, Gtk.RESPONSE_ACCEPT))
-    dialog.set_default_response(Gtk.RESPONSE_ACCEPT)
-    dialog.set_position(Gtk.WIN_POS_CENTER)
+                   Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                   ("OK", Gtk.ResponseType.REJECT,
+                    "Cancel", Gtk.ResponseType.ACCEPT))
+    dialog.set_default_response(Gtk.ResponseType.ACCEPT)
+    #dialog.set_position(Gtk.WIN_POS_CENTER)
     entry = Gtk.Entry();
     entry.set_activates_default(True)
     entry.set_width_chars(24)
@@ -148,23 +146,21 @@ def  get_str(prompt):
     label3 = Gtk.Label("   ");   label4 = Gtk.Label("   ")
     label1a = Gtk.Label(prompt); label1b = Gtk.Label("     ")
     hbox2 = Gtk.HBox()
-    hbox2.pack_start(label1, False)
-    hbox2.pack_start(label1a, False)
-    hbox2.pack_start(label1b, False)
-    hbox2.pack_start(entry)
-    hbox2.pack_start(label2, False)
+    hbox2.pack_start(label1, False, 0, 0)
+    hbox2.pack_start(label1a, False, 0, 0)
+    hbox2.pack_start(label1b, False, 0, 0)
+    hbox2.pack_start(entry, False, 0, 0)
+    hbox2.pack_start(label2, False, 0, 0)
 
-
-    dialog.vbox.pack_start(label3)
-    dialog.vbox.pack_start(hbox2)
-    dialog.vbox.pack_start(label4)
-
+    dialog.vbox.pack_start(label3, False, 0, 0)
+    dialog.vbox.pack_start(hbox2, False, 0, 0)
+    dialog.vbox.pack_start(label4, False, 0, 0)
 
     dialog.show_all()
     response = dialog.run()
     gotxt = entry.get_text()
     dialog.destroy()
-    if response == Gtk.RESPONSE_ACCEPT:
+    if response == Gtk.ResponseType.ACCEPT:
         resp = gotxt
 
     return resp
@@ -172,19 +168,20 @@ def  get_str(prompt):
 # -----------------------------------------------------------------------
 # Sleep just a little, but allow the system to breed
 
+if sys.version_info[0] < 3 or \
+    (sys.version_info[0] == 3 and sys.version_info[1] < 3):
+    timefunc = time.clock
+else:
+    timefunc = time.process_time
+
 def  usleep(msec):
 
-    got_clock = time.clock() + float(msec) / 1000
-    #print got_clock
+    got_clock = timefunc() + float(msec) / 1000
+    #print( got_clock)
     while True:
-        if time.clock() > got_clock:
+        if timefunc() > got_clock:
             break
+        #print ("Sleeping")
         Gtk.main_iteration_do(False)
 
-
-
-
-
-
-
-
+# EOF

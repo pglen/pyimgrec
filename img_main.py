@@ -119,16 +119,18 @@ class img_main(Gtk.DrawingArea):
             #self.window.draw_layout(gc, xx, yy, self.pangolayout)
 
         for xx, yy, col in self.aframe:
-            colormap = Gtk.widget_get_default_colormap()
-            gc.set_foreground(colormap.alloc_color("#%06x" % (col & 0xffffff) ))
+            #colormap = Gtk.widget_get_default_colormap()
+            #gc.set_foreground(colormap.alloc_color("#%06x" % (col & 0xffffff) ))
             #self.window.draw_rectangle(gc, False, int(xx*self.stepx), int(yy*self.stepy),
             #                    int(self.stepx), int(self.stepy))
+            pass
 
         for xx, yy, col in self.bframe:
-            colormap = Gtk.widget_get_default_colormap()
-            gc.set_foreground(colormap.alloc_color("#%06x" % (col & 0xffffff) ))
+            #colormap = Gtk.widget_get_default_colormap()
+            #gc.set_foreground(colormap.alloc_color("#%06x" % (col & 0xffffff) ))
             #self.window.draw_rectangle(gc, False, int(xx*self.stepx), int(yy*self.stepy),
             #                    int(self.stepx), int(self.stepy))
+            pass
 
         for xx, yy, func in self.annote:
             #func(self.window)
@@ -445,7 +447,6 @@ class img_main(Gtk.DrawingArea):
     def walk_image(self, xx, yy):
 
         #print( "walk_image() dim =", iw, ih, "pos =", xx, yy )
-        arr = self.image2.get_pixbuf().get_pixels()
         imgrec.verbose = 1
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
@@ -454,7 +455,6 @@ class img_main(Gtk.DrawingArea):
 
     def edge_image(self):
 
-        arr = self.image2.get_pixbuf().get_pixels()
         #imgrec.verbose = 1
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
@@ -468,11 +468,11 @@ class img_main(Gtk.DrawingArea):
     def anal_image(self, xxx = -1, yyy = -1):
 
         # Get img props.
-        pixb =  self.image2.get_pixbuf()
-        arr = pixb.get_pixels()
-        iw = pixb.get_width(); ih = pixb.get_height()
+        #pixb =  self.image2.get_pixbuf()
+        #arr = pixb.get_pixels()
+        #iw = pixb.get_width(); ih = pixb.get_height()
 
-        #imgrec.verbose = 1
+        imgrec.verbose = 1
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
@@ -535,28 +535,30 @@ class img_main(Gtk.DrawingArea):
             maxx = fparm.maxx - fparm.minx; maxy = fparm.maxy - fparm.miny
             #print( "maxx maxy", maxx, maxy)
             #print( "minx miny", minx, miny)
-            img = Gtk.Image()
-            pixbuf = Gtk.gdk.Pixbuf(Gtk.gdk.COLORSPACE_RGB, True, 8,  maxx+1, maxy+1)
-            pixbuf.fill(0x000000ff)
-            arr = pixbuf.get_pixels()
+            #img = Gtk.Image()
+            #pixbuf = Gtk.gdk.Pixbuf(Gtk.gdk.COLORSPACE_RGB, True, 8,  maxx+1, maxy+1)
+            #pixbuf.fill(0x000000ff)
+            #arr = pixbuf.get_pixels()
 
             #print( "bounds",  fparm.bounds)
 
             self.xparent.narr = norm_array(fparm)
             #print(  "narr len ", len(self.xparent.narr))
 
+            arr = self.surface.get_data()
+
             # Animate, so we see the correct winding
-            for bb in self.xparent.narr:
-                    #arr[aa[1] - miny, aa[0] - minx, 0] = 0x7f0000ff
-                    arr[bb[1], bb[0], 0] = 0xff
-                    arr[bb[1], bb[0], 1] = 0x00
-                    arr[bb[1], bb[0], 2] = 0x00
-                    arr[bb[1], bb[0], 3] = 0xff
-                    #print( bb[0], bb[1], "  ",)
-                    pixbuf2 = Gtk.gdk.pixbuf_new_from_array(arr, Gtk.gdk.COLORSPACE_RGB, 8)
-                    img.set_from_pixbuf(pixbuf2)
-                    self.xparent.fill_small_img(img)
-                    usleep(3)
+            #for bb in self.xparent.narr:
+            #        #arr[aa[1] - miny, aa[0] - minx, 0] = 0x7f0000ff
+            #        arr[bb[1], bb[0], 0] = 0xff
+            #        arr[bb[1], bb[0], 1] = 0x00
+            #        arr[bb[1], bb[0], 2] = 0x00
+            #        arr[bb[1], bb[0], 3] = 0xff
+            #        #print( bb[0], bb[1], "  ",)
+            #        pixbuf2 = Gtk.gdk.pixbuf_new_from_array(arr, Gtk.gdk.COLORSPACE_RGB, 8)
+            #        img.set_from_pixbuf(pixbuf2)
+            #        self.xparent.fill_small_img(img)
+            #        usleep(3)
 
             # Compare shape with saved ones
             cmp = []
@@ -567,7 +569,7 @@ class img_main(Gtk.DrawingArea):
             # Dictionary yet?
             if(len(cmp)):
                 cmp.sort()
-                print( cmp        )
+                print( "cmp", cmp)
                 self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
 
             self.show_prog(fparm)
@@ -614,12 +616,12 @@ class img_main(Gtk.DrawingArea):
         #print( "minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
         #print( "inval", minx * self.stepx, miny * self.stepy,
         #                (maxx + 1)* self.stepx, (maxy+1) * self.stepy )
-        rect = Gtk.gdk.Rectangle(int(minx * self.stepx), int(miny * self.stepy),
-                        int((maxx + 1) * self.stepx),
-                                int((maxy + 1)  * self.stepy))
+        #rect = Gtk.gdk.Rectangle(int(minx * self.stepx), int(miny * self.stepy),
+        #                int((maxx + 1) * self.stepx),
+        #                        int((maxy + 1)  * self.stepy))
 
-        self.window.invalidate_rect(rect, False)
-        #self.invalidate()
+        #self.window.invalidate_rect(rect, False)
+        self.invalidate()
         usleep(.005)
 
 

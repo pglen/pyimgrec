@@ -179,7 +179,7 @@ class MainWin():
 
         self.buttons(self.hbox, window)
         self.buttons2(self.hbox2, window)
-        #self.buttons3(self.hbox2a, window)
+        self.buttons3(self.hbox2a, window)
         self.checks(self.hbox3, window)
 
         self.spacer(self.hbox_s, False)
@@ -193,7 +193,7 @@ class MainWin():
         self.vbox.pack_start(vbox2, False, 0, 0)
         self.vbox.pack_start(self.hbox, False, 0, 0)
         self.vbox.pack_start(self.hbox2, False, 0, 0)
-        #self.vbox.pack_start(self.hbox2a, False, 0, 0)
+        self.vbox.pack_start(self.hbox2a, False, 0, 0)
         self.vbox.pack_start(self.hbox3, False, 0, 0)
 
         #frame = Gtk.Frame(); frame.add(self.img)
@@ -213,16 +213,15 @@ class MainWin():
 
     def clear_small_img(self, color = 0x000000ff):
         # Only get this once after resize
-        if not self.smrc:
-            self.smrc = self.img.get_allocation()
-
-        rc = self.img.get_allocation()
-        pixbuf = Gtk.gdk.Pixbuf(gdk.COLORSPACE_RGB, True, 8,  rc.width, rc.height)
-        pixbuf.fill(color)
-        self.img.set_from_pixbuf(pixbuf)
-        rc = self.mainbox.get_allocation()
-        self.mainbox.window.invalidate_rect(rc, False)
-
+        #if not self.smrc:
+        #    self.smrc = self.img.get_allocation()
+        #rc = self.img.get_allocation()
+        #pixbuf = Gtk.gdk.Pixbuf(gdk.COLORSPACE_RGB, True, 8,  rc.width, rc.height)
+        #pixbuf.fill(color)
+        #self.img.set_from_pixbuf(pixbuf)
+        #rc = self.mainbox.get_allocation()
+        #self.mainbox.window.invalidate_rect(rc, False)
+        pass
     def fill_small_img(self, img):
 
         # Only get this once after resize
@@ -469,8 +468,7 @@ class MainWin():
             msg("Cannot load file:\n%s" % self.fname)
 
     def save_image(self, arg, ww):
-        fname = ofd("Save Image File",
-                FILE_CHOOSER_ACTION_SAVE).result
+        fname = ofd("Save Image File", Gtk.FileChooserAction.SAVE).result
         if not fname:
             return
         try:
@@ -484,6 +482,7 @@ class MainWin():
 
     def anal_image(self, win, a3):
         self.area.anal_image()
+        self.area.invalidate()
 
     def refr_image(self, arg, ww):
         self.area.refresh()

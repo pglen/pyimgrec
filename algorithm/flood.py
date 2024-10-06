@@ -2,8 +2,6 @@
 
 import  os, sys, getopt, signal, array
 
-#import  gobject, gtk, pango, time
-
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -12,11 +10,10 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
 
-
 from    pyimgutils import *
 import  stack
 
-#import pyimgrec.imgrec as imgrec
+import pyimgrec.imgrec as imgrec
 
 # Placeholder for lots of params for the floodfill function
 # Passing a data class will make it private / reentrant data
