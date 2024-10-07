@@ -10,8 +10,12 @@ GNU / Linux:
 
  Usual (autoconf) ./configure and make cycle works
 
-Screenshot:
+## Screenshot:
 
 ![Screen Shot](screen.png)
 
-# EOF
+## Edge detection:
+
+![Screen Shot of Edge Detection](screen_edge.png)
+
+### EOF
