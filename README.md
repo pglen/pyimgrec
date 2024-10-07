@@ -10,3 +10,8 @@ GNU / Linux:
 
  Usual (autoconf) ./configure and make cycle works
 
+Screenshot:
+
+![Screen Shot](screen.png)
+
+# EOF
