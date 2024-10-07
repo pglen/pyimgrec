@@ -9,7 +9,7 @@
 #include "imgrec.h"
 #include "utils.h"
 
-static int avg;             // Global for passing avg between parts
+//static int avg;             // Global for passing avg between parts
 
 // -----------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "startx", "starty","endx", "endy", NULL };
 
-    int arg1 = 0;  int arg2 = 0; int arg3 = 0;  int arg4 = 0;
+    int arg1 = 0;  int arg2 = 0; int arg3 = dim1;  int arg4 = dim2;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiii", kwlist, &arg1, &arg2, &arg3, &arg4))
             return NULL;
@@ -35,7 +35,7 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
         return NULL;
         }
-     if (arg1 > dim2 || arg2 > dim1 || arg3 > dim2 || arg4  > dim1 )
+     if (arg3 > dim1 || arg4  > dim2 )
         {
         PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
         return NULL;
@@ -44,11 +44,11 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
     // All set, flush it out
     int *curr = anchor, loop, loop2;
 
-    for (loop = 0; loop < dim1; loop++)
+    for (loop = 0; loop < dim2; loop++)
         {
-        int offs = loop * dim2;
+        int offs = loop * dim1;
 
-        for (loop2 = 0; loop2 < dim2; loop2++)
+        for (loop2 = 0; loop2 < dim1; loop2++)
             {
             unsigned int ccc = curr[offs + loop2];
             int rr, gg, bb, xold, rrr, ggg, bbb;
@@ -268,12 +268,13 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
 
 // This is to prevent the macros from polluting the compilation screen
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+//pragma GCC diagnostic push
+//pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 // -----------------------------------------------------------------------
+#if 0
 
-int  smooth_line(int arg1, int arg2, int loop)
+static int  smooth_line(int arg1, int arg2, int loop)
 
 {
     int *curr = anchor, loop2, xold, offs =  arg2 * dim2;
@@ -302,7 +303,9 @@ int  smooth_line(int arg1, int arg2, int loop)
     return 0;
 }
 
-#pragma GCC diagnostic pop
+#endif
+
+//pragma GCC diagnostic pop
 
 // --------------------------------------------------------------------
 
@@ -315,15 +318,18 @@ int  smooth_line(int arg1, int arg2, int loop)
 
 // -----------------------------------------------------------------------
 
-int  edge_line(int arg1, int arg2, int loop)
+static  int  edge_line(int loop)
 
 {
     int *curr = anchor, loop2;
-    int state = IDLE, mark = 0, offs = loop * dim2;
+    int state = IDLE;
+
+    int offs = loop * dim1;
     unsigned int prev = curr[offs];
 
-    for (loop2 = arg1; loop2 < dim2; loop2++) // xx
+    for (loop2 = 1; loop2 < dim1; loop2++) // xx
         {
+        int mark = NOMARK;
         int rr, gg, bb, rrr, ggg, bbb;
         unsigned int ccc = curr[offs + loop2];
 
@@ -339,8 +345,9 @@ int  edge_line(int arg1, int arg2, int loop)
                 state = HIGH;
                 //if(rr < avg)
                     {
-                    mark = DOT;
+                    mark = CROSS;
                     }
+                //curr[offs + loop2] = 0xff0000ff;
                 }
             }
         else if (state == HIGH)
@@ -349,7 +356,9 @@ int  edge_line(int arg1, int arg2, int loop)
                 {
                 state = LOW;
                 //if(rr < avg)
-                //    mark = CROSS;
+                mark = XCROSS;
+                //curr[offs + loop2] = 0xff0000ff;
+                //mark = XCROSS;
                 }
             }
         else if (state == IDLE)
@@ -358,19 +367,25 @@ int  edge_line(int arg1, int arg2, int loop)
                 {
                 mark = XCROSS;
                 state = LOW;
+                //curr[offs + loop2] = 0xff0000;
+                }
+            else
+                {
+                mark = CROSS;
+                state = HIGH;
                 }
             }
+
         // Mark
         if (mark != NOMARK)
             {
             int xold, rrrr = 0, gggg = 000, bbbb = 0;
             ASSEM(xold, rrrr, gggg, bbbb)
             add_item(loop2, loop, xold, mark);
-            mark = NOMARK;
+            //mark = NOMARK;
             }
         prev = ccc;
         }
-
     //printf("\n");
     return 0;
 }
@@ -389,7 +404,7 @@ PyObject *_edge(PyObject *self, PyObject *args, PyObject *kwargs)
             return NULL;
 
     if( is_verbose())
-        printf("Edge %d\n", arg1);
+        printf("Edge: step= %d\n", arg1);
 
     if(!anchor)
         {
@@ -408,26 +423,30 @@ PyObject *_edge(PyObject *self, PyObject *args, PyObject *kwargs)
         }
     int loop, loop2;
     reent = 1;
-    avg = calc_avg();
+
+    //avg = calc_avg();
+    //printf("Average: %d\n", avg);
 
     // Scan lines
-    for (loop = 2; loop < dim1; loop += arg1) // yy
+    for (loop = 0; loop < dim2; loop += 1) // yy
         {
-        edge_line(2, 2, loop);
+        edge_line(loop);
         }
-
+    #if 1
     // Blank image
     int *curr = anchor;
-    for (loop = 0; loop < dim1; loop++)  // yy
+    for (loop = 0; loop < dim2; loop++)  // yy
         {
-        int offs = loop * dim2;
-        for (loop2 = 0; loop2 < dim2; loop2++)  //xx
+        int offs = loop * dim1;
+        for (loop2 = 0; loop2 < dim1; loop2++)  //xx
              curr[offs + loop2]  = 0xfffffff;
         }
-
+    //print_list();
     show_crosses();
+    #endif
+
     reent = 0;
     return Py_BuildValue("");
 }
 
-
+// EOF

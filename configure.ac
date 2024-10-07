@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.71])
 AC_INIT([Image Recognition],[1.0],[peterglen99@gmail.com])
-AC_CONFIG_SRCDIR([pyimgrec])
+AC_CONFIG_SRCDIR([imgrec])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 
@@ -27,7 +27,6 @@ AC_LANG_CONFTEST(
 
 # Checks for library functions.
 
-
 PYTHON_VERSION=3.10
 AM_PATH_PYTHON([$PYTHON_VERSION])
 AC_MSG_RESULT([Python Version is $PYTHON_VERSION])
@@ -36,7 +35,7 @@ AC_CHECK_HEADERS([/usr/include/python$PYTHON_VERSION/Python.h])
 AM_PATH_GTK_3_0([3.0.0])
 PYGOBJ_3_0([3.0])
 
-AC_CONFIG_FILES([Makefile pyimgrec/Makefile])
+AC_CONFIG_FILES([Makefile imgrec/Makefile])
 
 AC_OUTPUT
 

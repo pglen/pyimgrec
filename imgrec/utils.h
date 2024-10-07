@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
 // Image recognition module. Local utility header.
-                 
+
 // -----------------------------------------------------------------------
 //# Macros for assembling / dissasembling RGBA colors
 
@@ -13,7 +13,7 @@
             var = 0xff;  var <<= 8;     \
             var |= xbb;  var <<= 8;     \
             var |= xgg;  var <<= 8;     \
-            var |= xrr; 
+            var |= xrr;
 
 #define RGBA(xaa, xrr, xgg, xbb)         \
             ( ((( (xaa << 8) | xbb) << 8 | xgg) << 8) | xrr)
@@ -22,31 +22,30 @@
             var = axx;  var <<= 8;      \
             var |= xbb;  var <<= 8;     \
             var |= xgg;  var <<= 8;     \
-            var |= xrr; 
-            
+            var |= xrr;
+
 //# Break components from var into a set of vars
 
 #define APART(var, rrx, ggx, bbx)       \
             rrx = (var) & 0xff;         \
             ggx = (var >> 8) & 0xff;    \
             bbx = (var >> 16) & 0xff;
-            
+
 //# Construct it from vars into a var
 
 #define ASSEM(var, rrx, ggx, bbx)       \
             var = 0xff; var <<= 8;      \
             var |= bbx; var <<= 8;      \
             var |= ggx; var <<= 8;      \
-            var |= rrx; 
+            var |= rrx;
 
 //# Macros for clipping color values (clip - up, down, both)
 
 #define CLIP(ccx) if(ccx > 255) ccx = 255;
 #define DCLIP(ccx) if(ccx < 0)  ccx = 0;
-    
+
 #define XCLIP(ccx)  if(ccx < 0) ccx = 0;     \
                     if(ccx > 255) ccx = 255;
-
 
 // Funcs shared between modules
 

@@ -99,7 +99,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = pyimgrec/Makefile
+CONFIG_CLEAN_FILES = imgrec/Makefile
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
@@ -140,7 +140,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 AM_RECURSIVE_TARGETS = cscope
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/pyimgrec/Makefile.in AUTHORS COPYING ChangeLog \
+	$(top_srcdir)/imgrec/Makefile.in AUTHORS COPYING ChangeLog \
 	INSTALL NEWS README.md compile install-sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
@@ -317,7 +317,7 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-pyimgrec/Makefile: $(top_builddir)/config.status $(top_srcdir)/pyimgrec/Makefile.in
+imgrec/Makefile: $(top_builddir)/config.status $(top_srcdir)/imgrec/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 ID: $(am__tagged_files)
@@ -671,11 +671,11 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
-all:
-	make -C pyimgrec
+all-am:
+	make -C imgrec
 
 clean:
-	make -C pyimgrec clean
+	make -C imgrec clean
 
 git:
 	git add .

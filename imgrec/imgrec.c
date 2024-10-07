@@ -45,8 +45,8 @@ PyObject *module;                   // This is us
 
 int     reent = 0;                  // Stupid sanity check
 static  char version[] = "1.0";     // Can be queried
-static  long anclen = 0;            // Length of buffer in bytes
 
+//static  long anclen = 0;            // Length of buffer in bytes
 //static  Py_ssize_t anclen = 0;      // Length of buffer in bytes
 
 // -----------------------------------------------------------------------
@@ -72,16 +72,16 @@ static PyObject *_anchor(PyObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO", kwlist, &anc, &sss))
         return NULL;
 
-    PyObject_Print(anc, stdout, 0);
-    printf(" was: anc\n");
+    //PyObject_Print(anc, stdout, 0);
+    //printf(" was: anc\n");
     //PyObject_Print(sss, stdout, 0);
     //printf("was; sss\n");
 
     Py_buffer *py_buffer = PyMemoryView_GET_BUFFER(anc);
-    printf(" pymem %p len=%ld ndim=%ld\n",
-                        py_buffer->buf, py_buffer->len, py_buffer->ndim);
-    PyObject *sxx  = py_buffer->shape;
-    printf(" %p was shape\n", sxx);
+    //printf(" pymem %p len=%ld ndim=%d\n",
+    //                    py_buffer->buf, py_buffer->len, py_buffer->ndim);
+    //Py_ssize_t *sxx  = py_buffer->shape;
+    //printf(" %ld was shape\n", *sxx);
     //PyObject_Print(sxx, stdout, 0);
     //printf("check %d\n", PyTuple_Check(sxx));
 
@@ -111,21 +111,10 @@ static PyObject *_anchor(PyObject *self, PyObject *args, PyObject *kwargs)
     dim3 = PyLong_AsLong(d3);
     PyObject_SetAttrString(module, "dim3", Py_BuildValue("i", dim3));
 
-    printf("imgrec dims: %ld %ld %ld\n", dim1, dim2, dim3);
-
     anchor = py_buffer->buf;
 
-    // Cast it, so int * - s will not complain
-    //int ret3 = PyObject_AsWriteBuffer(anc, (void**)&anchor, (Py_ssize_t*)&anclen);
-    //int ret3 = PyObject_AsReadBuffer(anc, (void**)&anchor, (Py_ssize_t*)&anclen);
-    //int ret3 = PyObject_GetBuffer(PyObject *exporter, Py_buffer *view, int flags)
-    //int ret3 = PyObject_GetBuffer(anc, (void**)&anchor,  's*');
-    //if(ret3 < 0)
-    //    {
-    //    //printf("Cannot get pointer to buffer");
-    //    PyErr_Format(PyExc_ValueError, "%s", "Cannot get pointer to buffer");
-    //    return NULL;
-    //    }
+    if (is_verbose())
+        printf("imgrec anchor: %p dims: %ld %ld %ld\n", anchor, dim1, dim2, dim3);
 
     // Sanity check
     if(dim1*dim2*dim3 != py_buffer->len)

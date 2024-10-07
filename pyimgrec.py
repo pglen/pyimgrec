@@ -23,8 +23,8 @@ from pyimgutils import *
 import treehand, img_main
 
 try:
-    import pyimgrec.imgrec as imgrec
-    #print("PyImgLib Version:", imgrec.version(), "Built:", imgrec.builddate())
+    import imgrec.imgrec as imgrec
+    print("ImgRec Lib Version:", imgrec.version(), "Built:", imgrec.builddate())
 
 except:
     print_exception("import imgrec")
@@ -121,7 +121,7 @@ class MainWin():
         #else:
         #    window.set_default_size(7*www/8, 7*hhh/8)
 
-        window.set_default_size(6*www/8, 6*hhh/8)
+        #window.set_default_size(6*www/8, 6*hhh/8)
 
         #print( www, hhh)
         self.wwww = 3 * www / 4;  self.hhhh = 3 * hhh / 4

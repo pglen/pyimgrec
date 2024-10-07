@@ -26,7 +26,7 @@ def print_exception(xstr):
             for aa in ttt:
                 cumm += "File: " + os.path.basename(aa[0]) + \
                         " Line: " + str(aa[1]) + "\n" +  \
-                    "   Context: " + aa[2] + " -> " + aa[3] + "\n"
+                        "   Context: " + aa[2] + " -> " + aa[3] + "\n"
         except:
             print( "Could not print trace stack. ", sys.exc_info())
     print( cumm)

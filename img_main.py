@@ -30,7 +30,7 @@ import  algorithm.rectflood as rectflood
 import  treehand
 
 try:
-    import pyimgrec.imgrec as imgrec
+    import imgrec.imgrec as imgrec
 except:
     pass
 
@@ -285,13 +285,10 @@ class img_main(Gtk.DrawingArea):
             #print(type(arr))
             self.bpx = self.pb2.get_n_channels()
             #print("lens", self.iww, self.ihh, bpx, "mul",  self.iww*self.ihh*bpx, len(buf))
-
-            #buf = self.pb2.get_pixels()
-
             imgrec.verbose = 1
             buf = self.surface.get_data()
-            # memory
             imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+            imgrec.verbose = 0
 
             self.stepx = float(imgrec.width)/self.divider;
             self.stepy = float(imgrec.height)/self.divider;
@@ -355,9 +352,10 @@ class img_main(Gtk.DrawingArea):
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        print( "Norm Image")
-        imgrec.normalize(1,2,3)
-        imgrec.bw(1,2,3)
+        #print( "Norm Image")
+        imgrec.normalize()
+        #imgrec.normalize(1,2,3)
+        #imgrec.bw(1,2,3)
         self.invalidate()
 
     def smooth_image(self):
@@ -423,25 +421,21 @@ class img_main(Gtk.DrawingArea):
         #pixb =  self.image2.get_pixbuf()
         #iw = pixb.get_width(); ih = pixb.get_height()
         #print( "img dim", iw, ih)
-
         #import warnings
         #with warnings.catch_warnings():
         #    warnings.simplefilter("ignore")
         #arr = pixb.get_pixels()
 
-        #imgrec.verbose = 1
         buf = self.surface.get_data()
-        #ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
-        #imgrec.blank(color=0xffffffff)
-        iww = self.pb.get_width(); ihh = self.pb.get_height()
-        #print( "iww ihh", iww, ihh)
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        self.pb = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
-                            True, 8, iww, ihh)
-        self.pb2 = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
-                            True, 8, iww, ihh)
-        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.iww, self.ihh)
-
+        imgrec.verbose = 1
+        imgrec.blank() #color=0xffffffff)
+        imgrec.verbose = 0
+        #self.pb = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
+        #                    True, 8, iww, ihh)
+        #self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.iww, self.ihh)
+        #
         self.invalidate()
 
     def walk_image(self, xx, yy):

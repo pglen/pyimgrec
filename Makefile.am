@@ -1,10 +1,10 @@
 # Make image recognition libraries
 
-all:
-	make -C pyimgrec
+all-am:
+	make -C imgrec
 
 clean:
-	make -C pyimgrec clean
+	make -C imgrec clean
 
 git:
 	git add .

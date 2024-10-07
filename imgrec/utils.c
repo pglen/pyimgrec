@@ -51,18 +51,20 @@ int cross(int xx, int yy, int xold)
 
 {
     int *curr = anchor;
-    int loop2 = xx, offs = yy * dim2;
+    int loop2 = xx, offs = yy * dim1;
 
-    curr[offs + loop2 - 2 ] = xold;
-    curr[offs + loop2 - 1 ] = xold;
-    curr[offs + loop2]      = xold;
-    curr[offs + loop2 + 1 ] = xold;
-    curr[offs + loop2 + 2 ] = xold;
+    curr[offs + loop2] = 0xffff0000;
 
-    curr[offs + loop2 - dim2] = xold;
-    curr[offs + loop2 - 2 * dim2] = xold;
-    curr[offs + loop2 + dim2] = xold;
-    curr[offs + loop2 + 2 * dim2] = xold;
+    //curr[offs + loop2 - 2 ] = xold;
+    //curr[offs + loop2 - 1 ] = xold;
+    //curr[offs + loop2]      = xold;
+    //curr[offs + loop2 + 1 ] = xold;
+    //curr[offs + loop2 + 2 ] = xold;
+
+    //curr[offs + loop2 - dim1] = xold;
+    //curr[offs + loop2 - 2 * dim1] = xold;
+    //curr[offs + loop2 + dim1] = xold;
+    //curr[offs + loop2 + 2 * dim1] = xold;
 
     return 0;
 }
@@ -71,15 +73,16 @@ int xcross(int xx, int yy, int xold)
 
 {
     int *curr = anchor;
-    int loop2 = xx, offs = yy * dim2;
+    int loop2 = xx;
+    int offs = yy * dim1;
+    //printf("dim1 %ld\n", dim1);
 
-    curr[offs + loop2]      = xold;
+    curr[offs + loop2] = 0xff0000ff;
 
-    curr[offs + loop2 -2 - 2 * dim2] = xold;
-    curr[offs + loop2 -2 + 2 * dim2] = xold;
-
-    curr[offs + loop2 +2 - 2 * dim2] = xold;
-    curr[offs + loop2 +2 + 2 * dim2] = xold;
+    //curr[offs + loop2 - 2 - 2 * dim1] = xold;
+    //curr[offs + loop2 - 2 + 2 * dim1] = xold;
+    //curr[offs + loop2 + 2 - 2 * dim1] = xold;
+    //curr[offs + loop2 + 2 + 2 * dim1] = xold;
 
     return 0;
 }
@@ -90,19 +93,19 @@ int circ(int xx, int yy, int xold)
 
 {
     int *curr = anchor, loop2 = xx;
-    int offs = yy * dim2;
+    int offs = yy * dim1;
 
     // LL, RR, UU, DD
     curr[offs + loop2 - 2 ] = xold;
     curr[offs + loop2 + 2 ] = xold;
-    curr[offs + loop2 - 2 * dim2] = xold;
-    curr[offs + loop2 + 2 * dim2] = xold;
+    curr[offs + loop2 - 2 * dim1] = xold;
+    curr[offs + loop2 + 2 * dim1] = xold;
 
     // UL, UR, LL, LR
-    curr[offs + loop2 - 2 - 2 * dim2] = xold;
-    curr[offs + loop2 + 2 - 2 * dim2] = xold;
-    curr[offs + loop2 - 2 + 2 * dim2] = xold;
-    curr[offs + loop2 + 2 + 2 * dim2] = xold;
+    curr[offs + loop2 - 2 - 2 * dim1] = xold;
+    curr[offs + loop2 + 2 - 2 * dim1] = xold;
+    curr[offs + loop2 - 2 + 2 * dim1] = xold;
+    curr[offs + loop2 + 2 + 2 * dim1] = xold;
 
     return 0;
 }
@@ -113,10 +116,8 @@ int dot(int xx, int yy, int xold)
 
 {
     int *curr = anchor, loop2 = xx;
-    int offs = yy * dim2;
-
-    curr[offs + loop2 ] = xold;
-
+    int offs = yy * dim1;
+    curr[offs + loop2 ] = 0xffff0000;
     return 0;
 }
 
@@ -152,6 +153,8 @@ struct _item *root = 0;
 void    add_item(int xx, int yy, int cc, int shape)
 
 {
+    //printf("add_item: %d %d %x %d\n", xx, yy, cc, shape);
+
     struct _item *ptr = malloc(sizeof(struct _item));
     if (!ptr)
         {
@@ -173,6 +176,8 @@ void    add_item(int xx, int yy, int cc, int shape)
         }
 }
 
+// ff 00 00 00
+
 void    print_list(void)
 
 {
@@ -184,7 +189,7 @@ void    print_list(void)
 
     for(;;) {
         if (!ptr) break;
-        printf("%d %d  ", ptr->xx, ptr->yy);
+        printf("%d -- %d %d %x\n", ptr->shape, ptr->xx, ptr->yy, ptr->cc);
         ptr = ptr->next;
     }
     printf("\n");
@@ -216,6 +221,9 @@ void    show_crosses(void)
     }
     for(;;) {
         if (!ptr) break;
+
+        //printf("show_item: %d %d %x %d\n", ptr->xx, ptr->yy, ptr->cc, ptr->shape);
+
         if(ptr->shape == CROSS)
             cross(ptr->xx, ptr->yy, ptr->cc);
         else if(ptr->shape == XCROSS)
@@ -226,8 +234,8 @@ void    show_crosses(void)
             dot(ptr->xx, ptr->yy, ptr->cc);
         else if(ptr->shape == DOT2)
             dot2(ptr->xx, ptr->yy, ptr->cc);
-        else
-            printf("Invalid shape in cross list\n");
+        //else
+        //    printf("Invalid shape in cross list\n");
 
         ptr = ptr->next;
     }
@@ -259,4 +267,4 @@ int calc_avg(void)
     return avg / cnt;
 }
 
-
+// EOF

@@ -13,7 +13,7 @@ from gi.repository import Pango
 from    pyimgutils import *
 import  stack
 
-import pyimgrec.imgrec as imgrec
+import imgrec.imgrec as imgrec
 
 # Placeholder for lots of params for the floodfill function
 # Passing a data class will make it private / reentrant data
