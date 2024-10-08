@@ -164,14 +164,14 @@ PyObject *_whiten(PyObject *self, PyObject *args, PyObject *kwargs)
 
 PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "startx", "starty","endx", "endy", NULL };
+    static char *kwlist[] = { "startx", "starty", "endx", "endy", NULL };
 
     int arg1 = 0; int arg2 = 0; int arg3 = 0;  int arg4 = 0;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iiii", kwlist, &arg1, &arg2, &arg3, &arg4))
             return NULL;
 
-    if( is_verbose())
+    if( is_verbose() > 2)
         printf("Median %d %d %d %d\n", arg1, arg2, arg3, arg4);
 
     if(!anchor)
@@ -184,7 +184,7 @@ PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
         return NULL;
         }
-     if (arg1 > dim2 || arg2 > dim1 || arg3 > dim2 || arg4  > dim1 )
+     if (arg1 > dim1 || arg2 > dim2 || arg3 > dim1 || arg4  > dim2 )
         {
         PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
         return NULL;
@@ -222,7 +222,7 @@ PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs)
     old |= aabb; old <<= 8;  old |= aagg;
     old <<= 8;   old |= aarr;
 
-    if( is_verbose())
+    if( is_verbose() > 2)
         printf("Median result 0x%x\n", old);
 
     return Py_BuildValue("I", (int)old);
@@ -237,8 +237,8 @@ PyObject *_medianmulti(PyObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iiii", kwlist, &arg1, &arg2, &arg3, &arg4))
             return NULL;
 
-    if( is_verbose())
-        printf("Median %d %d %d %d\n", arg1, arg2, arg3, arg4);
+    if( is_verbose() > 2)
+        printf("Median multi %d %d %d %d\n", arg1, arg2, arg3, arg4);
 
     if(!anchor)
         {
@@ -288,8 +288,8 @@ PyObject *_medianmulti(PyObject *self, PyObject *args, PyObject *kwargs)
     old |= aabb; old <<= 8;  old |= aagg;
     old <<= 8;   old |= aarr;
 
-    if( is_verbose())
-        printf("Median result 0x%x\n", old);
+    if( is_verbose() > 2)
+        printf("Median multi result 0x%x\n", old);
 
     return Py_BuildValue("I", (int)old);
 }

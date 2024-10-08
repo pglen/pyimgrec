@@ -53,18 +53,18 @@ int cross(int xx, int yy, int xold)
     int *curr = anchor;
     int loop2 = xx, offs = yy * dim1;
 
-    curr[offs + loop2] = 0xffff0000;
+    //curr[offs + loop2] = 0xffff0000;
 
-    //curr[offs + loop2 - 2 ] = xold;
-    //curr[offs + loop2 - 1 ] = xold;
-    //curr[offs + loop2]      = xold;
-    //curr[offs + loop2 + 1 ] = xold;
-    //curr[offs + loop2 + 2 ] = xold;
+    curr[offs + loop2 - 2 ] = xold;
+    curr[offs + loop2 - 1 ] = xold;
+    curr[offs + loop2]      = xold;
+    curr[offs + loop2 + 1 ] = xold;
+    curr[offs + loop2 + 2 ] = xold;
 
-    //curr[offs + loop2 - dim1] = xold;
-    //curr[offs + loop2 - 2 * dim1] = xold;
-    //curr[offs + loop2 + dim1] = xold;
-    //curr[offs + loop2 + 2 * dim1] = xold;
+    curr[offs + loop2 - dim1] = xold;
+    curr[offs + loop2 - 2 * dim1] = xold;
+    curr[offs + loop2 + dim1] = xold;
+    curr[offs + loop2 + 2 * dim1] = xold;
 
     return 0;
 }
@@ -77,12 +77,17 @@ int xcross(int xx, int yy, int xold)
     int offs = yy * dim1;
     //printf("dim1 %ld\n", dim1);
 
-    curr[offs + loop2] = 0xff0000ff;
+    curr[offs + loop2] =    xold;
 
-    //curr[offs + loop2 - 2 - 2 * dim1] = xold;
-    //curr[offs + loop2 - 2 + 2 * dim1] = xold;
-    //curr[offs + loop2 + 2 - 2 * dim1] = xold;
-    //curr[offs + loop2 + 2 + 2 * dim1] = xold;
+    curr[offs + loop2 - 2 - 2 * dim1] = xold;
+    curr[offs + loop2 - 2 + 2 * dim1] = xold;
+    curr[offs + loop2 - 3 - 3 * dim1] = xold;
+    curr[offs + loop2 - 3 + 3 * dim1] = xold;
+
+    curr[offs + loop2 + 2 - 2 * dim1] = xold;
+    curr[offs + loop2 + 2 + 2 * dim1] = xold;
+    curr[offs + loop2 + 3 - 3 * dim1] = xold;
+    curr[offs + loop2 + 3 + 3 * dim1] = xold;
 
     return 0;
 }
@@ -117,24 +122,25 @@ int dot(int xx, int yy, int xold)
 {
     int *curr = anchor, loop2 = xx;
     int offs = yy * dim1;
-    curr[offs + loop2 ] = 0xffff0000;
+    curr[offs + loop2 ] = xold;
     return 0;
 }
 
-//# Draw a bigger dot
+//# Draw a different dot
 
 int dot2(int xx, int yy, int xold)
 
 {
     int *curr = anchor, loop2 = xx;
-    int offs = yy * dim2;
+    int offs = yy * dim1;
+
+    //curr[offs + loop2 ] = 0xf0000ff;
 
     curr[offs + loop2 ] = xold;
     curr[offs + loop2 + 1 ] = xold;
     curr[offs + loop2 - 1 ] = xold;
-    curr[offs + loop2 + dim2  ] = xold;
-    curr[offs + loop2 - dim2  ] = xold;
-
+    curr[offs + loop2 + dim1  ] = xold;
+    curr[offs + loop2 - dim1  ] = xold;
     return 0;
 }
 

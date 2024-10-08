@@ -30,8 +30,8 @@ PyObject *_diffcol(PyObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "II", kwlist, &arg1, &arg2))
             return NULL;
 
-    if( is_verbose())
-        printf("Sub Color %x %x\n", arg1, arg2);
+    //if( is_verbose())
+    //    printf("Sub Color %x %x\n", arg1, arg2);
 
     // Break apart
     int rr = arg1 & 0xff; int gg = (arg1>>8) & 0xff;
@@ -52,8 +52,8 @@ PyObject *_diffcol(PyObject *self, PyObject *args, PyObject *kwargs)
     int xsin = sqr(rrrr) + sqr(gggg) + sqr(bbbb);  xsin = sqrt(xsin);
     int xmax = MAX(bbbb, gggg); xmax = MAX(xmax, rrrr);
 
-    if( is_verbose())
-        printf("Sub Color ret %x %x %x\n", xold, xsin, xmax);
+    //if( is_verbose())
+    //    printf("Sub Color ret %x %x %x\n", xold, xsin, xmax);
 
     return Py_BuildValue("Iii", xold, xsin, xmax);
 }
@@ -71,8 +71,8 @@ PyObject *_diffmulcol(PyObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "II", kwlist, &arg1, &arg2))
             return NULL;
 
-    if( is_verbose())
-        printf("Sub Color %x %x\n", arg1, arg2);
+    //if( is_verbose())
+    //    printf("Sub Color %x %x\n", arg1, arg2);
 
     // Break apart
     int rr = arg1 & 0xff; int gg = (arg1>>8) & 0xff;
@@ -94,8 +94,8 @@ PyObject *_diffmulcol(PyObject *self, PyObject *args, PyObject *kwargs)
 
         int xmax = MAX(bbbb, gggg); xmax = MAX(xmax, rrrr);
 
-    if( is_verbose())
-        printf("Sub Color ret %x %x %x\n", xold, xsin, xmax);
+    //if( is_verbose())
+    //    printf("Sub Color ret %x %x %x\n", xold, xsin, xmax);
 
     return Py_BuildValue("Iii", xold, xsin, xmax);
 }

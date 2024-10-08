@@ -272,11 +272,11 @@ class MainWin():
         self.spacer(hbox, True )
 
     def check_hell(self, arg, ww):
-        '''print( "check1", self.check1.get_active())
-        print( "check2", self.check2.get_active())
-        print( "radio1", self.radio1.get_active())
-        print( "radio2", self.radio2.get_active()) '''
-        print( )
+        #print( "check1", self.check1.get_active())
+        #print( "check2", self.check2.get_active())
+        #print( "radio1", self.radio1.get_active())
+        #print( "radio2", self.radio2.get_active())
+        pass
 
     # --------------------------------------------------------------------
     # Load image
@@ -406,18 +406,35 @@ class MainWin():
 
         self.spacer(hbox)
 
+        butt92a = Gtk.Button.new_with_mnemonic(" Line ")
+        butt92a.connect("clicked", self.line, window)
+        hbox.pack_start(butt92a, False, 0 ,0)
+
+        self.spacer(hbox)
+
+        butt92b = Gtk.Button.new_with_mnemonic(" Frame ")
+        butt92b.connect("clicked", self.frame, window)
+        hbox.pack_start(butt92b, False, 0 ,0)
+
+        self.spacer(hbox)
+
         butt99 = Gtk.Button.new_with_mnemonic(" E_xit ")
         butt99.connect("clicked", self.exit, window)
         hbox.pack_start(butt99, False,0 ,0)
 
         self.spacer(hbox, True )
 
-
     def exit(self, butt, window):
         self.OnExit(1)
 
     def blank(self, butt, window):
         self.area.blank_image()
+
+    def line(self, butt, window):
+        self.area.line_image()
+
+    def frame(self, butt, window):
+        self.area.frame_image()
 
     def smooth(self, butt, window):
         self.area.smooth_image()
@@ -434,7 +451,7 @@ class MainWin():
 
     def walk(self, butt, window):
         #print( "Walk" #,butt, window)
-        self.area.walk_image(2, 2)
+        self.area.walk_image(4, 4)
 
     def edge(self, butt, window):
         #print( "Walk" #,butt, window)

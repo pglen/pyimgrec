@@ -44,6 +44,8 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
     // All set, flush it out
     int *curr = anchor, loop, loop2;
 
+    int avg = calc_avg();
+
     for (loop = 0; loop < dim2; loop++)
         {
         int offs = loop * dim1;
@@ -64,7 +66,8 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
             // Assemble
             ASSEM(xold, rrr, ggg, bbb)
 
-            curr[offs + loop2] = xold;
+            // disabled for now
+            //curr[offs + loop2] = xold;
             }
         }
     return Py_BuildValue("");
@@ -196,8 +199,8 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i", kwlist, &arg1))
             return NULL;
 
-    if( is_verbose())
-        printf("Smooth %d\n", arg1);
+    if( is_verbose() >  1)
+        printf("Smooth factor: %d\n", arg1);
 
     if(!anchor)
         {
@@ -216,7 +219,7 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
         }
     reent = 1;
 
-    int *bline = malloc(dim2 * sizeof(int));
+    int *bline = malloc(dim1 * sizeof(int));
     if (!bline)
         {
         PyErr_Format(PyExc_ValueError, "%s", "Cannot alloc memory for temp line");
@@ -230,13 +233,16 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
 
     for(loop3 = 0; loop3 < arg1; loop3++)           // Smooth Level
         {
-        for (loop = 0; loop < dim1; loop++)        // yy
+        for (loop = 0; loop < dim2; loop++)        // yy
             {
-            offs = loop * dim2; pprev = curr[offs + arg1];
-            prev = curr[offs + arg1 + 1];
+            offs = loop * dim1;
+            pprev = curr[offs];
+            prev = curr[offs + 1];
+
             int rr, gg, bb, rrr, ggg, bbb, rrrr, gggg, bbbb, rr2, gg2, bb2;
 
-            for (loop2 = 2; loop2 < dim2; loop2++) // xx
+            memset(bline, '\0', dim1 * sizeof(int));
+            for (loop2 = 2; loop2 < dim1; loop2++) // xx
                 {
                 ccc = curr[offs + loop2];
 
@@ -251,13 +257,13 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
                 ASSEM(xold, rr2, gg2, bb2);
 
                 // Write back
-                bline[loop2 - 1] = xold;
+                bline[loop2-1] = xold;
 
                 pprev = prev; prev = ccc;
                 }
 
-            // Put it back
-            memcpy(&curr[offs], bline, dim2 * sizeof(int));
+            // Put line back
+            memcpy(&curr[offs], bline, dim1 * sizeof(int));
             }
         }
     free(bline);
@@ -343,11 +349,7 @@ static  int  edge_line(int loop)
             if(rr > rrr)
                 {
                 state = HIGH;
-                //if(rr < avg)
-                    {
-                    mark = CROSS;
-                    }
-                //curr[offs + loop2] = 0xff0000ff;
+                mark = DOT2;
                 }
             }
         else if (state == HIGH)
@@ -355,24 +357,20 @@ static  int  edge_line(int loop)
             if(rr < rrr)
                 {
                 state = LOW;
-                //if(rr < avg)
-                mark = XCROSS;
-                //curr[offs + loop2] = 0xff0000ff;
-                //mark = XCROSS;
+                mark = DOT;
                 }
             }
         else if (state == IDLE)
             {
             if(rr < rrr)
                 {
-                mark = XCROSS;
                 state = LOW;
-                //curr[offs + loop2] = 0xff0000;
+                mark = DOT2;
                 }
             else
                 {
-                mark = CROSS;
                 state = HIGH;
+                mark = DOT;
                 }
             }
 

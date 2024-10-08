@@ -1,10 +1,8 @@
 // -----------------------------------------------------------------------
 // Image recognition module. Walk routines.
 //
-//
 
 #include <Python.h>
-//#include <pygobject.h>
 
 #include "imgrec.h"
 #include "utils.h"
@@ -43,27 +41,27 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
         }
 
-    //int loop, loop2;
     reent = 1;
 
-    // Mark starting point
-    int cdot = RGB(255, 0, 0);
-    int xold = RGB(0, 0, 0);
-    add_item(arg1, arg2, xold, XCROSS);
-
-    avg = calc_avg();
-
-    #if 0
-    for (loop = arg2; loop < arg2 + 1; loop+= 1) // yy
+    // Test cross markers
+    #if 1
+    int dist = 12;
+    for (int loop = dist; loop < dim2 - dist; loop += dist) // yy
         {
-        for (loop2 = arg1; loop2 < dim2; loop2+= 1) // xx
+        for (int loop2 = dist; loop2 < dim1 - dist; loop2 += dist) // xx
             {
-            int xold = RGB(0,0,0);
-            add_item(loop2, loop, xold, XCROSS);
+            int xold = RGB(0x88, 0x88, 0x88);
+            add_item(loop2, loop, xold, DOT2);
             }
         }
     #endif
 
+    // Mark starting point
+    int cdot = RGB(0x88, 0x88, 0x88);
+    int xold = RGB(0, 0, 0);
+
+    add_item(arg1, arg2, xold, XCROSS);
+    avg = calc_avg();
     // Scan away
     int xxx = arg1, yyy = arg2;
     int *curr = anchor;
@@ -72,21 +70,30 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
         // Boundary exit
         if(xxx < 0 || yyy < 0)
             break;
-        if(xxx > dim2 || yyy > dim1)
+        if(xxx > dim1 || yyy > dim2)
             break;
 
-        int offs = yyy * dim2;
+        int offs = yyy * dim1;
         int val = curr[offs + xxx];
         if ((val & 0xff) < avg)
             {
+            printf("found: %d %d\n", xxx, yyy);
+            add_item(xxx, yyy, cdot, XCROSS);
             xxx += 1;
-            add_item(xxx, yyy, cdot, DOT);
+            break;
             }
-        else
+
+        // Update coordinates
+        xxx += 1;
+        if (xxx >= dim1)
+            {
+            xxx = 0; yyy += 1;
+            }
+        if (yyy >= dim1)
             break;
     }
 
-
+    //print_list();
     show_crosses();
 
     reent = 0;

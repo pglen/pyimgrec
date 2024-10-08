@@ -32,6 +32,9 @@ class floodParm():
         self.colx = 0x808080;   self.bounds = {}
         self.stack = stack.Stack()
 
+        self.minx = 0;    self.miny = 0
+        self.maxx = 0;    self.maxy = 0
+
         # Callback
         self.inval = None
 
@@ -63,13 +66,15 @@ def flood(xxx, yyy, param):
         return
     reenter +=1
 
+    print("flood:", xxx, yyy, param)
+
     # Mark initial position
-    try:
-        param.mark = param.darr[xxx][yyy]
-    except KeyError:
-        print( "Exceeded allocated array %d / %d (%d)" %( xxx, yyy, param.ddd))
-        reenter -= 1
-        return
+    #try:
+    #    param.mark = param.darr[xxx][yyy]
+    #except KeyError:
+    #    print( "Exceeded allocated array %d / %d (%d)" %( xxx, yyy, param.ddd))
+    #    reenter -= 1
+    #    return -1
 
     param.stack.push((xxx, yyy))
     #mark_done(xxx, yyy, 1, param)
@@ -247,6 +252,7 @@ def is_done(xxx, yyy, param):
 def mark_done(xxx, yyy, flag, param):
 
         param.spaces[xxx, yyy] = flag
+
 
 
 def mark_bound(xxx, yyy, flag, param):

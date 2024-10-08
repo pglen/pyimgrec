@@ -24,9 +24,6 @@ from gi.repository import GdkPixbuf
 
 from pyimgutils import *
 from norm_outline import *
-
-import  algorithm.flood     as flood
-import  algorithm.rectflood as rectflood
 import  treehand
 
 try:
@@ -34,10 +31,14 @@ try:
 except:
     pass
 
+import  algorithm.flood     as flood
+import  algorithm.rectflood as rectflood
+
 MAG_FACT    = 2
 MAG_SIZE    = 300
 
-DIVIDER     = 256                # How many divisions
+#DIVIDER     = 256                # How many divisions
+DIVIDER     = 25                 # How many divisions
 TRESH       = 50                 # Color difference
 
 def printarr(arr):
@@ -290,8 +291,8 @@ class img_main(Gtk.DrawingArea):
             imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
             imgrec.verbose = 0
 
-            self.stepx = float(imgrec.width)/self.divider;
-            self.stepy = float(imgrec.height)/self.divider;
+            self.stepx = float(self.iww)/self.divider;
+            self.stepy = float(self.ihh)/self.divider;
         except:
             print("exc load", fname, sys.exc_info())
             print_exception("load")
@@ -338,42 +339,24 @@ class img_main(Gtk.DrawingArea):
 
     def norm_image(self):
 
-        pixb =  self.image2.get_pixbuf()
-        iw = pixb.get_width(); ih = pixb.get_height()
-        #print( "img dim", iw, ih)
-
-        import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-        arr = pixb.get_pixels()
-
         #imgrec.verbose = 1
-
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        #print( "Norm Image")
+        print( "Norm Image")
         imgrec.normalize()
-        #imgrec.normalize(1,2,3)
-        #imgrec.bw(1,2,3)
         self.invalidate()
 
     def smooth_image(self):
 
-        pixb =  self.image2.get_pixbuf()
-        iw = pixb.get_width(); ih = pixb.get_height()
-        #print( "img dim", iw, ih)
-
-        import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-        #arr = pixb.get_pixels()
-        arr = pixb.get_pixels()
-
-        imgrec.verbose = 1
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+
+        old = imgrec.verbose
+        imgrec.verbose = 2
         imgrec.smooth(10)
+        imgrec.verbose = old
+
         self.invalidate()
 
     def bri_image(self):
@@ -395,36 +378,49 @@ class img_main(Gtk.DrawingArea):
 
         self.invalidate()
 
-
     def dar_image(self):
-
-        pixb =  self.image2.get_pixbuf()
-        iw = pixb.get_width(); ih = pixb.get_height()
-        #print( "img dim", iw, ih)
-
-        import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-        arr = pixb.get_pixels()
 
         imgrec.verbose = 1
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
-
         imgrec.bridar(-10)
-
         self.invalidate()
 
+    def line_image(self):
+
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.verbose = 0
+
+        imgrec.line(10, 20, 10,  100,  0xffff0000)
+        imgrec.line(10, 20, 100, 20,  0xff0000ff)
+        imgrec.line(10, 20, 100, 100, 0xff00ff00)
+
+        imgrec.line(10, 20, 0, 0, 0xff00ff00)
+
+        imgrec.line(0, 0, self.iww, self.ihh, 0xff000000)
+        imgrec.line(0, self.ihh, self.iww, 0, 0xff000000)
+
+        arr = []
+        for aa in range(30):
+            arr.append(random.randint(1, 400))
+
+        #print("arr", arr)
+        imgrec.poly(0xff0000ff, tuple(arr))
+
+        imgrec.verbose = 0
+        self.invalidate()
+
+    def frame_image(self):
+
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.verbose = 1
+        imgrec.frame(10, 10, 100, 100, 0xff0000ff)
+        imgrec.verbose = 0
+        self.invalidate()
 
     def blank_image(self):
-
-        #pixb =  self.image2.get_pixbuf()
-        #iw = pixb.get_width(); ih = pixb.get_height()
-        #print( "img dim", iw, ih)
-        #import warnings
-        #with warnings.catch_warnings():
-        #    warnings.simplefilter("ignore")
-        #arr = pixb.get_pixels()
 
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
@@ -461,52 +457,50 @@ class img_main(Gtk.DrawingArea):
 
     def anal_image(self, xxx = -1, yyy = -1):
 
-        # Get img props.
-        #pixb =  self.image2.get_pixbuf()
-        #arr = pixb.get_pixels()
-        #iw = pixb.get_width(); ih = pixb.get_height()
-
         imgrec.verbose = 1
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        #print( "dims", imgrec.dim1, imgrec.dim2, imgrec.dim3)
-        #print( "width", imgrec.width, "height", imgrec.height)
-
-        #hstep = imgrec.width / self.divider; vstep = imgrec.height / self.divider
-        #hstep = float(iw) / self.divider; vstep = float(ih) / self.divider
-        #print( "steps", hstep, vstep, self.stepx, self.stepy)
-
         # Interpret defaults:
-        if xxx == -1: xxx = self.divider/2
-        if yyy == -1: yyy = self.divider/2
+        #if xxx == -1: xxx = self.divider
+        #if yyy == -1: yyy = self.divider
 
-        #print( "Anal image", xxx, yyy, self.stepx, self.stepy)
+        if xxx == -1: xxx = 0
+        if yyy == -1: yyy = 0
+
+        print( "Anal image", xxx, yyy, self.stepx, self.stepy)
+
+        imgrec.verbose = 0
 
         try:
             # Draw grid:
             if self.xparent.check1.get_active():
+                #print("Grid")
                 for xx in range(self.divider):
                     hor = int(xx * self.stepx)
-                    imgrec.line(hor, 0, hor, imgrec.height, 0xff888888)
+                    imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
+
                 for yy in range(self.divider):
                     ver = int(yy * self.stepy)
-                    imgrec.line(0, ver, imgrec.width, ver, 0xff888888)
+                    imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
+
                 self.invalidate()
         except:
             print_exception("grid")
+            raise
 
         # Get an array of median values
         try:
-            xcnt = 0; ycnt = 0; darr = {};
+            xcnt = 0; ycnt = 0;
+            darr = {};
             for yy in range(self.divider):
                 xcnt = 0
                 for xx in range(self.divider):
                     hor = int(xx * self.stepx); ver = int(yy * self.stepy)
-                    #print( "hor", hor, "ver", ver)
                     med = imgrec.median(hor, ver, int(hor + self.stepx), int(ver + self.stepy))
                     #imgrec.blank(hor, ver, hor + stepx, ver + stepy, med)
                     med &= 0xffffff;  # Mask out alpha
+                    #print( "hor", hor, "ver", ver, "med 0x%x" % med)
 
                     # Remember it in a dict
                     self.add_to_dict(darr, xcnt, ycnt, med)
@@ -515,18 +509,24 @@ class img_main(Gtk.DrawingArea):
         except:
             print_exception("median")
 
+        #print("darr", darr)
+
         if self.xparent.radio1.get_active():
             self.xparent.clear_small_img()
+
             # Set up flood fill
             fparm = flood.floodParm(self.divider, darr);
-            #fparm.stepx = self.stepx; fparm.stepy = self.stepy
+            fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.tresh = TRESH
             fparm.inval = self.show_prog;    # Progress feedback
             fparm.colx = int(random.random() * 0xffffff)
-            flood.flood(xxx, yyy, fparm)
+
+            ret = flood.flood(xxx, yyy, fparm)
+            if ret == -1:
+                return
 
             # Only draw relative shape
-            maxx = fparm.maxx - fparm.minx; maxy = fparm.maxy - fparm.miny
+            #maxx = fparm.maxx - fparm.minx; maxy = fparm.maxy - fparm.miny
             #print( "maxx maxy", maxx, maxy)
             #print( "minx miny", minx, miny)
             #img = Gtk.Image()

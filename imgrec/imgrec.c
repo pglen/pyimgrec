@@ -113,11 +113,11 @@ static PyObject *_anchor(PyObject *self, PyObject *args, PyObject *kwargs)
 
     anchor = py_buffer->buf;
 
-    if (is_verbose())
+    if (is_verbose() > 2)
         printf("imgrec anchor: %p dims: %ld %ld %ld\n", anchor, dim1, dim2, dim3);
 
-    // Sanity check
-    if(dim1*dim2*dim3 != py_buffer->len)
+    // Sanity check if buffer length correct
+    if(dim1 * dim2 * dim3 != py_buffer->len)
         {
         PyErr_Format(PyExc_ValueError, "%s", "Buffer len != dim[1]*dim[2]*dim[3]");
         return NULL;
