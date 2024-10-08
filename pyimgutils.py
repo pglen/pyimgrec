@@ -48,8 +48,10 @@ class ofd():
             old_dir = self.old
         print("old_dir:", old_dir)
 
-        butts =  "OK", Gtk.ButtonsType.OK, "Cancel", Gtk.ButtonsType.CANCEL
-        fc = Gtk.FileChooserDialog(msg, None, mode, butts)
+        fc = Gtk.FileChooserDialog( title = msg, transient_for = None,
+                                        action = mode)
+        butts =  ("OK", Gtk.ButtonsType.OK, "Cancel", Gtk.ButtonsType.CANCEL,)
+        fc.add_buttons(*butts)
         fc.set_current_folder(old_dir)
 
         fc.connect("key-press-event", self.area_key, fc)
@@ -63,8 +65,10 @@ class ofd():
 
         global old_dir
 
+        print("Done", resp)
+
         os.chdir(self.old)
-        if resp == Gtk.ButtonsType.OK:
+        if resp == Gtk.ButtonsType.OK or resp == Gtk.ResponseType.ACCEPT:
             try:
                 fname = win.get_filename()
                 if not fname:
@@ -76,7 +80,6 @@ class ofd():
             except:
                 msg("Cannot open file", fname)
         win.destroy()
-
 
     # Call key handler
     def area_key(self, area, event, win):
@@ -91,7 +94,7 @@ class ofd():
 
         if  event.type == Gdk.EventType.KEY_PRESS:
             if event.keyval == Gdk.KEY_Return:
-                #print "Ret"
+                print("Ret", win)
                 win.response(Gtk.ResponseType.ACCEPT)
                 #area.destroy()
                 return

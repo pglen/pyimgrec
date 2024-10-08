@@ -229,11 +229,11 @@ class img_main(Gtk.DrawingArea):
         self.invalidate()
 
     def invalidate(self):
-        rect = self.get_allocation()
-        rect = Gdk.Rectangle(rect)
+        #rect = self.get_allocation()
+        #rect = Gdk.Rectangle(rect)
         #winn.invalidate_rect(rect, False)
-        self.queue_draw()
         #self.queue_draw_area(rect)
+        self.queue_draw()
 
     # --------------------------------------------------------------------
 
@@ -286,7 +286,7 @@ class img_main(Gtk.DrawingArea):
             #print(type(arr))
             self.bpx = self.pb2.get_n_channels()
             #print("lens", self.iww, self.ihh, bpx, "mul",  self.iww*self.ihh*bpx, len(buf))
-            imgrec.verbose = 1
+            imgrec.verbose = 0
             buf = self.surface.get_data()
             imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
             imgrec.verbose = 0
@@ -339,7 +339,7 @@ class img_main(Gtk.DrawingArea):
 
     def norm_image(self):
 
-        #imgrec.verbose = 1
+        #imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
@@ -353,7 +353,7 @@ class img_main(Gtk.DrawingArea):
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         old = imgrec.verbose
-        imgrec.verbose = 2
+        imgrec.verbose = 0
         imgrec.smooth(10)
         imgrec.verbose = old
 
@@ -370,7 +370,7 @@ class img_main(Gtk.DrawingArea):
             warnings.simplefilter("ignore")
         arr = pixb.get_pixels()
 
-        imgrec.verbose = 1
+        imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
@@ -380,7 +380,7 @@ class img_main(Gtk.DrawingArea):
 
     def dar_image(self):
 
-        imgrec.verbose = 1
+        imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.bridar(-10)
@@ -400,13 +400,13 @@ class img_main(Gtk.DrawingArea):
 
         imgrec.line(0, 0, self.iww, self.ihh, 0xff000000)
         imgrec.line(0, self.ihh, self.iww, 0, 0xff000000)
-
         arr = []
         for aa in range(30):
-            arr.append(random.randint(1, 400))
-
-        #print("arr", arr)
-        imgrec.poly(0xff0000ff, tuple(arr))
+            arr.append(random.randint(1, self.iww))
+            arr.append(random.randint(1, self.ihh))
+        randcol = (0xff000000, 0xffff0000, 0xff00ff00, 0xff0000ff, 0xffffffff)
+        idx = random.randint(0, len(randcol)-1)
+        imgrec.poly(randcol[idx], tuple(arr))
 
         imgrec.verbose = 0
         self.invalidate()
@@ -415,7 +415,7 @@ class img_main(Gtk.DrawingArea):
 
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
-        imgrec.verbose = 1
+        imgrec.verbose = 0
         imgrec.frame(10, 10, 100, 100, 0xff0000ff)
         imgrec.verbose = 0
         self.invalidate()
@@ -425,7 +425,7 @@ class img_main(Gtk.DrawingArea):
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        imgrec.verbose = 1
+        imgrec.verbose = 0
         imgrec.blank() #color=0xffffffff)
         imgrec.verbose = 0
         #self.pb = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
@@ -437,15 +437,16 @@ class img_main(Gtk.DrawingArea):
     def walk_image(self, xx, yy):
 
         #print( "walk_image() dim =", iw, ih, "pos =", xx, yy )
-        imgrec.verbose = 1
+        imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
-        imgrec.walk(int(xx), int(yy))
+        ret2 = imgrec.walk(int(xx), int(yy))
+        print("ret2", ret2)
         self.invalidate()
 
     def edge_image(self):
 
-        #imgrec.verbose = 1
+        #imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
@@ -457,7 +458,7 @@ class img_main(Gtk.DrawingArea):
 
     def anal_image(self, xxx = -1, yyy = -1):
 
-        imgrec.verbose = 1
+        imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 

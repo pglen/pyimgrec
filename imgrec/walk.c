@@ -44,26 +44,23 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
     reent = 1;
 
     // Test cross markers
-    #if 1
-    int dist = 12;
+    #if 0
+    int dist = 55;
     for (int loop = dist; loop < dim2 - dist; loop += dist) // yy
         {
         for (int loop2 = dist; loop2 < dim1 - dist; loop2 += dist) // xx
             {
-            int xold = RGB(0x88, 0x88, 0x88);
-            add_item(loop2, loop, xold, DOT2);
+            int xcol = RGB(0, 0, 0xff);
+            add_item(loop2, loop, xcol, XCROSS);
             }
         }
     #endif
 
     // Mark starting point
-    int cdot = RGB(0x88, 0x88, 0x88);
-    int xold = RGB(0, 0, 0);
-
-    add_item(arg1, arg2, xold, XCROSS);
     avg = calc_avg();
     // Scan away
     int xxx = arg1, yyy = arg2;
+    int found = 0;
     int *curr = anchor;
     for(;;) {
 
@@ -77,25 +74,28 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
         int val = curr[offs + xxx];
         if ((val & 0xff) < avg)
             {
-            printf("found: %d %d\n", xxx, yyy);
+            //printf("found at: xxx=%d yyy=%d\n", xxx, yyy);
+            int cdot = RGB(0, 0, 0xff);
             add_item(xxx, yyy, cdot, XCROSS);
-            xxx += 1;
+            found = 1;
             break;
             }
-
         // Update coordinates
         xxx += 1;
         if (xxx >= dim1)
             {
             xxx = 0; yyy += 1;
             }
-        if (yyy >= dim1)
+        if (yyy >= dim2)
             break;
     }
 
     //print_list();
     show_crosses();
-
     reent = 0;
-    return Py_BuildValue("");
+
+    if(found)
+        return Py_BuildValue("ii", xxx, yyy);
+    else
+        return Py_BuildValue("");
 }

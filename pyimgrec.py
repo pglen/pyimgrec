@@ -3,9 +3,7 @@
 import os, sys, getopt, signal, array, pickle
 import time, traceback, warnings
 
-warnings.simplefilter("ignore")
-
-#import gobject, gtk, pango
+#warnings.simplefilter("ignore")
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -24,7 +22,7 @@ import treehand, img_main
 
 try:
     import imgrec.imgrec as imgrec
-    print("ImgRec Lib Version:", imgrec.version(), "Built:", imgrec.builddate())
+    #print("ImgRec Lib Version:", imgrec.version(), "Built:", imgrec.builddate())
 
 except:
     print_exception("import imgrec")
@@ -69,16 +67,16 @@ class MainWin():
 
     def __init__(self):
 
-        self.window = window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
+        self.window = window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         window.set_title("Python Image Recognition")
         window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.smrc = None
         self.narr = []; self.shapes = []
-        #ic = Gtk.Image(); ic.set_from_stock(Gtk.STOCK_DIALOG_INFO, ICON_SIZE_BUTTON)
-        #window.set_icon(ic.get_pixbuf())
+        ic = Gtk.Image(); ic.set_from_file("images/shapes.png")
+        #stock(Gtk.DialogType.INFO, Gtk.GtkIconSize.BUTTON)
+        window.set_icon(ic.get_pixbuf())
 
         #window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
-
         #window.set_events(  Gdk.POINTER_MOTION_MASK |
         #                    Gdk.POINTER_MOTION_HINT_MASK |
         #                    Gdk.BUTTON_PRESS_MASK |
@@ -98,6 +96,8 @@ class MainWin():
         except:
             pass
 
+
+        warnings.simplefilter("ignore")
 
         www = Gdk.Screen.width(); hhh = Gdk.Screen.height();
 
@@ -122,6 +122,8 @@ class MainWin():
         #    window.set_default_size(7*www/8, 7*hhh/8)
 
         #window.set_default_size(6*www/8, 6*hhh/8)
+
+        warnings.simplefilter("default")
 
         #print( www, hhh)
         self.wwww = 3 * www / 4;  self.hhhh = 3 * hhh / 4
@@ -458,7 +460,7 @@ class MainWin():
         self.area.edge_image()
 
     def spacer(self, hbox, flag = False ):
-        lab14 = Gtk.Label(" ");
+        lab14 = Gtk.Label(label=" ");
         hbox.pack_start(lab14, flag, 0, 0)
 
     # Refresh image from original

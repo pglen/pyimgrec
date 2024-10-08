@@ -47,7 +47,7 @@ class   TreeHand():
     def create_tree(self,  match, text = None):
 
         self.start_tree()
-        tv = Gtk.TreeView(self.treestore)
+        tv = Gtk.TreeView(model=self.treestore)
         tv.set_enable_search(True)
         cell = Gtk.CellRendererText()
         tvcolumn = Gtk.TreeViewColumn()
