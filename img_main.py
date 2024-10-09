@@ -38,7 +38,7 @@ MAG_FACT    = 2
 MAG_SIZE    = 300
 
 #DIVIDER     = 256                # How many divisions
-DIVIDER     = 25                 # How many divisions
+DIVIDER     = 64                 # How many divisions, testing
 TRESH       = 50                 # Color difference
 
 def printarr(arr):
@@ -46,7 +46,7 @@ def printarr(arr):
         print( "%.2d %d  " % (aa[0], aa[1]),)
     print()
 
-class img_main(Gtk.DrawingArea):
+class ImgMain(Gtk.DrawingArea):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
 
@@ -456,7 +456,7 @@ class img_main(Gtk.DrawingArea):
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
-    def anal_image(self, xxx = -1, yyy = -1):
+    def anal_image(self, xxx = 1, yyy = 1):
 
         imgrec.verbose = 0
         buf = self.surface.get_data()
@@ -465,9 +465,6 @@ class img_main(Gtk.DrawingArea):
         # Interpret defaults:
         #if xxx == -1: xxx = self.divider
         #if yyy == -1: yyy = self.divider
-
-        if xxx == -1: xxx = 0
-        if yyy == -1: yyy = 0
 
         print( "Anal image", xxx, yyy, self.stepx, self.stepy)
 
@@ -488,7 +485,6 @@ class img_main(Gtk.DrawingArea):
                 self.invalidate()
         except:
             print_exception("grid")
-            raise
 
         # Get an array of median values
         try:
@@ -498,19 +494,33 @@ class img_main(Gtk.DrawingArea):
                 xcnt = 0
                 for xx in range(self.divider):
                     hor = int(xx * self.stepx); ver = int(yy * self.stepy)
-                    med = imgrec.median(hor, ver, int(hor + self.stepx), int(ver + self.stepy))
-                    #imgrec.blank(hor, ver, hor + stepx, ver + stepy, med)
+                    med = imgrec.median(hor, ver, int(hor + self.stepx),
+                                            int(ver + self.stepy))
+                    imgrec.blank(hor, ver, int(hor + self.stepx),
+                                                int(ver + self.stepy), med)
                     med &= 0xffffff;  # Mask out alpha
                     #print( "hor", hor, "ver", ver, "med 0x%x" % med)
 
                     # Remember it in a dict
-                    self.add_to_dict(darr, xcnt, ycnt, med)
+                    self.add_to_dict(darr, ycnt, xcnt, med)
                     xcnt += 1
                 ycnt += 1;
         except:
             print_exception("median")
 
-        #print("darr", darr)
+        self.invalidate()
+        #return
+
+        # Print resulting array
+        #for aa in darr:
+        #    print("key%2d: " % aa, end = "")
+        #    for bb in darr[aa]:
+        #        #print("   %06x" % darr[aa][bb], end = " ")
+        #        if darr[aa][bb] == 0xffffff:
+        #            print(" ", end = "")
+        #        else:
+        #            print("*", end = "")
+        #    print()
 
         if self.xparent.radio1.get_active():
             self.xparent.clear_small_img()
@@ -521,6 +531,8 @@ class img_main(Gtk.DrawingArea):
             fparm.tresh = TRESH
             fparm.inval = self.show_prog;    # Progress feedback
             fparm.colx = int(random.random() * 0xffffff)
+            fparm.verbose = 1
+
 
             ret = flood.flood(xxx, yyy, fparm)
             if ret == -1:
@@ -571,7 +583,7 @@ class img_main(Gtk.DrawingArea):
 
         elif self.xparent.radio2.get_active():
             # Set up flood fill
-            fparm = rectflood.floodParm(self.divider, darr);
+            fparm = rectflood.rfloodParm(self.divider, darr);
             #fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.tresh = TRESH
             fparm.inval = self.show_prog;    # Progress feedback
@@ -598,7 +610,7 @@ class img_main(Gtk.DrawingArea):
         minx =  rc.width;  miny = rc.height;  maxx = maxy = 0
 
         self.bframe = []
-        #print( "Showing progress:", "minx", minx, "miny", miny, "len", len(fparm.spaces))
+        print( "progress:", "minx", minx, "miny", miny, "len", len(fparm.spaces))
         for aa in fparm.spaces.keys():
             #print( aa,)
             if fparm.spaces[aa]:
@@ -619,20 +631,4 @@ class img_main(Gtk.DrawingArea):
         self.invalidate()
         usleep(.005)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# EOF

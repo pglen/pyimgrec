@@ -5,7 +5,7 @@ import  os, sys, getopt, signal, array
 from pyimgutils import *
 import  stack
 
-#from import pyimgrec.imgrec as imgrec
+import imgrec.imgrec as imgrec
 
 # Placeholder for lots of params for the floodfill function
 # Passing a data class will make it private / reentrant data
@@ -49,7 +49,8 @@ def rectflood(xxx, yyy, param):
 
     # Safety net
     if rectflood_reenter:
-        print( "Flood re-entry", xxx, yyy);  return
+        print( "Flood re-entry", xxx, yyy);
+        return
     rectflood_reenter +=1
 
     # Mark initial position
@@ -91,7 +92,9 @@ def rectflood(xxx, yyy, param):
                 if  ret[0] == -1:  break;
                 if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
             print( "org", xxx, yyy)
-            xxx, yyy = param.stack.pop()
+            un = param.stack.pop()
+            print("un", un)
+            xxx, yyy = un
             print( "pop", xxx, yyy)
 
             if param.verbose:

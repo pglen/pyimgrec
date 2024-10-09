@@ -28,7 +28,7 @@ class floodParm():
         self.mark = 0;          self.ddd = divider
         self.tresh = 50;        self.breath = divider / 4
         self.darr = darr;       self.spaces = {}
-        self.verbose = False;   self.ops = 0
+        self.verbose = 0;       self.ops = 0
         self.colx = 0x808080;   self.bounds = {}
         self.stack = stack.Stack()
 
@@ -69,12 +69,12 @@ def flood(xxx, yyy, param):
     print("flood:", xxx, yyy, param)
 
     # Mark initial position
-    #try:
-    #    param.mark = param.darr[xxx][yyy]
-    #except KeyError:
-    #    print( "Exceeded allocated array %d / %d (%d)" %( xxx, yyy, param.ddd))
-    #    reenter -= 1
-    #    return -1
+    try:
+        param.mark = param.darr[xxx][yyy]
+    except KeyError:
+        print( "Start pos past allocated array %d / %d (%d)" %( xxx, yyy, param.ddd))
+        reenter -= 1
+        return -1
 
     param.stack.push((xxx, yyy))
     #mark_done(xxx, yyy, 1, param)
@@ -87,7 +87,7 @@ def flood(xxx, yyy, param):
         # To observe in action, if requested
         if param.inval:
             if param.cnt % param.breath == 0:
-                param.inval(param);
+                param.inval(param);                                             3
 
         #print( "Scaning", xxx, yyy)
 
@@ -98,56 +98,56 @@ def flood(xxx, yyy, param):
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "A", ret[3],)
 
         xxx2 = xxx+1; yyy2 = yyy-1
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "AR", ret[3],)
 
         xxx2 = xxx+1; yyy2 = yyy
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "R", ret[3],)
 
         xxx2 = xxx+1; yyy2 = yyy+1
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "BR", ret[3],)
 
         xxx2 = xxx; yyy2 = yyy+1
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "B", ret[3],)
 
         xxx2 = xxx-1; yyy2 = yyy+1
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "BL", ret[3],)
 
         xxx2 = xxx-1; yyy2 = yyy
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "L", ret[3],)
 
         xxx2 = xxx-1; yyy2 = yyy-1
         ret = scan_one(xxx, yyy, xxx2, yyy2, param)
         if  ret[0] == -1: break;
         if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
-        if param.verbose:
+        if param.verbose > 3:
             print( "AL", ret[3],)
 
         # ----------------------------------------------------------------
@@ -181,12 +181,13 @@ def calc_bounds(param):
 
     pass
 
-
 # ------------------------------------------------------------------------
 # Scan new patch in direction specified by the caller
 # Return -1, 0, 0 if done, 0, xxx,yyy if no, 1, xxx,yyy if match
 
 def scan_one(xxx, yyy, xxx2, yyy2, param):
+
+    #print("scan_one:", xxx, yyy, xxx2, yyy2);
 
     param.ops += 1
     done = is_done(xxx2, yyy2, param)
@@ -199,13 +200,13 @@ def scan_one(xxx, yyy, xxx2, yyy2, param):
         except:
             #print( "scan_one is_done")
             return -1, 0, 0, 0
-
     try:
         diff = imgrec.diffcol(param.mark, param.darr[xxx2][yyy2])
         #print( "diff", diff)
     except:
-        print_exception("diffcol")
-        #print( "out of range for ", xxx2, yyy2)
+        #print_exception("diffcol")
+        #print( "out of range ignoring: ", xxx2, yyy2)
+        #raise
         try:
             xxx3, yyy3 = param.stack.pop()
             param.depth -= 1
@@ -232,7 +233,6 @@ def scan_one(xxx, yyy, xxx2, yyy2, param):
         except:
             #print( "scan_one 2 done")
             return -1, 0, 0, 0
-
     return 0, 0, 0
 
 # ------------------------------------------------------------------------

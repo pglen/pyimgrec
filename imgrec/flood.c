@@ -17,7 +17,7 @@ PyObject *_flood(PyObject *self, PyObject *args, PyObject *kwargs)
             return NULL;
 
     if( is_verbose())
-        printf("Blanking %d %d %d %d color=0x%x\n", arg1, arg2, arg3, arg4, arg5);
+        printf("flood: %d %d %d %d color=0x%x\n", arg1, arg2, arg3, arg4, arg5);
 
     if(!anchor)
         {

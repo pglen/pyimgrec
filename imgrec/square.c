@@ -35,7 +35,7 @@ PyObject *_blank(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
         return NULL;
         }
-     if (arg1 > dim2 || arg2 > dim1 || arg3 > dim2 || arg4  > dim1 )
+     if (arg1 > dim1 || arg2 > dim2 || arg3 > dim1 || arg4  > dim2 )
         {
         PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
         return NULL;
@@ -45,9 +45,9 @@ PyObject *_blank(PyObject *self, PyObject *args, PyObject *kwargs)
     int *curr = anchor, loop, loop2;
     for (loop = arg2; loop < arg4; loop++)  // yy
         {
-        int offs = loop * dim2;
+        int offs = loop * dim1;
         for (loop2 = arg1; loop2 < arg3; loop2++)  //xx
-             curr[offs + loop2]  = arg5;
+             curr[offs + loop2] = arg5;
         }
     return Py_BuildValue("");
 }
@@ -202,7 +202,7 @@ PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs)
     int *curr = anchor, loop, loop2;
     for (loop = arg2; loop < arg4; loop++)
         {
-        int offs = loop * dim2;
+        int offs = loop * dim1;
         int arr = 0, agg = 0, abb = 0;                  // Accumulators
         for (loop2 = arg1; loop2 < arg3; loop2++)
             {
@@ -230,7 +230,7 @@ PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs)
 
 PyObject *_medianmulti(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "startx", "starty","endx", "endy", NULL };
+    static char *kwlist[] = { "startx", "starty", "endx", "endy", NULL };
 
     int arg1 = 0; int arg2 = 0; int arg3 = 0;  int arg4 = 0;
 
@@ -250,31 +250,29 @@ PyObject *_medianmulti(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
         return NULL;
         }
-     if (arg1 > dim2 || arg2 > dim1 || arg3 > dim2 || arg4  > dim1 )
+     if (arg1 > dim1 || arg2 > dim2 || arg3 > dim1 || arg4  > dim2 )
         {
         PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
         return NULL;
         }
-
     if (arg1 > arg3 || arg2 > arg4)
         {
         PyErr_Format(PyExc_ValueError, "%s", "coordinates need to be in increasing order");
         return NULL;
         }
-
     int dx = arg3 - arg1; int dy = arg4 - arg2, old;
-
     int aarr = 0, aagg = 0, aabb = 0;                  // Main accumulators
     int *curr = anchor, loop, loop2;
     for (loop = arg2; loop < arg4; loop++)
         {
-        int offs = loop * dim2;
+        int offs = loop * dim1;
         int arr = 0, agg = 0, abb = 0;                  // Accumulators
         for (loop2 = arg1; loop2 < arg3; loop2++)
             {
             old = curr[offs + loop2];
             // Break apart
-            int rr = old & 0xff; int gg = (old>>8) & 0xff;
+            int rr = old & 0xff;
+            int gg = (old>>8) & 0xff;
             int bb = (old>>16) & 0xff;
             arr += rr; agg += gg; abb += bb;
             }

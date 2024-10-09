@@ -136,7 +136,7 @@ class MainWin():
         self.hbox2a = Gtk.HBox()
         self.hbox3 = Gtk.HBox()
 
-        self.area = img_main.img_main(self)
+        self.area = img_main.ImgMain(self)
         self.vport = Gtk.Viewport()
         self.scroller = Gtk.ScrolledWindow()
         self.vport.add(self.area)
@@ -224,6 +224,7 @@ class MainWin():
         #rc = self.mainbox.get_allocation()
         #self.mainbox.window.invalidate_rect(rc, False)
         pass
+
     def fill_small_img(self, img):
 
         # Only get this once after resize
@@ -236,7 +237,6 @@ class MainWin():
         #self.mainbox.show_now()
         rc = self.mainbox.get_allocation()
         self.mainbox.window.invalidate_rect(rc, False)
-
 
     # --------------------------------------------------------------------
     def checks(self, hbox, window):
