@@ -425,7 +425,7 @@ class ImgMain(Gtk.DrawingArea):
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        imgrec.verbose = 0
+        #imgrec.verbose = 1
         imgrec.blank() #color=0xffffffff)
         imgrec.verbose = 0
         #self.pb = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
@@ -453,20 +453,57 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
+    def show_prog(self, xxx, yyy, fparm):
+        rc = self.get_allocation()
+        minx =  rc.width;  miny = rc.height;  maxx = maxy = 0
+
+        #print( "show_prog", xxx, yyy, fparm)
+        try:
+            for ccc in range(1):
+                xxxx = int((xxx + ccc) * fparm.stepx)
+                yyyy = int((yyy + ccc) * fparm.stepy)
+                offs = 4 * (xxxx + fparm.iww * yyyy)
+                fparm.img[int(offs) + 0] = 0x00
+                fparm.img[int(offs) + 1] = 0x00
+        except:
+            pass
+            #print("exc", xxx, yyy, sys.exc_info())
+
+        self.bframe = []
+        #print( "progress:", "minx", minx, "miny", miny, "len", len(fparm.spaces))
+        #for aa in fparm.spaces.keys():
+        #    #print( aa,)
+        #    if fparm.spaces[aa]:
+        #        self.bframe.append((aa[0], aa[1], fparm.colx))
+        #        if minx > aa[0]: minx = aa[0]
+        #        if miny > aa[1]: miny = aa[1]
+        #        if maxx < aa[0]: maxx = aa[0]
+        #        if maxy < aa[1]: maxy = aa[1]
+
+        #print( "minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
+        #print( "inval", minx * self.stepx, miny * self.stepy,
+        #                (maxx + 1)* self.stepx, (maxy+1) * self.stepy )
+        #rect = Gtk.gdk.Rectangle(int(minx * self.stepx), int(miny * self.stepy),
+        #                int((maxx + 1) * self.stepx),
+        #                        int((maxy + 1)  * self.stepy))
+
+        #self.window.invalidate_rect(rect, False)
+        self.invalidate()
+        usleep(.005)
+
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
-    def anal_image(self, xxx = 1, yyy = 1):
+    def anal_image(self, xxx, yyy):
 
         imgrec.verbose = 0
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
-        # Interpret defaults:
-        #if xxx == -1: xxx = self.divider
-        #if yyy == -1: yyy = self.divider
+        xxx, yyy = imgrec.walk(0, 0)
+        print("walkret", xxx, yyy)
 
-        print( "Anal image", xxx, yyy, self.stepx, self.stepy)
+        print( "Anal image", xxx, yyy, self.stepx, self.stepy, "w/h", self.iww, self.ihh)
 
         imgrec.verbose = 0
 
@@ -486,29 +523,35 @@ class ImgMain(Gtk.DrawingArea):
         except:
             print_exception("grid")
 
+        darr = {};
+
         # Get an array of median values
-        try:
-            xcnt = 0; ycnt = 0;
-            darr = {};
-            for yy in range(self.divider):
-                xcnt = 0
-                for xx in range(self.divider):
-                    hor = int(xx * self.stepx); ver = int(yy * self.stepy)
-                    med = imgrec.median(hor, ver, int(hor + self.stepx),
-                                            int(ver + self.stepy))
-                    imgrec.blank(hor, ver, int(hor + self.stepx),
-                                                int(ver + self.stepy), med)
-                    med &= 0xffffff;  # Mask out alpha
-                    #print( "hor", hor, "ver", ver, "med 0x%x" % med)
+        #try:
+        #    xcnt = 0; ycnt = 0;
+        #    for yy in range(self.divider):
+        #        xcnt = 0
+        #        for xx in range(self.divider):
+        #            hor = int(xx * self.stepx); ver = int(yy * self.stepy)
+        #            med = imgrec.median(hor, ver, int(hor + self.stepx),
+        #                                    int(ver + self.stepy))
+        #            imgrec.blank(hor, ver, int(hor + self.stepx),
+        #                                        int(ver + self.stepy), med)
+        #            med &= 0xffffff;  # Mask out alpha
+        #            #print( "hor", hor, "ver", ver, "med 0x%x" % med)
+        #
+        #            # Remember it in a dict
+        #            self.add_to_dict(darr, ycnt, xcnt, med)
+        #            xcnt += 1
+        #        ycnt += 1;
+        #except:
+        #    print_exception("median")
 
-                    # Remember it in a dict
-                    self.add_to_dict(darr, ycnt, xcnt, med)
-                    xcnt += 1
-                ycnt += 1;
-        except:
-            print_exception("median")
+        # Fill in 2D array
+        for yy in range(self.ihh):
+            for xx in range(self.iww):
+                self.add_to_dict(darr, yy, xx, buf[yy * self.iww + xx])
 
-        self.invalidate()
+        #self.invalidate()
         #return
 
         # Print resulting array
@@ -522,19 +565,23 @@ class ImgMain(Gtk.DrawingArea):
         #            print("*", end = "")
         #    print()
 
-        if self.xparent.radio1.get_active():
-            self.xparent.clear_small_img()
+        imgrec.blank() #color=0xff000000) #color=0xffffffff)
+        self.invalidate()
 
-            # Set up flood fill
-            fparm = flood.floodParm(self.divider, darr);
+        if self.xparent.radio1.get_active():
+            #self.xparent.clear_small_img()
+
+            # Set up flood fill parameters
+            fparm = flood.floodParm(darr, self.show_prog);
             fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.tresh = TRESH
             fparm.inval = self.show_prog;    # Progress feedback
             fparm.colx = int(random.random() * 0xffffff)
             fparm.verbose = 1
+            fparm.divider = self.divider
+            fparm.iww = self.iww;  fparm.ihh = self.ihh
 
-
-            ret = flood.flood(xxx, yyy, fparm)
+            ret = flood.flood_one(xxx, yyy, fparm)
             if ret == -1:
                 return
 
@@ -549,11 +596,10 @@ class ImgMain(Gtk.DrawingArea):
 
             #print( "bounds",  fparm.bounds)
 
-            self.xparent.narr = norm_array(fparm)
+            #self.xparent.narr = norm_array(fparm)
             #print(  "narr len ", len(self.xparent.narr))
 
-            arr = self.surface.get_data()
-
+            #arr = self.surface.get_data()
             # Animate, so we see the correct winding
             #for bb in self.xparent.narr:
             #        #arr[aa[1] - miny, aa[0] - minx, 0] = 0x7f0000ff
@@ -579,20 +625,21 @@ class ImgMain(Gtk.DrawingArea):
                 print( "cmp", cmp)
                 self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
 
-            self.show_prog(fparm)
+            self.show_prog(xxx, yyy, fparm)
 
         elif self.xparent.radio2.get_active():
-            # Set up flood fill
-            fparm = rectflood.rfloodParm(self.divider, darr);
+            # Set up rect flood fill
+
+            fparm = rectflood.rfloodParm(self.surface.get_data(), darr);
             #fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.tresh = TRESH
-            fparm.inval = self.show_prog;    # Progress feedback
+            fparm.callb = self.show_prog;    # Progress feedback
             fparm.colx = int(random.random() * 0xffffff)
             #fparm.verbose = True
             fparm.breath = 4
-            rectflood.rectflood(xxx, yyy, fparm)
-            self.show_prog(fparm)
 
+            rectflood.rectflood(xxx, yyy, fparm)
+            self.show_prog(xxx, yyy, fparm)
         else:
             #print( "No opeartion selected")
             self.walk_image(self.event_x, self.event_y)
@@ -604,31 +651,5 @@ class ImgMain(Gtk.DrawingArea):
 
         # Display final image
         self.invalidate()
-
-    def show_prog(self, fparm):
-        rc = self.get_allocation()
-        minx =  rc.width;  miny = rc.height;  maxx = maxy = 0
-
-        self.bframe = []
-        print( "progress:", "minx", minx, "miny", miny, "len", len(fparm.spaces))
-        for aa in fparm.spaces.keys():
-            #print( aa,)
-            if fparm.spaces[aa]:
-                self.bframe.append((aa[0], aa[1], fparm.colx))
-                if minx > aa[0]: minx = aa[0]
-                if miny > aa[1]: miny = aa[1]
-                if maxx < aa[0]: maxx = aa[0]
-                if maxy < aa[1]: maxy = aa[1]
-
-        #print( "minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
-        #print( "inval", minx * self.stepx, miny * self.stepy,
-        #                (maxx + 1)* self.stepx, (maxy+1) * self.stepy )
-        #rect = Gtk.gdk.Rectangle(int(minx * self.stepx), int(miny * self.stepy),
-        #                int((maxx + 1) * self.stepx),
-        #                        int((maxy + 1)  * self.stepy))
-
-        #self.window.invalidate_rect(rect, False)
-        self.invalidate()
-        usleep(.005)
 
 # EOF

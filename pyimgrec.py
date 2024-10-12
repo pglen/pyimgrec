@@ -149,9 +149,9 @@ class MainWin():
             #self.load("images/IMG_0823.jpg")
             #self.load("images/shapes.png")
             #self.load("images/shapex.png")
-            self.load("images/Untitled.png")
+            #self.load("images/Untitled.png")
             #self.load("images/line.png")
-            #self.load("images/star.png")
+            self.load("images/star.png")
             #self.load("images/IMG_0827.jpg")
             #self.load("images/enrolled.pgm")
         except:
@@ -500,7 +500,7 @@ class MainWin():
             msg("Cannot save file:\n%s" % fname)
 
     def anal_image(self, win, a3):
-        self.area.anal_image()
+        self.area.anal_image(0, 0)
         self.area.invalidate()
 
     def refr_image(self, arg, ww):

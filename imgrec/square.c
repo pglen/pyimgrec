@@ -16,7 +16,7 @@ PyObject *_blank(PyObject *self, PyObject *args, PyObject *kwargs)
 
     // Defaults
     int arg1 = 0, arg2 = 0;
-    int arg3 = dim2, arg4 = dim1;
+    int arg3 = dim1, arg4 = dim2;
     int arg5 = 0xFFffffff;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiiiI", kwlist, &arg1, &arg2, &arg3, &arg4, &arg5))

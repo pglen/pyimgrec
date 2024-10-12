@@ -14,12 +14,11 @@ rectflood_reenter = 0
 
 class rfloodParm():
 
-    def __init__(self, divider, darr):
+    def __init__(self, img, darr):
 
         self.cnt = 0;           self.depth = 0
-        self.mark = 0;          self.ddd = divider
         #self.hstep = 0;         self.vstep = 0
-        self.tresh = 10;        self.breath = divider / 4
+        self.tresh = 10;        self.breath = 1 #divider / 4
         self.darr = darr;       self.spaces = {}
         self.verbose = False;   self.ops = 0
         self.cmps = 0
@@ -27,6 +26,7 @@ class rfloodParm():
         self.stack = stack.Stack()
         # Callback
         self.inval = None
+        self.img = img
 
         #for aa in range(divider):
         #    self.spaces[aa] = {}
@@ -72,7 +72,7 @@ def rectflood(xxx, yyy, param):
         # To observe in action, if requested
         if param.inval:
             if param.cnt % param.breath == 0:
-                param.inval(param);
+                param.inval(xxx, yyy, param);
 
         #print( "Scanning", xxx, yyy)
 
@@ -93,9 +93,9 @@ def rectflood(xxx, yyy, param):
                 if  ret[0] ==  1: xxx = ret[1]; yyy = ret[2]
             print( "org", xxx, yyy)
             un = param.stack.pop()
-            print("un", un)
-            xxx, yyy = un
-            print( "pop", xxx, yyy)
+            #print("un", un)
+            #xxx, yyy = un
+            #print( "pop", xxx, yyy)
 
             if param.verbose:
                 print( "A", ret[3],)
@@ -203,24 +203,4 @@ def mark_done(xxx, yyy, flag, param):
 
         param.spaces[xxx, yyy] = flag
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ # EOF
