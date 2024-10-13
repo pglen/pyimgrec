@@ -117,8 +117,9 @@ def flood_one(xxx, yyy, param):
                 #break
         ret = DOT_NO;
         # Iterate operators
+        nn = 0
         for nnn in range(startop, len(scan_ops)):
-            #print("nnn", nnn)
+            print("nnn", nnn)
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
@@ -129,28 +130,22 @@ def flood_one(xxx, yyy, param):
                 mark_cell(xxx, yyy, 1, param.body)
                 param.stack.push((xxx, yyy, nnn))
                 xxx = xxx2; yyy = yyy2
-                break  # jump
+                break  # jump to next
             elif  ret == DOT_NO or ret == DOT_BOUND:
                 mark_cell(xxx, yyy, 1, param.bounds)
-                pass
             elif  ret == DOT_MARKED:
                 pass
             else:
                 print("invalid ret from scan_one", ret)
 
-        if  ret == DOT_YES:
-            continue
-        if  ret == DOT_NO or ret == DOT_BOUND:
-            print("pop", param.stack.len())
-            xxx, yyy, startop = param.stack.pop()
-            continue
-
         # ----------------------------------------------------------------
-        # All operations done, mark this one done
+        # All operations done, resume previous
+
+        print("eval", nnn+startop, "stack", param.stack.stacklen())
+
         if  nnn+startop == len(scan_ops):
             #mark_cell((xxx, yyy, nnn+startop), param.dones)
             xxx, yyy, startop = param.stack.pop()
-            continue
 
     print("loop count", param.cnt)
 
