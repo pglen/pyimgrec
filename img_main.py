@@ -32,14 +32,12 @@ except:
     pass
 
 import  algorithm.flood     as flood
-import  algorithm.rectflood as rectflood
 
 MAG_FACT    = 2
 MAG_SIZE    = 300
 
-#DIVIDER     = 256                # How many divisions
 DIVIDER     = 64                 # How many divisions, testing
-TRESH       = 50                 # Color difference
+THRESH      = 100                # Color counts as mark
 
 def printarr(arr):
     for aa in arr:
@@ -453,90 +451,57 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
-    def callb(self, xxx, yyy, fparm):
+    def callb(self, xxx, yyy, kind, fparm):
         #print( "callb", xxx, yyy, fparm)
 
-        img = self.surface.get_data()
-        img[4*xxx + 4*yyy * self.iww] = 0x00
-        img[4*xxx + 4*yyy * self.iww+1] = 0x00
-        #img[4*xxx + 4*yyy * self.iww+2] = 0x00
+        try:
+            if kind == 2:
+                self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
+            elif kind == 1:
+                self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww+1] = 0x00
+            elif kind == 0:
+                self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww+1] = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww+2] = 0x00
+            else:
+                print("unkown kind in callb")
+        except:
+            print("callb", sys.exc_info())
+            pass
 
-        self.bframe = []
-        #print( "progress:", "minx", minx, "miny", miny, "len", len(fparm.spaces))
-        #for aa in fparm.spaces.keys():
-        #    #print( aa,)
-        #    if fparm.spaces[aa]:
-        #        self.bframe.append((aa[0], aa[1], fparm.colx))
-        #        if minx > aa[0]: minx = aa[0]
-        #        if miny > aa[1]: miny = aa[1]
-        #        if maxx < aa[0]: maxx = aa[0]
-        #        if maxy < aa[1]: maxy = aa[1]
-
-        #print( "minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
-        #print( "inval", minx * self.stepx, miny * self.stepy,
-        #                (maxx + 1)* self.stepx, (maxy+1) * self.stepy )
-        #rect = Gtk.gdk.Rectangle(int(minx * self.stepx), int(miny * self.stepy),
-        #                int((maxx + 1) * self.stepx),
-        #                        int((maxy + 1)  * self.stepy))
-
-        #self.window.invalidate_rect(rect, False)
         self.invalidate()
-        usleep(.005)
-
+        if 1: #fparm.cnt % fparm.breath == 0:
+            usleep(1)
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
     def anal_image(self, xxx, yyy):
 
         imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
-
-        xxx, yyy = imgrec.walk(0, 0)
-        #print("walkret", xxx, yyy)
+        self.buf = self.surface.get_data()
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         print( "Anal image", xxx, yyy, self.stepx, self.stepy, "w/h", self.iww, self.ihh)
 
         imgrec.verbose = 0
 
-        try:
-            # Draw grid:
-            if self.xparent.check1.get_active():
+        # Draw grid:
+        if self.xparent.check1.get_active():
+            try:
                 #print("Grid")
                 for xx in range(self.divider):
                     hor = int(xx * self.stepx)
                     imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
-
                 for yy in range(self.divider):
                     ver = int(yy * self.stepy)
                     imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
 
                 self.invalidate()
-        except:
-            print_exception("grid")
+            except:
+                print_exception("grid")
 
         darr = {};
-
-        # Get an array of median values
-        #try:
-        #    xcnt = 0; ycnt = 0;
-        #    for yy in range(self.divider):
-        #        xcnt = 0
-        #        for xx in range(self.divider):
-        #            hor = int(xx * self.stepx); ver = int(yy * self.stepy)
-        #            med = imgrec.median(hor, ver, int(hor + self.stepx),
-        #                                    int(ver + self.stepy))
-        #            imgrec.blank(hor, ver, int(hor + self.stepx),
-        #                                        int(ver + self.stepy), med)
-        #            med &= 0xffffff;  # Mask out alpha
-        #            #print( "hor", hor, "ver", ver, "med 0x%x" % med)
-        #
-        #            # Remember it in a dict
-        #            self.add_to_dict(darr, ycnt, xcnt, med)
-        #            xcnt += 1
-        #        ycnt += 1;
-        #except:
-        #    print_exception("median")
 
         # Fill in 2D array
         for yy in range(self.ihh):
@@ -544,109 +509,66 @@ class ImgMain(Gtk.DrawingArea):
             for xx in range(self.iww):
                 val = []
                 for cc in range(4):
-                    val.append(buf[offs + xx * 4 + cc])
+                    val.append(self.buf[offs + xx * 4 + cc])
                 self.add_to_dict(darr, xx, yy, val)
 
         # TEST: Put it back to img
-        #imgrec.blank(color=0xff888888) #color=0xffffffff)  #)
+        #imgrec.blank(color=0xff888888)
         #for yy in range(self.ihh):
         #    for xx in range(self.iww):
         #        offs = yy * self.iww * 4
         #        for cc in range(4):
-        #            try:
-        #                buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
-        #            except:
-        #                pass
-        #
-        #        self.invalidate()
-        #        usleep(.003)
+        #            try: buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
+        #            except: pass
+        #    self.invalidate(); usleep(.1)
         #return
 
         imgrec.blank() #color=0xff000000) #color=0xffffffff)
         self.invalidate()
+        usleep(1)
 
-        if self.xparent.radio1.get_active():
-            #self.xparent.clear_small_img()
+        # Set up flood fill parameters
+        fparm = flood.floodParm(darr, self.callb);
+        fparm.stepx = self.stepx; fparm.stepy = self.stepy
+        fparm.thresh = THRESH
+        fparm.colx = int(random.random() * 0xffffff)
+        fparm.verbose = 1
+        fparm.iww = self.iww;  fparm.ihh = self.ihh
 
-            # Set up flood fill parameters
-            fparm = flood.floodParm(darr, self.callb);
+        # Iterate all shapes
+        while True:
+            ret, xxx, yyy = flood.seek(xxx, yyy, fparm)
+            print("seek:", ret, xxx, yyy)
+            if not ret:
+                if xxx > 0:
+                    xxx = 0
+                    yyy += 1
+                    continue
+                else:
+                    break
 
-            fparm.stepx = self.stepx; fparm.stepy = self.stepy
-            fparm.tresh = TRESH
-            fparm.colx = int(random.random() * 0xffffff)
-            fparm.verbose = 1
-            fparm.divider = self.divider
-            fparm.iww = self.iww;  fparm.ihh = self.ihh
-
-            ret = flood.flood_one(xxx + 1, yyy + 1, fparm)
+            ret = flood.flood_one(xxx, yyy, fparm)
             if ret == -1:
-                return
+                break
 
-            # Only draw relative shape
-            #maxx = fparm.maxx - fparm.minx; maxy = fparm.maxy - fparm.miny
-            #print( "maxx maxy", maxx, maxy)
-            #print( "minx miny", minx, miny)
-            #img = Gtk.Image()
-            #pixbuf = Gtk.gdk.Pixbuf(Gtk.gdk.COLORSPACE_RGB, True, 8,  maxx+1, maxy+1)
-            #pixbuf.fill(0x000000ff)
-            #arr = pixbuf.get_pixels()
-
-            #print( "bounds",  fparm.bounds)
-
-            #self.xparent.narr = norm_array(fparm)
-            #print(  "narr len ", len(self.xparent.narr))
-
-            #arr = self.surface.get_data()
-            # Animate, so we see the correct winding
-            #for bb in self.xparent.narr:
-            #        #arr[aa[1] - miny, aa[0] - minx, 0] = 0x7f0000ff
-            #        arr[bb[1], bb[0], 0] = 0xff
-            #        arr[bb[1], bb[0], 1] = 0x00
-            #        arr[bb[1], bb[0], 2] = 0x00
-            #        arr[bb[1], bb[0], 3] = 0xff
-            #        #print( bb[0], bb[1], "  ",)
-            #        pixbuf2 = Gtk.gdk.pixbuf_new_from_array(arr, Gtk.gdk.COLORSPACE_RGB, 8)
-            #        img.set_from_pixbuf(pixbuf2)
-            #        self.xparent.fill_small_img(img)
-            #        usleep(3)
-
-            # Compare shape with saved ones
-            cmp = []
-            for cc in self.xparent.shapes:
-                res = cmp_arrays(cc[1], self.xparent.narr)
-                cmp.append((res, cc[0]))
-
-            # Dictionary yet?
-            if(len(cmp)):
-                cmp.sort()
-                print( "cmp", cmp)
-                self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
-
-            self.callb(xxx, yyy, fparm)
-
-        elif self.xparent.radio2.get_active():
-            # Set up rect flood fill
-
-            fparm = rectflood.rfloodParm(self.surface.get_data(), darr);
-            #fparm.stepx = self.stepx; fparm.stepy = self.stepy
-            fparm.tresh = TRESH
-            fparm.callb = self.callb;    # Progress feedback
-            fparm.colx = int(random.random() * 0xffffff)
-            #fparm.verbose = True
-            fparm.breath = 4
-
-            rectflood.rectflood(xxx, yyy, fparm)
-            self.callb(xxx, yyy, fparm)
-        else:
-            #print( "No opeartion selected")
-            self.walk_image(self.event_x, self.event_y)
-
-        self.aframe += self.bframe
-
-        # Reference position
-        self.aframe.append((xxx, yyy, 0xff8888ff))
+        # Compare shape with saved ones
+        #cmp = []
+        #for cc in self.xparent.shapes:
+        #    res = cmp_arrays(cc[1], self.xparent.narr)
+        #    cmp.append((res, cc[0]))
+        ## Dictionary yet?
+        #if(len(cmp)):
+        #    cmp.sort()
+        #    print( "cmp", cmp)
+        #    self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
+        #
+        #self.aframe += self.bframe
+        #
+        ## Reference position
+        #self.aframe.append((xxx, yyy, 0xff8888ff))
 
         # Display final image
         self.invalidate()
 
 # EOF
+

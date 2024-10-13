@@ -91,7 +91,7 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
     //print_list();
-    show_crosses();
+    //show_crosses();
     reent_walk = 0;
 
     if(found)

@@ -37,16 +37,15 @@ class floodParm():
 
         self.darr = darr;       self.callb = callb
 
-        self.cnt = 0;           self.depth = 0
-        self.mark = 0;          self.divider = 0
-        self.thresh = 50;       self.breath = 1
+        self.cnt = 0;           self.depth = 0;     self.mark = 0;
+        self.thresh = 100;      self.breath = 10
         self.verbose = 0;       self.ops = 0
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
-        self.dones = {};        self.bounds = {}
-        self.body  = {}
+        self.dones = {};        self.bounds = {};   self.body  = {}
+        self.exit = 0
         self.stack = stack.Stack()
 
 # ------------------------------------------------------------------------
@@ -77,12 +76,15 @@ class floodParm():
 
 def flood_one(xxx, yyy, param):
 
+    ret = 0
     global reenter
     # Safety net
     if reenter:
         print( "Flood re-entry", xxx, yyy)
-        return
-    reenter +=1
+        reenter =+ 1
+        return -1
+
+    reenter += 1
 
     # Mark initial position
     try:
@@ -103,47 +105,59 @@ def flood_one(xxx, yyy, param):
         #print("new loop", xxx, yyy, startop)
         param.cnt += 1;
 
-        if param.stack.stacklen() == 0:
-            print( "while break end")
+        if reenter > 1:
+            reenter = 1
+            ret = -1
             break
 
+        if param.stack.stacklen() == 0:
+            break
         #if param.cnt > 500:
         #    break
 
-        # To observe in action, if requested
+        # To observe fill action, if requested
         if param.callb:
-            if param.cnt % param.breath == 0:
-                param.callb(xxx, yyy, param);
-                #break
-        ret = DOT_NO;
+            param.callb(xxx, yyy, 2, param);
+
+        ret = DOT_NO; nnn = 0
         # Iterate operators
-        nn = 0
-        for nnn in range(startop, len(scan_ops)):
-            print("nnn", nnn)
+        while 1:
+            if nnn+startop >= len(scan_ops):
+                break
+            #print("nnn", nnn)
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = scan_one(xxx2, yyy2, param)
             mark_cell(xxx, yyy, 1, param.dones)
-
             if  ret == DOT_YES:
                 mark_cell(xxx, yyy, 1, param.body)
                 param.stack.push((xxx, yyy, nnn))
                 xxx = xxx2; yyy = yyy2
                 break  # jump to next
-            elif  ret == DOT_NO or ret == DOT_BOUND:
+            elif  ret == DOT_NO:
+                mark_cell(xxx, yyy, 0, param.bounds)
+                # To observe boundary action, if requested
+                if param.callb:
+                    param.callb(xxx2, yyy2, 0, param);
+            elif ret == DOT_BOUND:
+                # Correct to within boundary
+                xxxx = min(xxx2, param.iww)
+                yyyy = min(yyy2, param.ihh)
                 mark_cell(xxx, yyy, 1, param.bounds)
+                if param.callb:
+                    param.callb(xxx2, yyy2, 0, param);
             elif  ret == DOT_MARKED:
                 pass
             else:
                 print("invalid ret from scan_one", ret)
+            nnn += 1
 
         # ----------------------------------------------------------------
         # All operations done, resume previous
 
-        print("eval", nnn+startop, "stack", param.stack.stacklen())
-
         if  nnn+startop == len(scan_ops):
+            #print("eval", nnn+startop, "stack", param.stack.stacklen())
             #mark_cell((xxx, yyy, nnn+startop), param.dones)
             xxx, yyy, startop = param.stack.pop()
 
@@ -154,7 +168,21 @@ def flood_one(xxx, yyy, param):
 
     #print( "done cnt =", param.cnt, "ops =", param.ops)
     calc_bounds(param)
-    return
+    return ret
+
+def seek(xxx, yyy, param):
+
+    for yy in range(yyy, param.ihh):
+        for xx in range(xxx, param.iww):
+            if is_pixel_done(xx, yy, param):
+                continue
+            val = param.darr[yy][xx]
+            #print(val, end = " ")
+            cc = (val[1] + val[2] + val[3]) // 3
+            #print(cc, end = " ")
+            if cc < param.thresh:
+                return (1, xx, yy)
+    return  (0, xxx, yyy)
 
 def coldiff(colm, colx):
 
@@ -166,40 +194,37 @@ def coldiff(colm, colx):
     #print("coldiff", colm, colx, ret)
     return ret
 
-def scan_one(xxx2, yyy2, param):
-    ret = _scan_one(xxx2, yyy2, param)
-    print("scan_one:", xxx2, yyy2, dot_strs[ret])
-    return ret
-
 # ------------------------------------------------------------------------
 # Scan new patch in direction specified by the caller
 
-def _scan_one(xxx2, yyy2, param):
+def scan_one(xxx2, yyy2, param):
 
     ''' Scan one pixel, specified by the caller coordinates
         Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
     '''
 
     ret = DOT_NO
-    if is_pixel_done(xxx2, yyy2, param):
-        # already marked
-        ret =  DOT_MARKED
-        return ret
-    else:
-        param.ops += 1
-        try:
-            diff = coldiff(param.mark, param.darr[yyy2][xxx2])
-            #print( "diff: 0x%x" % diff, xxx2, yyy2)
-        except:
-            print_exception("coldiff")
-            #print( "out of range ignoring: ", xxx2, yyy2)
-            ret = DOT_BOUND
-            return ret
+    while 1:        # Substitute goto
+        if is_pixel_done(xxx2, yyy2, param):
+            # already marked
+            ret =  DOT_MARKED
+            break
+        else:
+            param.ops += 1
+            try:
+                diff = coldiff(param.mark, param.darr[yyy2][xxx2])
+                #print( "diff: 0x%x" % diff, xxx2, yyy2)
+            except:
+                #print_exception("coldiff")
+                #print( "out of range ignoring: ", xxx2, yyy2)
+                ret = DOT_BOUND
+                break
+            if diff < param.thresh:
+                ret = DOT_YES
+                break
+            break
 
-        if diff < param.thresh:
-            ret = DOT_YES
-            return ret
-
+    #print("scan_one:", xxx2, yyy2, dot_strs[ret])
     return ret
 
 # ------------------------------------------------------------------------

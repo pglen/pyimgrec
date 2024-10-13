@@ -143,15 +143,26 @@ class MainWin():
         self.scroller.add(self.vport)
         self.mainbox.add(self.scroller)
 
+        self.area2 = Gtk.Image.new_from_file("images/star.png")
+
+        self.vport2 = Gtk.Viewport()
+        self.scroller2 = Gtk.ScrolledWindow()
+        self.vport2.add(self.area2)
+        self.scroller2.add(self.vport2)
+        self.mainbox.add(self.scroller2)
+
+        a2 = self.area2.get_pixbuf()
+        self.scroller2.set_size_request(a2.get_width(), a2.get_width())
+
         try:
             # Load default image(s)
             #self.load("images/african.jpg")
             #self.load("images/IMG_0823.jpg")
             #self.load("images/shapes.png")
             #self.load("images/shapex.png")
-            #self.load("images/Untitled.png")
+            self.load("images/Untitled.png")
             #self.load("images/line.png")
-            self.load("images/star.png")
+            #self.load("images/star.png")
             #self.load("images/rect.png")
             #self.load("images/IMG_0827.jpg")
             #self.load("images/enrolled.pgm")
@@ -194,10 +205,10 @@ class MainWin():
         self.vbox.pack_start(self.mainbox, True, 0, 0)
         #self.vbox.pack_start(self.hbox_s2, False, 0, 0)
         self.vbox.pack_start(vbox2, False, 0, 0)
-        self.vbox.pack_start(self.hbox, False, 0, 0)
-        self.vbox.pack_start(self.hbox2, False, 0, 0)
-        self.vbox.pack_start(self.hbox2a, False, 0, 0)
         self.vbox.pack_start(self.hbox3, False, 0, 0)
+        self.vbox.pack_start(self.hbox, False, 0, 0)
+        self.vbox.pack_start(self.hbox2a, False, 0, 0)
+        self.vbox.pack_start(self.hbox2, False, 0, 0)
 
         #frame = Gtk.Frame(); frame.add(self.img)
         #vbox2.pack_start(frame, 1, 1, 0)

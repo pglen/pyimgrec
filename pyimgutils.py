@@ -56,8 +56,9 @@ class ofd():
 
         fc.connect("key-press-event", self.area_key, fc)
         fc.connect("key-release-event", self.area_key, fc)
+        fc.connect("key-release-event", self.area_key, fc)
 
-        fc.set_default_response(Gtk.ResponseType.ACCEPT)
+        fc.set_default_response(Gtk.ButtonsType.OK)
         fc.connect("response", self._done_opendlg)
         fc.run()
 
