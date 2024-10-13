@@ -8,6 +8,7 @@
 #include "utils.h"
 
 static int avg;             // Global for passing avg between parts
+static int reent_walk = 0;
 
 PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -35,20 +36,20 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
         return NULL;
         }
-    if(reent)
+    if(reent_walk)
         {
         PyErr_Format(PyExc_ValueError, "%s", "Cannot reenter");
         return NULL;
         }
 
-    reent = 1;
+    reent_walk = 1;
 
     // Test cross markers
     #if 0
-    int dist = 55;
-    for (int loop = dist; loop < dim2 - dist; loop += dist) // yy
+    int dist = 20;
+    for (int loop = 0; loop < dim2; loop += dist) // yy
         {
-        for (int loop2 = dist; loop2 < dim1 - dist; loop2 += dist) // xx
+        for (int loop2 = 0; loop2 < dim1; loop2 += dist) // xx
             {
             int xcol = RGB(0, 0, 0xff);
             add_item(loop2, loop, xcol, XCROSS);
@@ -56,25 +57,24 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
         }
     #endif
 
-    // Mark starting point
-    avg = calc_avg();
+    // Mark ref color
+    //avg = calc_avg();
+    avg = 0x55;
+
     // Scan away
     int xxx = arg1, yyy = arg2;
     int found = 0;
     int *curr = anchor;
     for(;;) {
-
-        // Boundary exit
-        if(xxx < 0 || yyy < 0)
-            break;
-        if(xxx > dim1 || yyy > dim2)
-            break;
-
         int offs = yyy * dim1;
-        int val = curr[offs + xxx];
-        if ((val & 0xff) < avg)
+        int val;
+        val = curr[offs + xxx] & 0x00ffffff;
+        //printf ("val: %x\n", val);
+        int valx = val & 0xff; valx += (val >> 8) & 0xff;
+        valx += (val >> 16) & 0xff;  valx /= 3;
+        if (valx  < avg)
             {
-            //printf("found at: xxx=%d yyy=%d\n", xxx, yyy);
+            //printf("found at: xxx=%d yyy=%d val=%x\n", xxx, yyy, valx);
             int cdot = RGB(0, 0, 0xff);
             add_item(xxx, yyy, cdot, XCROSS);
             found = 1;
@@ -92,7 +92,7 @@ PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs)
 
     //print_list();
     show_crosses();
-    reent = 0;
+    reent_walk = 0;
 
     if(found)
         return Py_BuildValue("ii", xxx, yyy);

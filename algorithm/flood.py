@@ -16,12 +16,13 @@ import  stack
 import imgrec.imgrec as imgrec
 
 
-# States of compare
+# Results of compare
 
 DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND = range(4)
+dot_strs = ("DOT_NO", "DOT_YES", "DOT_MARKED", "DOT_BOUND")
 
-# Scanning order for xxx, yyy at      R B L A
-scan_ops = ((0,1), (1,0), (0,-1), (-1,-1))
+# Scanning order for xxx, yyy at: R B L A
+scan_ops = ((1,0), (0,1), (-1,0), (0,-1))
 
 reenter = 0
 
@@ -40,7 +41,6 @@ class floodParm():
         self.mark = 0;          self.divider = 0
         self.thresh = 50;       self.breath = 1
         self.verbose = 0;       self.ops = 0
-        self.colx = 0x808080;
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
@@ -84,52 +84,54 @@ def flood_one(xxx, yyy, param):
         return
     reenter +=1
 
-    print("flood_one:", xxx, yyy)
-
     # Mark initial position
     try:
-        param.mark = param.darr[xxx][yyy]
+        param.mark = param.darr[yyy][xxx]
     except KeyError:
         print( "Start pos past allocated array %d / %d (%d)" %( xxx, yyy, param.divider))
         reenter -= 1
         return -1
 
+    print("flood_one: (xxx/yyy)", xxx, yyy, "mark:", param.mark)
+
     param.stack.push((xxx, yyy, 0))
     #mark_done(xxx, yyy, 1, param)
 
     # Walk the patches, loop until done
-
     startop = 0
     while True :
-        print("loop", xxx, yyy)
+        #print("new loop", xxx, yyy, startop)
         param.cnt += 1;
-        if param.cnt > 10:
+
+        if param.stack.stacklen() == 0:
+            print( "while break end")
             break
+
+        #if param.cnt > 500:
+        #    break
+
         # To observe in action, if requested
         if param.callb:
             if param.cnt % param.breath == 0:
                 param.callb(xxx, yyy, param);
                 #break
-
         ret = DOT_NO;
         # Iterate operators
         for nnn in range(startop, len(scan_ops)):
-            print("nnn", nnn)
+            #print("nnn", nnn)
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = scan_one(xxx2, yyy2, param)
+            mark_cell(xxx, yyy, 1, param.dones)
+
             if  ret == DOT_YES:
                 mark_cell(xxx, yyy, 1, param.body)
                 param.stack.push((xxx, yyy, nnn))
                 xxx = xxx2; yyy = yyy2
-                break
-
-            elif  ret == DOT_NO:
-                mark_cell(xxx, yyy, 1, params.bounds)
-                pass
-            elif  ret == DOT_BOUND:
-                mark_cell(xxx, yyy, 1, params.bounds)
+                break  # jump
+            elif  ret == DOT_NO or ret == DOT_BOUND:
+                mark_cell(xxx, yyy, 1, param.bounds)
                 pass
             elif  ret == DOT_MARKED:
                 pass
@@ -138,72 +140,71 @@ def flood_one(xxx, yyy, param):
 
         if  ret == DOT_YES:
             continue
-
-        # All operations done, mark this one done
-        if  nnn+startop ==  len(scan_ops):
-            mark_cell((xxx, yyy, nnn+startop), param.dones)
-
-        xxx, yyy, startop = param.stack.pop()
+        if  ret == DOT_NO or ret == DOT_BOUND:
+            print("pop", param.stack.len())
+            xxx, yyy, startop = param.stack.pop()
+            continue
 
         # ----------------------------------------------------------------
-
-        if param.stack.stacklen() == 0:
-            print( "while break end")
-            break
+        # All operations done, mark this one done
+        if  nnn+startop == len(scan_ops):
+            #mark_cell((xxx, yyy, nnn+startop), param.dones)
+            xxx, yyy, startop = param.stack.pop()
+            continue
 
     print("loop count", param.cnt)
 
     reenter -=1
-    print("dones", len(param.dones), param.dones)
+    #print("dones", len(param.dones), param.dones)
 
     #print( "done cnt =", param.cnt, "ops =", param.ops)
     calc_bounds(param)
     return
 
-def calc_bounds(param):
-    #print( "param len", len(param.dones))
-    minx = 10000; maxx = 0; miny = 10000; maxy = 0
-    for aa in param.bounds.keys():
-        #print( aa,)
-        if param.bounds[aa]:
-            if minx > aa[0]: minx = aa[0]
-            if miny > aa[1]: miny = aa[1]
-            if maxx < aa[0]: maxx = aa[0]
-            if maxy < aa[1]: maxy = aa[1]
+def coldiff(colm, colx):
 
-    #print( "flood minx miny", minx, miny, "maxx maxy",  maxx, maxy)
-    param.minx = minx
-    param.miny = miny
-    param.maxx = maxx
-    param.maxy = maxy
+    ''' Substruct col avarage from ref avarage '''
 
-    pass
+    cc = (colm[1] + colm[2] + colm[3]) // 3
+    dd = (colx[1] + colx[2] + colx[3]) // 3
+    ret = abs(cc - dd)
+    #print("coldiff", colm, colx, ret)
+    return ret
+
+def scan_one(xxx2, yyy2, param):
+    ret = _scan_one(xxx2, yyy2, param)
+    print("scan_one:", xxx2, yyy2, dot_strs[ret])
+    return ret
 
 # ------------------------------------------------------------------------
 # Scan new patch in direction specified by the caller
 
-def scan_one(xxx2, yyy2, param):
+def _scan_one(xxx2, yyy2, param):
 
     ''' Scan one pixel, specified by the caller coordinates
         Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
     '''
 
+    ret = DOT_NO
     if is_pixel_done(xxx2, yyy2, param):
         # already marked
         ret =  DOT_MARKED
+        return ret
     else:
-        ret = DOT_NO
         param.ops += 1
         try:
-            diff = imgrec.diffcol(param.mark, param.darr[xxx2][yyy2])
-            #print( "diff %s" % diff, xxx2, yyy2)
+            diff = coldiff(param.mark, param.darr[yyy2][xxx2])
+            #print( "diff: 0x%x" % diff, xxx2, yyy2)
         except:
-            print_exception("diffcol")
+            print_exception("coldiff")
             #print( "out of range ignoring: ", xxx2, yyy2)
-            #raise
-        if ret < param.thresh:
+            ret = DOT_BOUND
+            return ret
+
+        if diff < param.thresh:
             ret = DOT_YES
-    print("scan_one:", xxx2, yyy2, ret)
+            return ret
+
     return ret
 
 # ------------------------------------------------------------------------
@@ -229,5 +230,24 @@ def mark_cell(xxx, yyy, flag, dictx):
             dictx[xxx, yyy] = flag
         except:
             print("cell", sys.exc_info())
+
+def calc_bounds(param):
+    #print( "param len", len(param.dones))
+    minx = 10000; maxx = 0; miny = 10000; maxy = 0
+    for aa in param.bounds.keys():
+        #print( aa,)
+        if param.bounds[aa]:
+            if minx > aa[0]: minx = aa[0]
+            if miny > aa[1]: miny = aa[1]
+            if maxx < aa[0]: maxx = aa[0]
+            if maxy < aa[1]: maxy = aa[1]
+
+    #print( "flood minx miny", minx, miny, "maxx maxy",  maxx, maxy)
+    param.minx = minx
+    param.miny = miny
+    param.maxx = maxx
+    param.maxy = maxy
+
+    pass
 
 # EOF

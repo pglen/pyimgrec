@@ -152,6 +152,7 @@ class MainWin():
             #self.load("images/Untitled.png")
             #self.load("images/line.png")
             self.load("images/star.png")
+            #self.load("images/rect.png")
             #self.load("images/IMG_0827.jpg")
             #self.load("images/enrolled.pgm")
         except:
@@ -289,6 +290,8 @@ class MainWin():
         #self.clear_annote()
         self.area.load(fname)
         #self.area.get_img()
+
+        self.scroller.set_size_request(self.area.iww, self.area.ihh)
 
     # --------------------------------------------------------------------
     def buttons3(self, hbox, window):

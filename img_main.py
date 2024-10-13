@@ -86,12 +86,12 @@ class ImgMain(Gtk.DrawingArea):
         self.connect("draw", self.draw)
         self.connect("motion-notify-event", self.area_motion)
 
-    def add_to_dict(self, xdic, hor, ver, med):
+    def add_to_dict(self, xdic, xxx, yyy, val):
         try:
-            xdic[hor][ver] = med
+            xdic[yyy][xxx] = val
         except KeyError:
-            xdic[hor] = {}
-            xdic[hor][ver] = med
+            xdic[yyy] = {}
+            xdic[yyy][xxx] = val
         except:
             print( "add to dict", sys.exc_info())
 
@@ -453,21 +453,13 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
-    def show_prog(self, xxx, yyy, fparm):
-        rc = self.get_allocation()
-        minx =  rc.width;  miny = rc.height;  maxx = maxy = 0
+    def callb(self, xxx, yyy, fparm):
+        #print( "callb", xxx, yyy, fparm)
 
-        #print( "show_prog", xxx, yyy, fparm)
-        try:
-            for ccc in range(1):
-                xxxx = int((xxx + ccc) * fparm.stepx)
-                yyyy = int((yyy + ccc) * fparm.stepy)
-                offs = 4 * (xxxx + fparm.iww * yyyy)
-                fparm.img[int(offs) + 0] = 0x00
-                fparm.img[int(offs) + 1] = 0x00
-        except:
-            pass
-            #print("exc", xxx, yyy, sys.exc_info())
+        img = self.surface.get_data()
+        img[4*xxx + 4*yyy * self.iww] = 0x00
+        img[4*xxx + 4*yyy * self.iww+1] = 0x00
+        #img[4*xxx + 4*yyy * self.iww+2] = 0x00
 
         self.bframe = []
         #print( "progress:", "minx", minx, "miny", miny, "len", len(fparm.spaces))
@@ -501,7 +493,7 @@ class ImgMain(Gtk.DrawingArea):
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         xxx, yyy = imgrec.walk(0, 0)
-        print("walkret", xxx, yyy)
+        #print("walkret", xxx, yyy)
 
         print( "Anal image", xxx, yyy, self.stepx, self.stepy, "w/h", self.iww, self.ihh)
 
@@ -548,22 +540,27 @@ class ImgMain(Gtk.DrawingArea):
 
         # Fill in 2D array
         for yy in range(self.ihh):
+            offs = yy * self.iww * 4
             for xx in range(self.iww):
-                self.add_to_dict(darr, yy, xx, buf[yy * self.iww + xx])
+                val = []
+                for cc in range(4):
+                    val.append(buf[offs + xx * 4 + cc])
+                self.add_to_dict(darr, xx, yy, val)
 
-        #self.invalidate()
+        # TEST: Put it back to img
+        #imgrec.blank(color=0xff888888) #color=0xffffffff)  #)
+        #for yy in range(self.ihh):
+        #    for xx in range(self.iww):
+        #        offs = yy * self.iww * 4
+        #        for cc in range(4):
+        #            try:
+        #                buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
+        #            except:
+        #                pass
+        #
+        #        self.invalidate()
+        #        usleep(.003)
         #return
-
-        # Print resulting array
-        #for aa in darr:
-        #    print("key%2d: " % aa, end = "")
-        #    for bb in darr[aa]:
-        #        #print("   %06x" % darr[aa][bb], end = " ")
-        #        if darr[aa][bb] == 0xffffff:
-        #            print(" ", end = "")
-        #        else:
-        #            print("*", end = "")
-        #    print()
 
         imgrec.blank() #color=0xff000000) #color=0xffffffff)
         self.invalidate()
@@ -572,16 +569,16 @@ class ImgMain(Gtk.DrawingArea):
             #self.xparent.clear_small_img()
 
             # Set up flood fill parameters
-            fparm = flood.floodParm(darr, self.show_prog);
+            fparm = flood.floodParm(darr, self.callb);
+
             fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.tresh = TRESH
-            fparm.inval = self.show_prog;    # Progress feedback
             fparm.colx = int(random.random() * 0xffffff)
             fparm.verbose = 1
             fparm.divider = self.divider
             fparm.iww = self.iww;  fparm.ihh = self.ihh
 
-            ret = flood.flood_one(xxx, yyy, fparm)
+            ret = flood.flood_one(xxx + 1, yyy + 1, fparm)
             if ret == -1:
                 return
 
@@ -625,7 +622,7 @@ class ImgMain(Gtk.DrawingArea):
                 print( "cmp", cmp)
                 self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
 
-            self.show_prog(xxx, yyy, fparm)
+            self.callb(xxx, yyy, fparm)
 
         elif self.xparent.radio2.get_active():
             # Set up rect flood fill
@@ -633,13 +630,13 @@ class ImgMain(Gtk.DrawingArea):
             fparm = rectflood.rfloodParm(self.surface.get_data(), darr);
             #fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.tresh = TRESH
-            fparm.callb = self.show_prog;    # Progress feedback
+            fparm.callb = self.callb;    # Progress feedback
             fparm.colx = int(random.random() * 0xffffff)
             #fparm.verbose = True
             fparm.breath = 4
 
             rectflood.rectflood(xxx, yyy, fparm)
-            self.show_prog(xxx, yyy, fparm)
+            self.callb(xxx, yyy, fparm)
         else:
             #print( "No opeartion selected")
             self.walk_image(self.event_x, self.event_y)
