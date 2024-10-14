@@ -12,6 +12,9 @@ from gi.repository import Gdk
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
+from gi.repository import GdkPixbuf
+
+import cairo
 
 from timeit import Timer
 from random import *
@@ -143,24 +146,20 @@ class MainWin():
         self.scroller.add(self.vport)
         self.mainbox.add(self.scroller)
 
-        self.area2 = Gtk.Image.new_from_file("images/star.png")
-
         self.vport2 = Gtk.Viewport()
         self.scroller2 = Gtk.ScrolledWindow()
-        self.vport2.add(self.area2)
-        self.scroller2.add(self.vport2)
-        self.mainbox.add(self.scroller2)
 
-        a2 = self.area2.get_pixbuf()
-        self.scroller2.set_size_request(a2.get_width(), a2.get_width())
+        #self.simg = Gtk.Image.new_from_file("images/star.png")
+        #a2 = self.simg.get_pixbuf()
+        #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
 
         try:
             # Load default image(s)
             #self.load("images/african.jpg")
             #self.load("images/IMG_0823.jpg")
             #self.load("images/shapes.png")
-            #self.load("images/shapex.png")
-            self.load("images/Untitled.png")
+            self.load("images/shapex.png")
+            #self.load("images/Untitled.png")
             #self.load("images/line.png")
             #self.load("images/star.png")
             #self.load("images/rect.png")
@@ -173,6 +172,12 @@ class MainWin():
 
         pix = self.area.image.get_pixbuf()
         iww = pix.get_width(); ihh = pix.get_height()
+
+        self.simg = Imagex(iww, ihh)
+
+        self.vport2.add(self.simg)
+        self.scroller2.add(self.vport2)
+        self.mainbox.add(self.scroller2)
 
         if iww > self.wwww or ihh > self.hhhh:
             self.scroller.set_size_request(self.wwww, self.hhhh)
@@ -202,7 +207,7 @@ class MainWin():
         self.vbox = Gtk.VBox();
 
         #self.vbox.pack_start(self.hbox_s, False, 0, 0)
-        self.vbox.pack_start(self.mainbox, True, 0, 0)
+        self.vbox.pack_start(self.mainbox, True, True, 4)
         #self.vbox.pack_start(self.hbox_s2, False, 0, 0)
         self.vbox.pack_start(vbox2, False, 0, 0)
         self.vbox.pack_start(self.hbox3, False, 0, 0)
@@ -225,30 +230,35 @@ class MainWin():
     def set_small_text(self, txt):
         self.lab.set_text(txt)
 
-    def clear_small_img(self, color = 0x000000ff):
+    def clear_small_img(self, color = 0xffffffff):
         # Only get this once after resize
         #if not self.smrc:
-        #    self.smrc = self.img.get_allocation()
-        #rc = self.img.get_allocation()
-        #pixbuf = Gtk.gdk.Pixbuf(gdk.COLORSPACE_RGB, True, 8,  rc.width, rc.height)
+        #    self.smrc = self.simg.get_allocation()
+        #rc = self.simg.get_allocation()
+        #pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8,
+        #                                    rc.width, rc.height)
         #pixbuf.fill(color)
-        #self.img.set_from_pixbuf(pixbuf)
+        #self.simg.set_from_pixbuf(pixbuf)
         #rc = self.mainbox.get_allocation()
         #self.mainbox.window.invalidate_rect(rc, False)
         pass
 
     def fill_small_img(self, img):
 
+        pass
         # Only get this once after resize
-        if not self.smrc:
-            self.smrc = self.img.get_allocation()
+        #if not self.smrc:
+        #    self.smrc = self.img.get_allocation()
         #print( "fill small", self.smrc.width, self.smrc.height)
-        nnn = img.get_pixbuf().scale_simple(self.smrc.width, self.smrc.height,
-                    gdk.INTERP_NEAREST)
-        self.img.set_from_pixbuf(nnn)
+
+        #rc = self.simg.get_allocation()
+        #print( "fill small", img, rc.width, rc.height)
+        #nnn = img.get_pixbuf().scale_simple(rc.width, rc.height,
+        #                GdkPixbuf.InterpType.NEAREST)
+        #self.simg.set_from_pixbuf(nnn)
         #self.mainbox.show_now()
-        rc = self.mainbox.get_allocation()
-        self.mainbox.window.invalidate_rect(rc, False)
+        #rc = self.mainbox.get_allocation()
+        #self.mainbox.window.invalidate_rect(rc, False)
 
     # --------------------------------------------------------------------
     def checks(self, hbox, window):
@@ -298,11 +308,10 @@ class MainWin():
     def load(self, fname):
 
         self.fname = fname
-        #self.clear_annote()
         self.area.load(fname)
-        #self.area.get_img()
-
+        self.simg = Imagex(self.area.iww, self.area.ihh)
         self.scroller.set_size_request(self.area.iww, self.area.ihh)
+        self.scroller2.set_size_request(self.area.iww, self.area.ihh)
 
     # --------------------------------------------------------------------
     def buttons3(self, hbox, window):
@@ -514,6 +523,7 @@ class MainWin():
             msg("Cannot save file:\n%s" % fname)
 
     def anal_image(self, win, a3):
+        self.clear_small_img()
         self.area.anal_image(0, 0)
         self.area.invalidate()
 

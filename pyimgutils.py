@@ -10,6 +10,8 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
 
+import cairo
+
 import traceback
 
 # ------------------------------------------------------------------------
@@ -34,6 +36,46 @@ def print_exception(xstr):
 # pyimgutils
 # --------------------------------------------------------------------
 
+class Imagex(Gtk.DrawingArea):
+
+    def __init__(self, ww, hh):
+        super().__init__()
+        self.set_size_request(ww, hh)
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
+        self.data = self.surface.get_data()
+        self.connect("draw", self.draw)
+
+        ctx = cairo.Context(self.surface)
+        ctx.set_source_rgba(0.7, 0.7, 0.7 )
+        ctx.rectangle(0, 0, ww, hh)
+        ctx.fill()
+
+        print("Imagex", ww, hh)
+
+        ## Needs some op to draw
+        #ctx.set_source_rgba(0, 0, 0 )
+        #ctx.move_to(0, 0)
+        #ctx.line_to(1, 1)
+        #ctx.stroke()
+        #ctx.paint()
+
+    def draw(self, me, gc):
+        #print("Imagex draw")
+        gc.set_source_surface(self.surface)
+        gc.paint()
+        #return True
+
+    def invalidate(self):
+        # Needs some op to actually draw
+        ctx = cairo.Context(self.surface)
+        #ctx.set_source_rgba(0, 0, 0, .1 )
+        ctx.move_to(0, 0)
+        ctx.line_to(1, 0)
+        ctx.stroke()
+        #ctx.reset_clip()
+        #self.surface.flush()
+        self.queue_draw()
+
 old_dir = ""
 
 class ofd():
@@ -41,12 +83,13 @@ class ofd():
     def __init__(self, msg = "Open File", mode=Gtk.FileChooserAction.OPEN):
 
         self.result = None
-        self.old    = os.getcwd()
+        self.old = os.getcwd()
 
         global old_dir
         if not old_dir:
             old_dir = self.old
-        print("old_dir:", old_dir)
+
+        #print("old_dir:", old_dir)
 
         fc = Gtk.FileChooserDialog( title = msg, transient_for = None,
                                         action = mode)
@@ -66,8 +109,7 @@ class ofd():
 
         global old_dir
 
-        print("Done", resp)
-
+        #print("Done", resp)
         os.chdir(self.old)
         if resp == Gtk.ButtonsType.OK or resp == Gtk.ResponseType.ACCEPT:
             try:
@@ -77,7 +119,6 @@ class ofd():
                 else:
                     self.result = fname
                 old_dir = os.path.dirname(fname)
-
             except:
                 msg("Cannot open file", fname)
         win.destroy()

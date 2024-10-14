@@ -37,16 +37,17 @@ class floodParm():
 
         self.darr = darr;       self.callb = callb
 
-        self.cnt = 0;           self.depth = 0;     self.mark = 0;
+        self.mark = 0;          self.exit = 0
+        self.cnt = 0;           self.depth = 0;
         self.thresh = 100;      self.breath = 10
         self.verbose = 0;       self.ops = 0
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
-        self.dones = {};        self.bounds = {};   self.body  = {}
-        self.exit = 0
-        self.stack = stack.Stack()
+
+        self.dones = {};        self.bounds = {};
+        self.body  = {};        self.stack = stack.Stack()
 
 # ------------------------------------------------------------------------
 # Flood fill. Fill in cross formation, clockwise. Re-written from recursive
@@ -115,10 +116,6 @@ def flood_one(xxx, yyy, param):
         #if param.cnt > 500:
         #    break
 
-        # To observe fill action, if requested
-        if param.callb:
-            param.callb(xxx, yyy, 2, param);
-
         ret = DOT_NO; nnn = 0
         # Iterate operators
         while 1:
@@ -131,22 +128,27 @@ def flood_one(xxx, yyy, param):
             ret = scan_one(xxx2, yyy2, param)
             mark_cell(xxx, yyy, 1, param.dones)
             if  ret == DOT_YES:
-                mark_cell(xxx, yyy, 1, param.body)
+                mark_cell(xxx2, yyy2, 1, param.body)
                 param.stack.push((xxx, yyy, nnn))
                 xxx = xxx2; yyy = yyy2
+                # To observe fill action, if requested
+                if param.callb:
+                    param.callb(xxx, yyy, 2, param);
                 break  # jump to next
             elif  ret == DOT_NO:
-                mark_cell(xxx, yyy, 0, param.bounds)
+                #print("no", xxx2, yyy2, end = " ")
+                mark_cell(xxx2, yyy2, 1, param.bounds)
                 # To observe boundary action, if requested
                 if param.callb:
-                    param.callb(xxx2, yyy2, 0, param);
+                    param.callb(xxx, yyy, 0, param);
             elif ret == DOT_BOUND:
+                #print("bound", xxx2, yyy2, end = " ")
                 # Correct to within boundary
-                xxxx = min(xxx2, param.iww)
-                yyyy = min(yyy2, param.ihh)
-                mark_cell(xxx, yyy, 1, param.bounds)
+                xxxx = max(0, min(xxx2, param.iww-1))
+                yyyy = max(0, min(yyy2, param.ihh-1))
+                mark_cell(xxxx, yyyy, 1, param.bounds)
                 if param.callb:
-                    param.callb(xxx2, yyy2, 0, param);
+                    param.callb(xxxx, yyyy, 1, param);
             elif  ret == DOT_MARKED:
                 pass
             else:
@@ -167,7 +169,9 @@ def flood_one(xxx, yyy, param):
     #print("dones", len(param.dones), param.dones)
 
     #print( "done cnt =", param.cnt, "ops =", param.ops)
-    calc_bounds(param)
+    bbb  = calc_bounds(param)
+    norm_bounds(bbb, param)
+
     return ret
 
 def seek(xxx, yyy, param):
@@ -203,6 +207,7 @@ def scan_one(xxx2, yyy2, param):
         Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
     '''
 
+    param.ops += 1
     ret = DOT_NO
     while 1:        # Substitute goto
         if is_pixel_done(xxx2, yyy2, param):
@@ -210,18 +215,21 @@ def scan_one(xxx2, yyy2, param):
             ret =  DOT_MARKED
             break
         else:
-            param.ops += 1
             try:
                 diff = coldiff(param.mark, param.darr[yyy2][xxx2])
                 #print( "diff: 0x%x" % diff, xxx2, yyy2)
             except:
                 #print_exception("coldiff")
-                #print( "out of range ignoring: ", xxx2, yyy2)
+                #print( "out of range: ", xxx2, yyy2)
                 ret = DOT_BOUND
                 break
             if diff < param.thresh:
                 ret = DOT_YES
                 break
+            else:
+                ret = DOT_NO
+                break
+            # Just in case
             break
 
     #print("scan_one:", xxx2, yyy2, dot_strs[ret])
@@ -263,11 +271,19 @@ def calc_bounds(param):
             if maxy < aa[1]: maxy = aa[1]
 
     #print( "flood minx miny", minx, miny, "maxx maxy",  maxx, maxy)
-    param.minx = minx
-    param.miny = miny
-    param.maxx = maxx
-    param.maxy = maxy
+    return minx, miny, maxx, maxy
 
-    pass
+def norm_bounds(boundx, param):
+
+    ''' Make it upper left aligned '''
+
+    #print("boundx", boundx)
+
+    param.boundsx = []
+    for aa in param.bounds.keys():
+        #print( aa,)
+        if param.bounds[aa]:
+            bb = (aa[0] - boundx[0], aa[1] - boundx[1])
+            param.boundsx.append(bb)
 
 # EOF

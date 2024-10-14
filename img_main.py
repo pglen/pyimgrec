@@ -188,8 +188,16 @@ class ImgMain(Gtk.DrawingArea):
         except:
             print("bm draw", sys.exc_info())
 
+        #gc.set_source_rgba(111, 0, 0 )
+        #gc.rectangle(0, 0, 100, 100)
+        #gc.fill()
+        #gc.move_to(100, 100)
+        #gc.line_to(200, 200)
+        #gc.stroke()
+
         gc.set_source_surface(self.surface)
         gc.paint()
+
 
     # --------------------------------------------------------------------
     def key_press_event(self, win, event):
@@ -458,21 +466,22 @@ class ImgMain(Gtk.DrawingArea):
             if kind == 2:
                 self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
             elif kind == 1:
-                self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
-                self.buf[4*xxx + 4*yyy * self.iww+1] = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
             elif kind == 0:
-                self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
-                self.buf[4*xxx + 4*yyy * self.iww+1] = 0x00
-                self.buf[4*xxx + 4*yyy * self.iww+2] = 0x00
+                pass
+                self.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
+                self.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
             else:
                 print("unkown kind in callb")
         except:
-            print("callb", sys.exc_info())
+            print("callb", xxx, yyy, kind, sys.exc_info())
             pass
 
-        self.invalidate()
-        if 1: #fparm.cnt % fparm.breath == 0:
-            usleep(1)
+        if fparm.cnt % fparm.breath == 0:
+            self.invalidate()
+            usleep(.1)
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
@@ -547,9 +556,42 @@ class ImgMain(Gtk.DrawingArea):
                 else:
                     break
 
+            # Reset data output
+            fparm.bounds = {}
+            fparm.body = {}
+
             ret = flood.flood_one(xxx, yyy, fparm)
             if ret == -1:
                 break
+
+        print("bounds", fparm.boundsx)
+        ctx = cairo.Context(self.xparent.simg.surface)
+
+        fparm.boundsx.sort()
+        for aa in fparm.boundsx:
+            #print(aa[0], aa[1])
+            offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
+            try:
+                self.xparent.simg.data[offs]   = 0xff
+                self.xparent.simg.data[offs+1] = 0xff
+                self.xparent.simg.data[offs+2] = 0xff
+                self.xparent.simg.data[offs+3] = 0xff
+            except:
+                pass
+            self.xparent.simg.invalidate()
+            usleep(5)
+
+        #for aa in fparm.body:
+        #    #print(aa[0], aa[1])
+        #    offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
+        #    try:
+        #        self.xparent.simg.data[offs]   = 0xff
+        #        self.xparent.simg.data[offs+1] = 0x00
+        #        self.xparent.simg.data[offs+2] = 0x00
+        #        self.xparent.simg.data[offs+3] = 0xff
+        #    except:
+        #        pass
+        #self.xparent.simg.invalidate()
 
         # Compare shape with saved ones
         #cmp = []
@@ -568,7 +610,6 @@ class ImgMain(Gtk.DrawingArea):
         #self.aframe.append((xxx, yyy, 0xff8888ff))
 
         # Display final image
-        self.invalidate()
+        #self.invalidate()
 
 # EOF
-
