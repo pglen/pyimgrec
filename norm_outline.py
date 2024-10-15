@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import math
-from pyimgutils import *
+import pyimgutils as iut
 
 # Process the array for vector rotation. Return normalized coordinate array.
 
@@ -15,13 +15,13 @@ def norm_array(fparm):
     #print( "minx2", minx2, "maxx2", maxx2, "miny2", miny2, "maxy2", maxy2)
     maxx = maxx2 - minx2; maxy = maxy2 - miny2
 
-    midx = maxx / 2; midy = maxy / 2;
+    midx = maxx // 2; midy = maxy // 2;
     #print( "midx", midx, "midy", midy       )
 
     # Normalize to zero based for the small image, clean non zeros
     xarr = {}
     for aa in fparm.bounds.keys():
-        if fparm.bounds[aa]:
+        if 1: #fparm.bounds[aa]:
             xarr[aa[0] - minx2, aa[1] - miny2] = 1
 
     #xsarr = sorted(xarr.keys())
@@ -57,12 +57,12 @@ def norm_array(fparm):
     resarr += order_vectors(carr3, midx, midy)
     resarr += order_vectors(carr4, midx, midy)
     #print( "shape arr len", len(resarr))
+    #return resarr
 
     # Shape them uniform, number of elements, maximum magnitude
-    resarr2 = scale_vectors(resarr, 64)
-    resarr3 = scale_magnitude(resarr2, 64)
-
-    #print( resarr3)
+    resarr2 = scale_vectors(resarr, 128)
+    #return resarr2
+    resarr3 = scale_magnitude(resarr2, 128)
     return resarr3
 
 # ========================================================================
@@ -194,10 +194,41 @@ def norm_array2(fparm):
         #print()
     return resarr
 
-# ========================================================================
 def sqrdiff(aa, bb):
+
+    ''' math sugar for absolute difference '''
+
     dist = math.sqrt(abs(math.pow(bb, 2) - \
                 math.pow(aa, 2)))
     return dist
 
+def norm_bounds(boundx, bounds):
 
+    ''' Make it upper left aligned '''
+
+    print("norm_bounds() boundx = ", boundx)
+    retdict = {}
+    for aa in bounds.keys():
+        if bounds[aa]:
+            iut.mark_cell(aa[0] - boundx[0], aa[1] - boundx[1],  1, retdict)
+    return retdict
+
+def calc_bounds(bounds):
+
+    ''' Calculate boundaries of the data '''
+
+    minx = 10000; maxx = 0; miny = 10000; maxy = 0
+
+    for aa in bounds:
+        #print( aa,)
+        if bounds[aa]:
+            if minx > aa[0]: minx = aa[0]
+            if miny > aa[1]: miny = aa[1]
+            if maxx < aa[0]: maxx = aa[0]
+            if maxy < aa[1]: maxy = aa[1]
+
+    #print("calc_bounds() minx =", minx, "miny =", miny,
+    #                            "maxx =",  maxx,  "maxy =", maxy)
+    return (minx, miny, maxx, maxy)
+
+# EOF

@@ -40,17 +40,20 @@ class Imagex(Gtk.DrawingArea):
 
     def __init__(self, ww, hh):
         super().__init__()
+        self.ww = ww; self.hh = hh
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
         self.data = self.surface.get_data()
         self.connect("draw", self.draw)
+        self.clear()
 
+    def clear(self):
         ctx = cairo.Context(self.surface)
         ctx.set_source_rgba(0.7, 0.7, 0.7 )
-        ctx.rectangle(0, 0, ww, hh)
+        ctx.rectangle(0, 0, self.ww, self.hh)
         ctx.fill()
-
-        print("Imagex", ww, hh)
+        self.invalidate()
+        print("Imagex", self.ww, self.hh)
 
         ## Needs some op to draw
         #ctx.set_source_rgba(0, 0, 0 )
@@ -221,6 +224,10 @@ else:
 
 def  usleep(msec):
 
+    ''' sleep msec milliseconds ...
+         ...  timefunc workaround to allow PY Ver < 3.3
+    '''
+
     got_clock = timefunc() + float(msec) / 1000
     #print( got_clock)
     while True:
@@ -228,5 +235,18 @@ def  usleep(msec):
             break
         #print ("Sleeping")
         Gtk.main_iteration_do(False)
+
+def mark_cell(xxx, yyy, flag, dictx):
+
+    '''  Mark a cell done. Create dimention if not prese]nt '''
+
+    try:
+        dictx[xxx, yyy] = flag
+    except:
+        try:
+            dictx[xxx] = {}
+            dictx[xxx, yyy] = flag
+        except:
+            print("cell", sys.exc_info())
 
 # EOF

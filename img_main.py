@@ -564,34 +564,40 @@ class ImgMain(Gtk.DrawingArea):
             if ret == -1:
                 break
 
-        print("bounds", fparm.boundsx)
-        ctx = cairo.Context(self.xparent.simg.surface)
+            # Process data from flood
+            bound  = calc_bounds(fparm.bounds)
+            fparm.minx = bound[0]; fparm.miny = bound[1]
+            fparm.maxx = bound[2]; fparm.maxy = bound[3]
 
-        fparm.boundsx.sort()
-        for aa in fparm.boundsx:
-            #print(aa[0], aa[1])
-            offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
-            try:
-                self.xparent.simg.data[offs]   = 0xff
-                self.xparent.simg.data[offs+1] = 0xff
-                self.xparent.simg.data[offs+2] = 0xff
-                self.xparent.simg.data[offs+3] = 0xff
-            except:
-                pass
-            self.xparent.simg.invalidate()
-            usleep(5)
+            #nbounds = norm_bounds(bound, fparm.bounds)
+            nbounds = norm_array(fparm)
+            #print("nbounds", nbounds)
+            ctx = cairo.Context(self.xparent.simg.surface)
 
-        #for aa in fparm.body:
-        #    #print(aa[0], aa[1])
-        #    offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
-        #    try:
-        #        self.xparent.simg.data[offs]   = 0xff
-        #        self.xparent.simg.data[offs+1] = 0x00
-        #        self.xparent.simg.data[offs+2] = 0x00
-        #        self.xparent.simg.data[offs+3] = 0xff
-        #    except:
-        #        pass
-        #self.xparent.simg.invalidate()
+            for aa in nbounds:
+                #print(aa[0], aa[1])
+                offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
+                try:
+                    self.xparent.simg.data[offs]   = 0xff
+                    self.xparent.simg.data[offs+1] = 0xff
+                    self.xparent.simg.data[offs+2] = 0xff
+                    self.xparent.simg.data[offs+3] = 0xff
+                except:
+                    pass
+                self.xparent.simg.invalidate()
+                usleep(5)
+
+            #for aa in fparm.body:
+            #    #print(aa[0], aa[1])
+            #    offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
+            #    try:
+            #        self.xparent.simg.data[offs]   = 0xff
+            #        self.xparent.simg.data[offs+1] = 0x00
+            #        self.xparent.simg.data[offs+2] = 0x00
+            #        self.xparent.simg.data[offs+3] = 0xff
+            #    except:
+            #        pass
+            #self.xparent.simg.invalidate()
 
         # Compare shape with saved ones
         #cmp = []

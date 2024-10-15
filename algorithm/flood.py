@@ -10,11 +10,10 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
 
-from    pyimgutils import *
+import pyimgutils as iut
 import  stack
 
 import imgrec.imgrec as imgrec
-
 
 # Results of compare
 
@@ -126,9 +125,10 @@ def flood_one(xxx, yyy, param):
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = scan_one(xxx2, yyy2, param)
-            mark_cell(xxx, yyy, 1, param.dones)
+
+            iut.mark_cell(xxx, yyy, 1, param.dones)
             if  ret == DOT_YES:
-                mark_cell(xxx2, yyy2, 1, param.body)
+                iut.mark_cell(xxx2, yyy2, 1, param.body)
                 param.stack.push((xxx, yyy, nnn))
                 xxx = xxx2; yyy = yyy2
                 # To observe fill action, if requested
@@ -137,7 +137,7 @@ def flood_one(xxx, yyy, param):
                 break  # jump to next
             elif  ret == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
-                mark_cell(xxx2, yyy2, 1, param.bounds)
+                iut.mark_cell(xxx2, yyy2, 1, param.bounds)
                 # To observe boundary action, if requested
                 if param.callb:
                     param.callb(xxx, yyy, 0, param);
@@ -146,7 +146,7 @@ def flood_one(xxx, yyy, param):
                 # Correct to within boundary
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
-                mark_cell(xxxx, yyyy, 1, param.bounds)
+                iut.mark_cell(xxxx, yyyy, 1, param.bounds)
                 if param.callb:
                     param.callb(xxxx, yyyy, 1, param);
             elif  ret == DOT_MARKED:
@@ -160,17 +160,14 @@ def flood_one(xxx, yyy, param):
 
         if  nnn+startop == len(scan_ops):
             #print("eval", nnn+startop, "stack", param.stack.stacklen())
-            #mark_cell((xxx, yyy, nnn+startop), param.dones)
+            #iut.mark_cell((xxx, yyy, nnn+startop), param.dones)
             xxx, yyy, startop = param.stack.pop()
 
     print("loop count", param.cnt)
 
     reenter -=1
     #print("dones", len(param.dones), param.dones)
-
     #print( "done cnt =", param.cnt, "ops =", param.ops)
-    bbb  = calc_bounds(param)
-    norm_bounds(bbb, param)
 
     return ret
 
@@ -244,46 +241,5 @@ def is_pixel_done(xxx, yyy, param):
     except:
         aa = 0
     return aa
-
-# ------------------------------------------------------------------------
-# Mark a cell done
-
-def mark_cell(xxx, yyy, flag, dictx):
-
-    try:
-        dictx[xxx, yyy] = flag
-    except:
-        try:
-            dictx[xxx] = {}
-            dictx[xxx, yyy] = flag
-        except:
-            print("cell", sys.exc_info())
-
-def calc_bounds(param):
-    #print( "param len", len(param.dones))
-    minx = 10000; maxx = 0; miny = 10000; maxy = 0
-    for aa in param.bounds.keys():
-        #print( aa,)
-        if param.bounds[aa]:
-            if minx > aa[0]: minx = aa[0]
-            if miny > aa[1]: miny = aa[1]
-            if maxx < aa[0]: maxx = aa[0]
-            if maxy < aa[1]: maxy = aa[1]
-
-    #print( "flood minx miny", minx, miny, "maxx maxy",  maxx, maxy)
-    return minx, miny, maxx, maxy
-
-def norm_bounds(boundx, param):
-
-    ''' Make it upper left aligned '''
-
-    #print("boundx", boundx)
-
-    param.boundsx = []
-    for aa in param.bounds.keys():
-        #print( aa,)
-        if param.bounds[aa]:
-            bb = (aa[0] - boundx[0], aa[1] - boundx[1])
-            param.boundsx.append(bb)
 
 # EOF

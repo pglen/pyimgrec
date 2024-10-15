@@ -530,6 +530,7 @@ class MainWin():
     def refr_image(self, arg, ww):
         self.area.refresh()
         self.area.invalidate()
+        self.simg.clear()
 
     def invalidate(self):
         self.area.invalidate()
