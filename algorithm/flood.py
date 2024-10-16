@@ -36,9 +36,10 @@ class floodParm():
 
         self.darr = darr;       self.callb = callb
 
-        self.mark = 0;          self.exit = 0
+        self.mark = [0,0,0,0];  self.exit = 0
         self.cnt = 0;           self.depth = 0;
-        self.thresh = 100;      self.breath = 10
+        self.thresh = 20;       self.breath = 10
+        self.markcol = 100
         self.verbose = 0;       self.ops = 0
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
@@ -88,7 +89,7 @@ def flood_one(xxx, yyy, param, dones):
 
     reenter += 1
 
-    # Mark initial position
+    # Mark initial position's color
     try:
         param.mark = param.darr[yyy][xxx]
     except KeyError:
@@ -168,7 +169,7 @@ def flood_one(xxx, yyy, param, dones):
     param.minx = bound[0]; param.miny = bound[1]
     param.maxx = bound[2]; param.maxy = bound[3]
 
-    #print("loop count", param.cnt)
+    print("loop count", param.cnt, "bounds len", len(param.bounds) )
 
     reenter -=1
     #print("dones", len(param.dones), dones)
@@ -186,7 +187,7 @@ def seek(xxx, yyy, param, dones):
             #print(val, end = " ")
             cc = (val[1] + val[2] + val[3]) // 3
             #print(cc, end = " ")
-            if cc < param.thresh:
+            if cc < param.markcol:
                 return (1, xx, yy)
     return  (0, xxx, yyy)
 

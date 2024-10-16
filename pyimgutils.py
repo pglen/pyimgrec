@@ -48,6 +48,16 @@ class Imagex(Gtk.DrawingArea):
         self.clear()
         #print("Imagex create", self.ww, self.hh)
 
+    def resize(self, ww, hh):
+
+        ''' drop old, alloc new '''
+
+        self.ww = ww; self.hh = hh
+        #print("Imagex resize", self.ww, self.hh)
+        self.set_size_request(ww, hh)
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
+        self.data = self.surface.get_data()
+
     def clear(self):
         ctx = cairo.Context(self.surface)
         ctx.set_source_rgba(0.7, 0.7, 0.7 )
@@ -237,5 +247,10 @@ def mark_cell(xxx, yyy, flag, dictx):
             dictx[xxx, yyy] = flag
         except:
             print("cell", sys.exc_info())
+
+def printarr(arr):
+    for aa in arr:
+        print( "%.2d %d  " % (aa[0], aa[1]),)
+    print()
 
 # EOF

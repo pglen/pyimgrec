@@ -23,7 +23,6 @@ from gi.repository import Pango
 from gi.repository import GdkPixbuf
 
 from pyimgutils import *
-from norm_outline import *
 import  treehand
 
 try:
@@ -31,18 +30,14 @@ try:
 except:
     pass
 
-import  algorithm.flood     as flood
+import  algorithm.flood  as flood
+from   algorithm.norm_outline import *
 
 MAG_FACT    = 2
 MAG_SIZE    = 300
-
 DIVIDER     = 64                 # How many divisions, testing
-THRESH      = 100                # Color counts as mark
-
-def printarr(arr):
-    for aa in arr:
-        print( "%.2d %d  " % (aa[0], aa[1]),)
-    print()
+THRESH      = 30                 # Color diff for boundary
+MARKCOL     = 180                # Color counts as mark
 
 class ImgMain(Gtk.DrawingArea):
 
@@ -291,7 +286,9 @@ class ImgMain(Gtk.DrawingArea):
             #arr = self.array_from_pixbuf(self.pb2)
             #print(type(arr))
             self.bpx = self.pb2.get_n_channels()
-            #print("lens", self.iww, self.ihh, bpx, "mul",  self.iww*self.ihh*bpx, len(buf))
+            print("loaded:", self.iww, self.ihh, self.bpx)
+
+            # "mul",  self.iww*self.ihh*bpx, len(buf))
             imgrec.verbose = 0
             buf = self.surface.get_data()
             imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
@@ -491,7 +488,8 @@ class ImgMain(Gtk.DrawingArea):
         self.buf = self.surface.get_data()
         ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
-        print( "Anal image", xxx, yyy, self.stepx, self.stepy, "w/h", self.iww, self.ihh)
+        print( "Anal image", xxx, yyy, "ww", self.iww, "hh", self.ihh,
+                        "thresh", THRESH, "markcol", MARKCOL)
 
         imgrec.verbose = 0
 
@@ -535,9 +533,9 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.blank()
         self.invalidate()
         usleep(1)
-
         dones = {}
-
+        nbounds = []
+        found = 0
         # Iterate all shapes
         while True:
             # Set up flood fill parameters
@@ -545,6 +543,7 @@ class ImgMain(Gtk.DrawingArea):
             fparm.iww = self.iww;  fparm.ihh = self.ihh
             fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.thresh = THRESH
+            fparm.markcol = MARKCOL
             fparm.colx = int(random.random() * 0xffffff)
             fparm.verbose = 1
 
@@ -556,31 +555,51 @@ class ImgMain(Gtk.DrawingArea):
                     continue
                 else:
                     break
-
             ret = flood.flood_one(xxx, yyy, fparm, dones)
             if ret == -1:
                 break
 
+            if len(fparm.bounds) < 32:
+                continue
+
+            found += 1
+
+            #self.xparent.simg.clear()
+
             # Process data from flood
-            #nbounds = norm_bounds(bound, fparm.bounds)
             nbounds = norm_array(fparm)
             #print("nbounds", nbounds)
+            # Save last
+            if nbounds:
+                self.xparent.narr = ("", fparm.minx, fparm.miny, fparm.mark, nbounds)
 
             # Display results
             ctx = cairo.Context(self.xparent.simg.surface)
             for aa in nbounds:
                 #print(aa[0], aa[1])
-                offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
+                offs = 4 * (aa[0] + aa[1] * self.xparent.simg.ww)
+                offs += 4 * fparm.minx
+                offs += 4 * self.xparent.simg.ww * fparm.miny
                 try:
-                    self.xparent.simg.data[offs]   = 0xff
-                    self.xparent.simg.data[offs+1] = 0xff
-                    self.xparent.simg.data[offs+2] = 0xff
+                    self.xparent.simg.data[offs]   = 0x00
+                    self.xparent.simg.data[offs+1] = 0x00
+                    self.xparent.simg.data[offs+2] = 0x00
                     self.xparent.simg.data[offs+3] = 0xff
                 except:
-                    print("nbounds", sys.exc_info())
+                    #print("disp nbounds", offs, sys.exc_info())
                     pass
                 self.xparent.simg.invalidate()
-                usleep(15)
+                usleep(5)
+
+            if self.xparent.check2.get_active():
+                if len(nbounds) == 0:
+                    msg("No shape yet")
+
+                sss = get_str("Enter name for shape:")
+                if sss != "":
+                    #print( "Adding shape", sss)
+                    self.xparent.shapes.append(
+                            (sss, fparm.minx, fparm.miny, fparm.mark, nbounds))
 
             #for aa in fparm.body:
             #    #print(aa[0], aa[1])
@@ -594,7 +613,7 @@ class ImgMain(Gtk.DrawingArea):
             #        pass
             #self.xparent.simg.invalidate()
 
-        self.xparent.narr = nbounds[:]
+        print("%d segments found." % found)
 
         # Compare shape with saved ones
         #cmp = []

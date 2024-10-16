@@ -3,6 +3,8 @@
 import math
 import pyimgutils as iut
 
+ARRLEN = 64
+
 # Process the array for vector rotation. Return normalized coordinate array.
 
 def norm_array(fparm):
@@ -62,9 +64,9 @@ def norm_array(fparm):
     #return resarr
 
     # Shape them uniform, number of elements, maximum magnitude
-    resarr2 = scale_vectors(resarr, 128)
+    resarr2 = scale_vectors(resarr, ARRLEN)
     #return resarr2
-    resarr3 = scale_magnitude(resarr2, 128)
+    resarr3 = scale_magnitude(resarr2, ARRLEN)
     return resarr3
 
 # ========================================================================
@@ -91,7 +93,10 @@ def scale_vectors(carr, newsize):
     resarr = []; arrlen = len(carr)
     step = float(arrlen) / newsize
     for aa in range(newsize):
-        resarr.append(carr[int(aa * step)] )
+        try:
+            resarr.append(carr[int(aa * step)] )
+        except:
+            print("exc scale", aa, arrlen) #, sys.exc_info())
     return resarr
 
 # ========================================================================

@@ -70,17 +70,17 @@ class MainWin():
 
     def __init__(self):
 
-        self.window = window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
-        window.set_title("Python Image Recognition")
-        window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        self.window.set_title("Python Image Recognition")
+        self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.smrc = None
         self.narr = []; self.shapes = []
         ic = Gtk.Image(); ic.set_from_file("images/shapes.png")
         #stock(Gtk.DialogType.INFO, Gtk.GtkIconSize.BUTTON)
-        window.set_icon(ic.get_pixbuf())
+        self.window.set_icon(ic.get_pixbuf())
 
-        #window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
-        #window.set_events(  Gdk.POINTER_MOTION_MASK |
+        #self.window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
+        #self.window.set_events(  Gdk.POINTER_MOTION_MASK |
         #                    Gdk.POINTER_MOTION_HINT_MASK |
         #                    Gdk.BUTTON_PRESS_MASK |
         #                    Gdk.BUTTON_RELEASE_MASK |
@@ -88,17 +88,16 @@ class MainWin():
         #                    Gdk.KEY_RELEASE_MASK |
         #                    Gdk.FOCUS_CHANGE_MASK )
 
-        window.connect("destroy", self.OnExit)
-        window.connect("button-press-event", self.area_button)
-        window.connect("key-press-event", self.key_press_event)
-        window.connect("configure-event", self.config_event)
+        self.window.connect("destroy", self.OnExit)
+        self.window.connect("button-press-event", self.area_button)
+        self.window.connect("key-press-event", self.key_press_event)
+        self.window.connect("configure-event", self.config_event)
 
         self.pangolayout = self.window.create_pango_layout("a")
         try:
-            window.set_icon_from_file("icon.png")
+            self.window.set_icon_from_file("icon.png")
         except:
             pass
-
 
         warnings.simplefilter("ignore")
 
@@ -120,11 +119,11 @@ class MainWin():
 
         #print("Window size", www, hhh)
         #if www / hhh > 2:
-        #    window.set_default_size(5*www/8, 7*hhh/8)
+        #    self.window.set_default_size(5*www/8, 7*hhh/8)
         #else:
-        #    window.set_default_size(7*www/8, 7*hhh/8)
+        #    self.window.set_default_size(7*www/8, 7*hhh/8)
 
-        #window.set_default_size(6*www/8, 6*hhh/8)
+        #self.window.set_default_size(6*www/8, 6*hhh/8)
 
         warnings.simplefilter("default")
 
@@ -153,6 +152,20 @@ class MainWin():
         #a2 = self.simg.get_pixbuf()
         #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
 
+        self.simg = Imagex(200, 200)
+
+        win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        win2.ww = 200; win2.hh = 200
+        win2.set_title("Image Show")
+        win2.set_size_request(win2.ww,  win2.hh)
+        win2.simg = Imagex(win2.ww, win2.hh)
+        win2.add(win2.simg)
+
+        win2.move(100, 100)
+        #win2.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        self.win2 = win2
+        win2.show_all()
+
         try:
             # Load default image(s)
             #self.load("images/african.jpg")
@@ -172,8 +185,6 @@ class MainWin():
 
         pix = self.area.image.get_pixbuf()
         iww = pix.get_width(); ihh = pix.get_height()
-
-        self.simg = Imagex(iww, ihh)
 
         self.vport2.add(self.simg)
         self.scroller2.add(self.vport2)
@@ -196,10 +207,10 @@ class MainWin():
         #self.img = Gtk.Image();
         #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
 
-        self.buttons(self.hbox, window)
-        self.buttons2(self.hbox2, window)
-        self.buttons3(self.hbox2a, window)
-        self.checks(self.hbox3, window)
+        self.buttons(self.hbox, self.window)
+        self.buttons2(self.hbox2, self.window)
+        self.buttons3(self.hbox2a, self.window)
+        self.checks(self.hbox3, self.window)
 
         self.spacer(self.hbox_s, False)
         self.spacer(self.hbox_s2, False)
@@ -221,11 +232,14 @@ class MainWin():
         #self.lab = Gtk.Label("idle")
         #self.vbox.pack_start(self.lab, False, 0, 0)
 
-        window.add(self.vbox)
+        self.window.add(self.vbox)
+        GLib.timeout_add(100, self.after)
 
-        # Move to current monitor corner
-        #xxx, yyy = window.get_position()
-        #window.move(xxx, 65)
+    def after(self):
+        # Move to current app corner
+        xxx, yyy = self.window.get_position()
+        #print("curr", xxx, yyy)
+        self.win2.move(xxx - 100, yyy - 100)
 
     def set_small_text(self, txt):
         self.lab.set_text(txt)
@@ -271,9 +285,15 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        self.check2 = Gtk.CheckButton.new_with_mnemonic(" _Click heaven ")
+        self.check2 = Gtk.CheckButton.new_with_mnemonic(" _Prompt for save Shape ")
         self.check2.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.check2, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check3 = Gtk.CheckButton.new_with_mnemonic(" _Click heaven ")
+        self.check3.connect("clicked", self.check_hell, window)
+        hbox.pack_start(self.check3, False, 0, 0)
 
         self.spacer(hbox, False )
 
@@ -309,7 +329,12 @@ class MainWin():
 
         self.fname = fname
         self.area.load(fname)
-        self.simg = Imagex(self.area.iww, self.area.ihh)
+        self.simg.resize(self.area.iww, self.area.ihh)
+        self.simg.clear()
+
+        self.win2.simg.resize(self.area.iww, self.area.ihh)
+        self.win2.simg.clear()
+
         self.scroller.set_size_request(self.area.iww, self.area.ihh)
         self.scroller2.set_size_request(self.area.iww, self.area.ihh)
 
@@ -318,19 +343,20 @@ class MainWin():
 
         self.spacer(hbox, True )
 
-        butt6 = Gtk.Button.new_with_mnemonic(" Save S_hape ")
+        butt6 = Gtk.Button.new_with_mnemonic(" Save Last S_hape ")
         butt6.connect("clicked", self.save_shape, window)
         hbox.pack_start(butt6, False, 0, 0)
 
         self.spacer(hbox)
 
-        butt7 = Gtk.Button.new_with_mnemonic(" Show Shapes ")
-        butt7.connect("clicked", self.show_shapes, window)
+        butt7 = Gtk.Button.new_with_mnemonic(" Show All Shapes ")
+        butt7.connect("clicked", self.show_all_shapes, window)
         hbox.pack_start(butt7, False, 0, 0)
 
         self.spacer(hbox)
 
         butt8 = Gtk.Button.new_with_mnemonic(" Pickle Shapes ")
+        butt8.set_tooltip_text("Will save it to disk")
         butt8.connect("clicked", self.pickle_shapes, window)
         hbox.pack_start(butt8, False, 0, 0)
 
@@ -338,9 +364,20 @@ class MainWin():
 
         butt9 = Gtk.Button.new_with_mnemonic(" unPickle Shapes ")
         butt9.connect("clicked", self.unpickle_shapes, window)
+        butt9.set_tooltip_text("Will append it from disk")
         hbox.pack_start(butt9, False, 0, 0)
 
+        self.spacer(hbox, False )
+
+        butt9a = Gtk.Button.new_with_mnemonic(" Clear Shapes ")
+        butt9a.connect("clicked", self.clear_shapes, window)
+        butt9a.set_tooltip_text("Will clear current shapes")
+        hbox.pack_start(butt9a, False, 0, 0)
+
         self.spacer(hbox, True )
+
+    def clear_shapes(self, win, a3):
+        self.shapes = []
 
     # --------------------------------------------------------------------
     def buttons(self, hbox, window):
@@ -353,7 +390,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt1 = Gtk.Button.new_with_mnemonic(" Save _Image ")
+        butt1 = Gtk.Button.new_with_mnemonic(" _Save Image ")
         butt1.connect("clicked", self.save_image, window)
         hbox.pack_start(butt1, False, 0, 0)
 
@@ -419,7 +456,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt91 = Gtk.Button.new_with_mnemonic(" _Smooth ")
+        butt91 = Gtk.Button.new_with_mnemonic(" Smooth ")
         butt91.connect("clicked", self.smooth, window)
         hbox.pack_start(butt91, False,0 ,0)
 
@@ -576,26 +613,31 @@ class MainWin():
         sss = get_str("Enter name for (the last) shape:")
         if sss != "":
             #print( "Adding shape", sss)
-            self.shapes.append((sss, self.narr))
+            self.shapes.append((sss, self.narr[1],
+                    self.narr[2], self.narr[3], self.narr[4]) )
 
-    def show_shapes(self, win, a3):
-        self.simg.clear()
+    def show_all_shapes(self, win, a3):
+        if not self.shapes:
+            print("No shapes saved")
+            return
+        self.win2.simg.clear()
         for ss in self.shapes:
-            print( ss[0], ss[1][:4])
-            ctx = cairo.Context(self.simg.surface)
-            for aa in ss[1]:
+            print( ss[0:4], "len:", len(ss[4]), ss[4][:3], "...")
+            ctx = cairo.Context(self.win2.simg.surface)
+            for aa in ss[4]:
                 #print(aa[0], aa[1])
                 offs = 4 * (aa[0] + aa[1] * self.area.iww)
                 try:
-                    self.simg.data[offs]   = 0xff
-                    self.simg.data[offs+1] = 0xff
-                    self.simg.data[offs+2] = 0xff
-                    self.simg.data[offs+3] = 0xff
+                    self.win2.simg.data[offs]   = 0xff
+                    self.win2.simg.data[offs+1] = 0xff
+                    self.win2.simg.data[offs+2] = 0xff
+                    self.win2.simg.data[offs+3] = 0xff
                 except:
-                    print("nbounds", sys.exc_info())
+                    print("exc nbounds", sys.exc_info())
                     pass
-                self.simg.invalidate()
-                usleep(15)
+                self.win2.simg.invalidate()
+                self.win2.queue_draw()
+                usleep(5)
 
     # --------------------------------------------------------------------
 
