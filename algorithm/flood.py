@@ -45,8 +45,9 @@ class floodParm():
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
 
-        self.dones = {};        self.bounds = {};
-        self.body  = {};        self.stack = stack.Stack()
+        self.bounds = {};       self.body  = {};
+
+        self.stack = stack.Stack()
 
 # ------------------------------------------------------------------------
 # Flood fill. Fill in cross formation, clockwise. Re-written from recursive
@@ -65,6 +66,7 @@ class floodParm():
 #   xxx, yyy    start coordinates
 #    fparm      pre filled parameter class
 #               ... most of the parameters are passed via this class.
+#    dones      dictioanry to store done flags
 #
 # History:
 #           Sept.2024           Resurrected from pyimgrec
@@ -74,7 +76,7 @@ class floodParm():
 # Relies on code from stack.py
 #
 
-def flood_one(xxx, yyy, param):
+def flood_one(xxx, yyy, param, dones):
 
     ret = 0
     global reenter
@@ -124,9 +126,9 @@ def flood_one(xxx, yyy, param):
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
-            ret = scan_one(xxx2, yyy2, param)
+            ret = _scan_one(xxx2, yyy2, param, dones)
 
-            iut.mark_cell(xxx, yyy, 1, param.dones)
+            iut.mark_cell(xxx, yyy, 1, dones)
             if  ret == DOT_YES:
                 iut.mark_cell(xxx2, yyy2, 1, param.body)
                 param.stack.push((xxx, yyy, nnn))
@@ -155,27 +157,30 @@ def flood_one(xxx, yyy, param):
                 print("invalid ret from scan_one", ret)
             nnn += 1
 
-        # ----------------------------------------------------------------
-        # All operations done, resume previous
-
         if  nnn+startop == len(scan_ops):
             #print("eval", nnn+startop, "stack", param.stack.stacklen())
-            #iut.mark_cell((xxx, yyy, nnn+startop), param.dones)
+            #iut.mark_cell((xxx, yyy, nnn+startop), dones)
             xxx, yyy, startop = param.stack.pop()
 
-    print("loop count", param.cnt)
+    # All operations done, pre-process
+
+    bound  = _calc_bounds(param.bounds)
+    param.minx = bound[0]; param.miny = bound[1]
+    param.maxx = bound[2]; param.maxy = bound[3]
+
+    #print("loop count", param.cnt)
 
     reenter -=1
-    #print("dones", len(param.dones), param.dones)
+    #print("dones", len(param.dones), dones)
     #print( "done cnt =", param.cnt, "ops =", param.ops)
 
     return ret
 
-def seek(xxx, yyy, param):
+def seek(xxx, yyy, param, dones):
 
     for yy in range(yyy, param.ihh):
         for xx in range(xxx, param.iww):
-            if is_pixel_done(xx, yy, param):
+            if _is_pixel_done(xx, yy, dones):
                 continue
             val = param.darr[yy][xx]
             #print(val, end = " ")
@@ -185,7 +190,7 @@ def seek(xxx, yyy, param):
                 return (1, xx, yy)
     return  (0, xxx, yyy)
 
-def coldiff(colm, colx):
+def _coldiff(colm, colx):
 
     ''' Substruct col avarage from ref avarage '''
 
@@ -195,10 +200,25 @@ def coldiff(colm, colx):
     #print("coldiff", colm, colx, ret)
     return ret
 
-# ------------------------------------------------------------------------
-# Scan new patch in direction specified by the caller
+def _calc_bounds(bounds):
 
-def scan_one(xxx2, yyy2, param):
+    ''' Calculate boundaries of the data '''
+
+    minx = 10000; maxx = 0; miny = 10000; maxy = 0
+
+    for aa in bounds:
+        #print( aa,)
+        if bounds[aa]:
+            if minx > aa[0]: minx = aa[0]
+            if miny > aa[1]: miny = aa[1]
+            if maxx < aa[0]: maxx = aa[0]
+            if maxy < aa[1]: maxy = aa[1]
+
+    #print("calc_bounds() minx =", minx, "miny =", miny,
+    #                            "maxx =",  maxx,  "maxy =", maxy)
+    return (minx, miny, maxx, maxy)
+
+def _scan_one(xxx2, yyy2, param, dones):
 
     ''' Scan one pixel, specified by the caller coordinates
         Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
@@ -207,19 +227,21 @@ def scan_one(xxx2, yyy2, param):
     param.ops += 1
     ret = DOT_NO
     while 1:        # Substitute goto
-        if is_pixel_done(xxx2, yyy2, param):
+        if _is_pixel_done(xxx2, yyy2, dones):
             # already marked
             ret =  DOT_MARKED
             break
         else:
             try:
-                diff = coldiff(param.mark, param.darr[yyy2][xxx2])
+                diff = _coldiff(param.mark, param.darr[yyy2][xxx2])
                 #print( "diff: 0x%x" % diff, xxx2, yyy2)
-            except:
-                #print_exception("coldiff")
+            except KeyError:
                 #print( "out of range: ", xxx2, yyy2)
                 ret = DOT_BOUND
                 break
+            except:
+                iut.print_exception("coldiff")
+
             if diff < param.thresh:
                 ret = DOT_YES
                 break
@@ -235,11 +257,13 @@ def scan_one(xxx2, yyy2, param):
 # ------------------------------------------------------------------------
 # Return flag if visited before
 
-def is_pixel_done(xxx, yyy, param):
+def _is_pixel_done(xxx, yyy, dones):
     try:
-        aa = param.dones[xxx, yyy]
-    except:
+        aa = dones[xxx, yyy]
+    except KeyError:
         aa = 0
+    except:
+        print("is done", sys.exc_info())
     return aa
 
 # EOF

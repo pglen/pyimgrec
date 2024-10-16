@@ -532,48 +532,42 @@ class ImgMain(Gtk.DrawingArea):
         #    self.invalidate(); usleep(.1)
         #return
 
-        imgrec.blank() #color=0xff000000) #color=0xffffffff)
+        imgrec.blank()
         self.invalidate()
         usleep(1)
 
-        # Set up flood fill parameters
-        fparm = flood.floodParm(darr, self.callb);
-        fparm.stepx = self.stepx; fparm.stepy = self.stepy
-        fparm.thresh = THRESH
-        fparm.colx = int(random.random() * 0xffffff)
-        fparm.verbose = 1
-        fparm.iww = self.iww;  fparm.ihh = self.ihh
+        dones = {}
 
         # Iterate all shapes
         while True:
-            ret, xxx, yyy = flood.seek(xxx, yyy, fparm)
-            print("seek:", ret, xxx, yyy)
+            # Set up flood fill parameters
+            fparm = flood.floodParm(darr, self.callb);
+            fparm.iww = self.iww;  fparm.ihh = self.ihh
+            fparm.stepx = self.stepx; fparm.stepy = self.stepy
+            fparm.thresh = THRESH
+            fparm.colx = int(random.random() * 0xffffff)
+            fparm.verbose = 1
+
+            ret, xxx, yyy = flood.seek(xxx, yyy, fparm, dones)
+            #print("seek:", ret, xxx, yyy)
             if not ret:
                 if xxx > 0:
-                    xxx = 0
-                    yyy += 1
+                    xxx = 0; yyy += 1
                     continue
                 else:
                     break
 
-            # Reset data output
-            fparm.bounds = {}
-            fparm.body = {}
-
-            ret = flood.flood_one(xxx, yyy, fparm)
+            ret = flood.flood_one(xxx, yyy, fparm, dones)
             if ret == -1:
                 break
 
             # Process data from flood
-            bound  = calc_bounds(fparm.bounds)
-            fparm.minx = bound[0]; fparm.miny = bound[1]
-            fparm.maxx = bound[2]; fparm.maxy = bound[3]
-
             #nbounds = norm_bounds(bound, fparm.bounds)
             nbounds = norm_array(fparm)
             #print("nbounds", nbounds)
-            ctx = cairo.Context(self.xparent.simg.surface)
 
+            # Display results
+            ctx = cairo.Context(self.xparent.simg.surface)
             for aa in nbounds:
                 #print(aa[0], aa[1])
                 offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
@@ -583,9 +577,10 @@ class ImgMain(Gtk.DrawingArea):
                     self.xparent.simg.data[offs+2] = 0xff
                     self.xparent.simg.data[offs+3] = 0xff
                 except:
+                    print("nbounds", sys.exc_info())
                     pass
                 self.xparent.simg.invalidate()
-                usleep(5)
+                usleep(15)
 
             #for aa in fparm.body:
             #    #print(aa[0], aa[1])
@@ -598,6 +593,8 @@ class ImgMain(Gtk.DrawingArea):
             #    except:
             #        pass
             #self.xparent.simg.invalidate()
+
+        self.xparent.narr = nbounds[:]
 
         # Compare shape with saved ones
         #cmp = []

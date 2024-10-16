@@ -573,14 +573,29 @@ class MainWin():
             msg("No shape yet")
             return
 
-        sss = get_str("Enter name for shape:")
+        sss = get_str("Enter name for (the last) shape:")
         if sss != "":
-            print( "Adding shape", sss)
+            #print( "Adding shape", sss)
             self.shapes.append((sss, self.narr))
 
     def show_shapes(self, win, a3):
-        for aa in self.shapes:
-            print( aa)
+        self.simg.clear()
+        for ss in self.shapes:
+            print( ss[0], ss[1][:4])
+            ctx = cairo.Context(self.simg.surface)
+            for aa in ss[1]:
+                #print(aa[0], aa[1])
+                offs = 4 * (aa[0] + aa[1] * self.area.iww)
+                try:
+                    self.simg.data[offs]   = 0xff
+                    self.simg.data[offs+1] = 0xff
+                    self.simg.data[offs+2] = 0xff
+                    self.simg.data[offs+3] = 0xff
+                except:
+                    print("nbounds", sys.exc_info())
+                    pass
+                self.simg.invalidate()
+                usleep(15)
 
     # --------------------------------------------------------------------
 

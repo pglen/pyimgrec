@@ -46,6 +46,7 @@ class Imagex(Gtk.DrawingArea):
         self.data = self.surface.get_data()
         self.connect("draw", self.draw)
         self.clear()
+        #print("Imagex create", self.ww, self.hh)
 
     def clear(self):
         ctx = cairo.Context(self.surface)
@@ -53,14 +54,7 @@ class Imagex(Gtk.DrawingArea):
         ctx.rectangle(0, 0, self.ww, self.hh)
         ctx.fill()
         self.invalidate()
-        print("Imagex", self.ww, self.hh)
-
-        ## Needs some op to draw
-        #ctx.set_source_rgba(0, 0, 0 )
-        #ctx.move_to(0, 0)
-        #ctx.line_to(1, 1)
-        #ctx.stroke()
-        #ctx.paint()
+        #print("Imagex clear", self.ww, self.hh)
 
     def draw(self, me, gc):
         #print("Imagex draw")
@@ -69,14 +63,12 @@ class Imagex(Gtk.DrawingArea):
         #return True
 
     def invalidate(self):
-        # Needs some op to actually draw
         ctx = cairo.Context(self.surface)
-        #ctx.set_source_rgba(0, 0, 0, .1 )
+        # Needs some op to actually draw. We fake a pixel into 0, 0
+        ctx.set_source_rgba(0, 0, 0, .1 )
         ctx.move_to(0, 0)
         ctx.line_to(1, 0)
         ctx.stroke()
-        #ctx.reset_clip()
-        #self.surface.flush()
         self.queue_draw()
 
 old_dir = ""
@@ -170,8 +162,8 @@ class ofd():
 # --------------------------------------------------------------------
 
 def msg(xstr, xtype = Gtk.MessageType.INFO):
-    md = Gtk.MessageDialog( flags=Gtk.DialogFlags.MODAL,
-                type=xtype, buttons=Gtk.ButtonsType.OK)
+    md = Gtk.MessageDialog(  modal=1, #flags=Gtk.DialogFlags.MODAL,
+                message_type=xtype, buttons=Gtk.ButtonsType.OK)
     md.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
     md.set_markup(xstr);
     md.run();
@@ -180,19 +172,15 @@ def msg(xstr, xtype = Gtk.MessageType.INFO):
 def  get_str(prompt):
 
     resp = ""
-    dialog = Gtk.Dialog("Enter string",
-                   None,
-                   Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                   ("OK", Gtk.ResponseType.REJECT,
-                    "Cancel", Gtk.ResponseType.ACCEPT))
+    dialog = Gtk.Dialog(title="Enter string", modal = True, destroy_with_parent = True)
+    dialog.add_buttons("OK", Gtk.ResponseType.REJECT, "Cancel", Gtk.ResponseType.ACCEPT,)
     dialog.set_default_response(Gtk.ResponseType.ACCEPT)
-    #dialog.set_position(Gtk.WIN_POS_CENTER)
     entry = Gtk.Entry();
     entry.set_activates_default(True)
     entry.set_width_chars(24)
-    label1 = Gtk.Label("   ");   label2 = Gtk.Label("   ")
-    label3 = Gtk.Label("   ");   label4 = Gtk.Label("   ")
-    label1a = Gtk.Label(prompt); label1b = Gtk.Label("     ")
+    label1 = Gtk.Label(label="   ");   label2 = Gtk.Label(label="   ")
+    label3 = Gtk.Label(label="   ");   label4 = Gtk.Label(label="   ")
+    label1a = Gtk.Label(label=prompt); label1b = Gtk.Label(label="     ")
     hbox2 = Gtk.HBox()
     hbox2.pack_start(label1, False, 0, 0)
     hbox2.pack_start(label1a, False, 0, 0)
@@ -208,9 +196,10 @@ def  get_str(prompt):
     response = dialog.run()
     gotxt = entry.get_text()
     dialog.destroy()
-    if response == Gtk.ResponseType.ACCEPT:
+    if response != Gtk.ResponseType.CANCEL:
         resp = gotxt
 
+    #print("resp", resp)
     return resp
 
 # -----------------------------------------------------------------------

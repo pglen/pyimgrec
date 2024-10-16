@@ -13,15 +13,15 @@ def norm_array(fparm):
     minx2 = min(fparm.minx, fparm.maxx);  miny2 = min(fparm.miny, fparm.maxy)
     maxx2 = max(fparm.minx, fparm.maxx);  maxy2 = max(fparm.miny, fparm.maxy)
     #print( "minx2", minx2, "maxx2", maxx2, "miny2", miny2, "maxy2", maxy2)
-    maxx = maxx2 - minx2; maxy = maxy2 - miny2
+    maxwx = maxx2 - minx2; maxhy = maxy2 - miny2
 
-    midx = maxx // 2; midy = maxy // 2;
+    midx = maxwx // 2; midy = maxhy // 2;
     #print( "midx", midx, "midy", midy       )
 
     # Normalize to zero based for the small image, clean non zeros
     xarr = {}
     for aa in fparm.bounds.keys():
-        if 1: #fparm.bounds[aa]:
+        if fparm.bounds[aa]:
             xarr[aa[0] - minx2, aa[1] - miny2] = 1
 
     #xsarr = sorted(xarr.keys())
@@ -43,6 +43,7 @@ def norm_array(fparm):
         else: xx = - (midx - bb[0])
         if bb[1] > midy: yy = bb[1] - midy;
         else: yy = - (midy - bb[1])
+        #print("xx", xx, "yy", yy)
 
         # Distribute quadrants
         if (xx <= 0) and (yy <= 0):   carr1[xx, yy] = 1
@@ -50,6 +51,7 @@ def norm_array(fparm):
         elif (xx > 0) and (yy > 0):   carr3[xx, yy] = 1
         elif (xx <= 0) and (yy > 0):  carr4[xx, yy] = 1
         #else: print( "Bad juju")
+        #print("carr1", carr1)
 
     # Sort them by angle
     resarr += order_vectors(carr1, midx, midy)
@@ -212,23 +214,5 @@ def norm_bounds(boundx, bounds):
         if bounds[aa]:
             iut.mark_cell(aa[0] - boundx[0], aa[1] - boundx[1],  1, retdict)
     return retdict
-
-def calc_bounds(bounds):
-
-    ''' Calculate boundaries of the data '''
-
-    minx = 10000; maxx = 0; miny = 10000; maxy = 0
-
-    for aa in bounds:
-        #print( aa,)
-        if bounds[aa]:
-            if minx > aa[0]: minx = aa[0]
-            if miny > aa[1]: miny = aa[1]
-            if maxx < aa[0]: maxx = aa[0]
-            if maxy < aa[1]: maxy = aa[1]
-
-    #print("calc_bounds() minx =", minx, "miny =", miny,
-    #                            "maxx =",  maxx,  "maxy =", maxy)
-    return (minx, miny, maxx, maxy)
 
 # EOF
