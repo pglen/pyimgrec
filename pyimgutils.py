@@ -171,14 +171,21 @@ class ofd():
 
         return None
 
-
 # --------------------------------------------------------------------
 
-def msg(xstr, xtype = Gtk.MessageType.INFO):
-    md = Gtk.MessageDialog(  modal=1, #flags=Gtk.DialogFlags.MODAL,
+def msg(*xstr, xtype = Gtk.MessageType.INFO):
+
+    xstr2 = ""
+    if type(xstr) == type(()):
+        for aa in xstr:
+            xstr2 += aa + " "
+    else:
+        xstr2 = xstr
+
+    md = Gtk.MessageDialog( modal=1, #flags=Gtk.DialogFlags.MODAL,
                 message_type=xtype, buttons=Gtk.ButtonsType.OK)
     md.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-    md.set_markup(xstr);
+    md.set_markup(xstr2);
     md.run();
     md.destroy()
 

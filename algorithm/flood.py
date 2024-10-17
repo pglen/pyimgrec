@@ -39,14 +39,13 @@ class floodParm():
         self.mark = [0,0,0,0];  self.exit = 0
         self.cnt = 0;           self.depth = 0;
         self.thresh = 20;       self.breath = 10
-        self.markcol = 100
+        self.markcol = 100;     self.grey = 0
         self.verbose = 0;       self.ops = 0
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
-        self.grey = 0
-        self.bounds = {};       self.body  = {};
+        self.bounds = [];       self.body  = []
 
         self.stack = stack.Stack()
 
@@ -93,7 +92,7 @@ def flood_one(xxx, yyy, param, dones):
     try:
         param.mark = param.darr[yyy][xxx]
     except KeyError:
-        print( "Start pos past allocated array %d / %d (%d)" %( xxx, yyy, param.divider))
+        print( "Start pos past allocated array %d / %d (%d)" % (xxx, yyy))
         reenter -= 1
         return -1
 
@@ -129,7 +128,8 @@ def flood_one(xxx, yyy, param, dones):
 
             iut.mark_cell(xxx, yyy, 1, dones)
             if  ret == DOT_YES:
-                iut.mark_cell(xxx2, yyy2, 1, param.body)
+                #iut.mark_cell(xxx2, yyy2, 1, param.body)
+                param.body.append((xxx2, yyy2))
                 param.stack.push((xxx, yyy, nnn))
                 xxx = xxx2; yyy = yyy2
                 # To observe fill action, if requested
@@ -140,7 +140,8 @@ def flood_one(xxx, yyy, param, dones):
                 #print("no", xxx2, yyy2, end = " ")
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
-                iut.mark_cell(xxxx, yyyy, 1, param.bounds)
+                #iut.mark_cell(xxxx, yyyy, 1, param.bounds)
+                param.bounds.append((xxxx, yyyy))
                 # To observe boundary action, if requested
                 if param.callb:
                     param.callb(xxxx, yyyy, 0, param);
@@ -149,7 +150,8 @@ def flood_one(xxx, yyy, param, dones):
                 # Correct to within boundary
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
-                iut.mark_cell(xxxx, yyyy, 1, param.bounds)
+                #iut.mark_cell(xxxx, yyyy, 1, param.bounds)
+                param.bounds.append((xxxx, yyyy))
                 if param.callb:
                     param.callb(xxxx, yyyy, 1, param);
             elif  ret == DOT_MARKED:
@@ -166,7 +168,7 @@ def flood_one(xxx, yyy, param, dones):
     # All operations done, pre-process
 
     xlen = len(param.bounds)
-    if xlen > 16:
+    if xlen > 32:
         print("flood_one: xxx", xxx, "yyy", yyy, "mark:", param.mark, "xlen", xlen)
         #print("loop count", param.cnt, "bounds len", len(param.bounds) )
 
@@ -203,9 +205,12 @@ def _coldiff(colm, colx):
     dd = abs(colm[1] - colx[1])
     ee = abs(colm[2] - colx[2])
 
-    #ret = (cc + dd + ee) // 3
-    retx = max(cc, dd)
-    ret = max(retx, ee)
+    # Average
+    ret = (cc + dd + ee) // 3
+
+    # maxdiff
+    #retx = max(cc, dd)
+    #ret = max(retx, ee)
 
     #print("coldiff", colm, colx, ret)
     return ret
@@ -228,11 +233,10 @@ def _calc_bounds(bounds):
 
     for aa in bounds:
         #print( aa,)
-        if bounds[aa]:
-            if minx > aa[0]: minx = aa[0]
-            if miny > aa[1]: miny = aa[1]
-            if maxx < aa[0]: maxx = aa[0]
-            if maxy < aa[1]: maxy = aa[1]
+        if minx > aa[0]: minx = aa[0]
+        if miny > aa[1]: miny = aa[1]
+        if maxx < aa[0]: maxx = aa[0]
+        if maxy < aa[1]: maxy = aa[1]
 
     #print("calc_bounds() minx =", minx, "miny =", miny,
     #                            "maxx =",  maxx,  "maxy =", maxy)

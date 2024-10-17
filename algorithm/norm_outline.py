@@ -3,7 +3,7 @@
 import math
 import pyimgutils as iut
 
-ARRLEN = 256
+ARRLEN = 128
 
 # Process the array for vector rotation. Return normalized coordinate array.
 
@@ -21,13 +21,10 @@ def norm_array(fparm):
     #print( "midx", midx, "midy", midy       )
 
     # Normalize to zero based for the small image, clean non zeros
-    xarr = {}
-    for aa in fparm.bounds.keys():
-        if fparm.bounds[aa]:
-            xarr[aa[0] - minx2, aa[1] - miny2] = 1
+    xarr = flush_upleft(fparm)
 
     #xsarr = sorted(xarr.keys())
-    xsarr = xarr.keys();
+    #xsarr = xarr.keys();
 
     # Quadrants. Visualizer tells us to parse in clock winding order.
     # Starting from upper left ...
@@ -38,7 +35,7 @@ def norm_array(fparm):
     #     -1, +1      |-----|-----|
 
     carr1 = {}; carr2 = {};  carr3 = {};  carr4 = {}
-    for bb in xsarr:
+    for bb in xarr:
         # Normalize it to the center
         # minx  ----  midx ----  maxx
         if bb[0] > midx: xx = bb[0] - midx;
@@ -61,13 +58,19 @@ def norm_array(fparm):
     resarr += order_vectors(carr3, midx, midy)
     resarr += order_vectors(carr4, midx, midy)
     #print( "shape arr len", len(resarr))
-    return resarr
+    #return resarr
 
     # Shape them uniform, number of elements, maximum magnitude
     resarr2 = scale_vectors(resarr, ARRLEN)
     #return resarr2
     resarr3 = scale_magnitude(resarr2, ARRLEN)
     return resarr3
+
+def flush_upleft(fparm):
+    xarr = []
+    for aa in fparm.bounds:
+        xarr.append(([aa[0] - fparm.minx, aa[1] - fparm.miny]))
+    return xarr
 
 # ========================================================================
 # Order vectors. Calculate vector tangent and sort by it.

@@ -31,7 +31,7 @@ except:
     pass
 
 import  algorithm.flood  as flood
-from   algorithm.norm_outline import *
+import  algorithm.norm_outline as norm
 
 MAG_FACT    = 2
 MAG_SIZE    = 300
@@ -459,7 +459,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def callb(self, xxx, yyy, kind, fparm):
         #print( "callb", xxx, yyy, fparm)
-
+        #return
         try:
             if kind == 2:
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]   = 0x00
@@ -479,16 +479,22 @@ class ImgMain(Gtk.DrawingArea):
                 self.xparent.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
                 self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
                 self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
+
+                #if fparm.cnt % fparm.breath == 0:
+                #    #self.xparent.win2.simg.invalidate()
+                #    self.xparent.simg.invalidate()
+                #    usleep(5)
             else:
                 print("unkown kind in callb")
+
+            if fparm.cnt % fparm.breath == 0:
+                self.xparent.win2.simg.invalidate()
+                self.xparent.simg.invalidate()
+
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
             pass
 
-        if fparm.cnt % fparm.breath == 0:
-            self.xparent.win2.simg.invalidate()
-            self.xparent.simg.invalidate()
-            #usleep(.1)
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
@@ -567,20 +573,22 @@ class ImgMain(Gtk.DrawingArea):
                 #print("Grey compare")
                 fparm.grey = True
 
-            ret, xxx, yyy = flood.seek(xxx, yyy, fparm, dones)
-            #print("seek:", ret, xxx, yyy)
-            if not ret:
-                if xxx > 0:
-                    xxx = 0; yyy += 1
-                    continue
-                else:
-                    break
+            if not single:
+                ret, xxx, yyy = flood.seek(xxx, yyy, fparm, dones)
+                #print("seek:", ret, xxx, yyy)
+                if not ret:
+                    if xxx > 0:
+                        xxx = 0; yyy += 1
+                        continue
+                    else:
+                        break
             ttt = time.time()
             ret = flood.flood_one(xxx, yyy, fparm, dones)
             if ret == -1:
                 break
 
             if len(fparm.bounds) < 32:
+                print("Short buffer", xxx, yyy, fparm.bounds[:4])
                 continue
 
             print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
@@ -589,29 +597,36 @@ class ImgMain(Gtk.DrawingArea):
             #self.xparent.simg.clear()
 
             # Process data from flood
-            nbounds = norm_array(fparm)
-            #print("nbounds", nbounds)
+            #nbounds = norm.norm_array(fparm)
+            uls = norm.flush_upleft(fparm)
+            nbs = norm.scale_vectors(uls, norm.ARRLEN)
+            nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
+            nbounds.sort()
+            print("nbounds len", len(nbounds))
             # Save last
             if nbounds:
                 self.xparent.narr = ("", fparm.minx, fparm.miny, fparm.mark, nbounds)
 
+            # Compare with stock
+            self.compare(nbounds)
+
             # Display results
-            ctx = cairo.Context(self.xparent.simg.surface)
+            self.xparent.simg2.clear()
             for aa in nbounds:
                 #print(aa[0], aa[1])
-                offs = 4 * (aa[0] + aa[1] * self.xparent.simg.ww)
-                offs += 4 * fparm.minx
-                offs += 4 * self.xparent.simg.ww * fparm.miny
+                offs = 4 * (aa[0] + aa[1] * self.xparent.simg2.ww)
+                #offs += 4 * fparm.minx
+                #offs += 4 * self.xparent.simg2.ww * fparm.miny
                 try:
-                    self.xparent.simg.data[offs]   = 0x00
-                    self.xparent.simg.data[offs+1] = 0x00
-                    self.xparent.simg.data[offs+2] = 0x00
-                    self.xparent.simg.data[offs+3] = 0xff
+                    self.xparent.simg2.buf[offs]   = 0x00
+                    self.xparent.simg2.buf[offs+1] = 0x00
+                    self.xparent.simg2.buf[offs+2] = 0x00
+                    self.xparent.simg2.buf[offs+3] = 0xff
                 except:
                     #print("disp nbounds", offs, sys.exc_info())
                     pass
-                self.xparent.simg.invalidate()
-                #usleep(5)
+                self.xparent.simg2.invalidate()
+                #usleep(15)
 
             if self.xparent.check2.get_active():
                 if len(nbounds) == 0:
@@ -640,19 +655,23 @@ class ImgMain(Gtk.DrawingArea):
 
         print("%d segments found." % found)
 
+    def compare(self, xarr):
+
         # Compare shape with saved ones
-        #cmp = []
-        #for cc in self.xparent.shapes:
-        #    res = cmp_arrays(cc[1], self.xparent.narr)
-        #    cmp.append((res, cc[0]))
-        ## Dictionary yet?
-        #if(len(cmp)):
-        #    cmp.sort()
-        #    print( "cmp", cmp)
-        #    self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
-        #
+        cmp = []
+        for cc in self.xparent.shapes:
+            res = norm.cmp_arrays(cc[4], xarr)
+            #print("comp", res, cc[0])
+            cmp.append((res, cc[0]))
+
+        if(len(cmp)):
+            cmp.sort()
+            for aa in cmp:
+                print( "cmp %.2f %s" % (aa[0], aa[1]) )
+            #self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
+            self.xparent.tree.append_treestore(cmp[0][1])
+
         #self.aframe += self.bframe
-        #
         ## Reference position
         #self.aframe.append((xxx, yyy, 0xff8888ff))
 

@@ -94,7 +94,4 @@ class   TreeHand():
     def append_treestore(self, text):
         piter = self.treestore.append(None, [text])
 
-
-
-
-
+# EOF

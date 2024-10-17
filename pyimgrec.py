@@ -143,7 +143,7 @@ class MainWin():
         self.scroller = Gtk.ScrolledWindow()
         self.vport.add(self.area)
         self.scroller.add(self.vport)
-        self.mainbox.pack_start(self.scroller, 1, 1, 0)
+        self.mainbox.pack_start(self.scroller, 1, 1, 4)
 
         self.vport2 = Gtk.Viewport()
         self.scroller2 = Gtk.ScrolledWindow()
@@ -153,6 +153,7 @@ class MainWin():
         #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
 
         self.simg = Imagex(200, 200)
+        self.simg2 = Imagex(128, 128)
 
         self.win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.win2.set_title("Image Show")
@@ -188,7 +189,9 @@ class MainWin():
 
         self.vport2.add(self.simg)
         self.scroller2.add(self.vport2)
-        self.mainbox.pack_start(self.scroller2, 1, 1, 0)
+        self.mainbox.pack_start(self.scroller2, 1, 1, 4)
+
+        self.mainbox.pack_start(self.simg2, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
         self.scale.set_value(128)
@@ -251,7 +254,7 @@ class MainWin():
         xxx, yyy = self.window.get_position()
         #print("curr", xxx, yyy)
         self.win2.move(xxx - 100, yyy)
-
+        self.unpickle_shapes()
     def set_small_text(self, txt):
         self.lab.set_text(txt)
 
@@ -381,9 +384,16 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        butt9a = Gtk.Button.new_with_mnemonic(" Clear Shapes ")
+        butt9a = Gtk.Button.new_with_mnemonic(" Clear All Shapes ")
         butt9a.connect("clicked", self.clear_shapes, window)
         butt9a.set_tooltip_text("Will clear current shapes")
+        hbox.pack_start(butt9a, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        butt9a = Gtk.Button.new_with_mnemonic(" Delete Shape ")
+        butt9a.connect("clicked", self.del_shape, window)
+        butt9a.set_tooltip_text("Will delete shape, no undo")
         hbox.pack_start(butt9a, False, 0, 0)
 
         self.spacer(hbox, True )
@@ -608,7 +618,7 @@ class MainWin():
         except:
             print(_exception("pickle"))
 
-    def unpickle_shapes(self, win, a3):
+    def unpickle_shapes(self, win = None, a3 = None):
         try:
             fp = open("shapes.txt", "rb")
             self.shapes = pickle.load( fp)
@@ -628,29 +638,43 @@ class MainWin():
             self.shapes.append((sss, self.narr[1],
                     self.narr[2], self.narr[3], self.narr[4]) )
 
+    def del_shape(self, win, a3):
+        #print( "Delete shape")
+        sss = get_str("Enter name for shape to delete:")
+        if sss == "":
+            return
+        cnt = 0
+        #print( "Deleteing shape", sss)
+        for aa in range(len(self.shapes)-1, -1, -1):
+            if self.shapes[aa][0] == sss:
+                print("Deleting", sss)
+                del self.shapes[aa]
+                cnt += 1
+        if not cnt:
+            msg("No such shape", sss)
+
     def show_all_shapes(self, win, a3):
         if not self.shapes:
             print("No shapes saved")
             return
-        self.win2.simg.clear()
         for ss in self.shapes:
-            print( ss[0:4], "len:", len(ss[4]), ss[4][:3], "...")
-            ctx = cairo.Context(self.win2.simg.surface)
+            self.simg2.clear()
+            print( ss[0:4], "len:", len(ss[4]), ss[4][:3])
+            #ctx = cairo.Context(self.simg2.surface)
             for aa in ss[4]:
                 #print(aa[0], aa[1])
-                offs = 4 * (aa[0] + aa[1] * self.area.iww)
+                offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
                 try:
-                    self.win2.simg.data[offs]   = 0xff
-                    self.win2.simg.data[offs+1] = 0xff
-                    self.win2.simg.data[offs+2] = 0xff
-                    self.win2.simg.data[offs+3] = 0xff
+                    self.simg2.buf[offs]   = 0xff
+                    self.simg2.buf[offs+1] = 0xff
+                    self.simg2.buf[offs+2] = 0xff
+                    self.simg2.buf[offs+3] = 0xff
                 except:
-                    print("exc nbounds", sys.exc_info())
+                    #print("exc nbounds", aa[0], aa[1], sys.exc_info())
                     pass
-                self.win2.simg.invalidate()
-                self.win2.queue_draw()
+                self.simg2.invalidate()
                 usleep(5)
-
+            usleep(100)
     # --------------------------------------------------------------------
 
     def exit_all(self, area):
