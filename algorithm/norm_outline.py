@@ -3,7 +3,7 @@
 import math
 import pyimgutils as iut
 
-ARRLEN = 64
+ARRLEN = 256
 
 # Process the array for vector rotation. Return normalized coordinate array.
 
@@ -61,7 +61,7 @@ def norm_array(fparm):
     resarr += order_vectors(carr3, midx, midy)
     resarr += order_vectors(carr4, midx, midy)
     #print( "shape arr len", len(resarr))
-    #return resarr
+    return resarr
 
     # Shape them uniform, number of elements, maximum magnitude
     resarr2 = scale_vectors(resarr, ARRLEN)

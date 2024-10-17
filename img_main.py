@@ -36,7 +36,7 @@ from   algorithm.norm_outline import *
 MAG_FACT    = 2
 MAG_SIZE    = 300
 DIVIDER     = 64                 # How many divisions, testing
-THRESH      = 30                 # Color diff for boundary
+THRESH      = 20                 # Color diff for boundary
 MARKCOL     = 180                # Color counts as mark
 
 class ImgMain(Gtk.DrawingArea):
@@ -53,7 +53,7 @@ class ImgMain(Gtk.DrawingArea):
 
         self.divider = DIVIDER;
         self.wwww = wwww; self.hhhh = hhhh
-        self.set_size_request(wwww, hhhh)
+        #self.set_size_request(wwww, hhhh)
 
         self.annote = []; self.aframe = []; self.bframe = []
         self.atext = []
@@ -63,7 +63,8 @@ class ImgMain(Gtk.DrawingArea):
         self.image  = None
         #self.colormap = Gtk.get_default_colormap()
         #self.set_flags(Gtk.CAN_FOCUS | Gtk.SENSITIVE)
-        #self.area.set_events(Gtk.gdk.ALL_EVENTS_MASK)
+
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
 
         #self.set_events(  Gtk.gdk.POINTER_MOTION_MASK |
         #                    Gtk.gdk.POINTER_MOTION_HINT_MASK |
@@ -213,14 +214,14 @@ class ImgMain(Gtk.DrawingArea):
 
     def  area_button(self, win, event):
 
-        self.window.set_cursor(Gtk.gdk.Cursor(Gtk.gdk.CLOCK))
-
-        #rc = self.get_allocation()
+        rc = self.get_allocation()
         #print( "img button", event.x, event.y, rc.width, rc.height)
-        #stepx = float(rc.width)/self.divider; stepy = float(rc.height)/self.divider;
-        #print( event.x / stepx,      event.y / stepy)
-        self.anal_image(int(event.x / self.stepx), int(event.y / self.stepy))
-        self.window.set_cursor(None)
+
+        curs = Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "wait")
+        self.get_window().set_cursor(curs)
+
+        self.anal_image(int(event.x), int(event.y), True)
+        self.get_window().set_cursor(None)
 
     def toggle_mag(self):
         self.mag = not self.mag
@@ -286,7 +287,7 @@ class ImgMain(Gtk.DrawingArea):
             #arr = self.array_from_pixbuf(self.pb2)
             #print(type(arr))
             self.bpx = self.pb2.get_n_channels()
-            print("loaded:", self.iww, self.ihh, self.bpx)
+            #print("loaded:", self.iww, self.ihh, self.bpx)
 
             # "mul",  self.iww*self.ihh*bpx, len(buf))
             imgrec.verbose = 0
@@ -461,15 +462,23 @@ class ImgMain(Gtk.DrawingArea):
 
         try:
             if kind == 2:
-                self.buf[4*xxx + 4*yyy * self.iww]   = 0x00
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]   = 0x00
             elif kind == 1:
-                self.buf[4*xxx + 4*yyy * self.iww]    = 0x00
-                self.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
+
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
             elif kind == 0:
                 pass
-                self.buf[4*xxx + 4*yyy * self.iww]    = 0x00
-                self.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
-                self.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
+
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
             else:
                 print("unkown kind in callb")
         except:
@@ -477,21 +486,27 @@ class ImgMain(Gtk.DrawingArea):
             pass
 
         if fparm.cnt % fparm.breath == 0:
-            self.invalidate()
-            usleep(.1)
+            self.xparent.win2.simg.invalidate()
+            self.xparent.simg.invalidate()
+            #usleep(.1)
+
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
-    def anal_image(self, xxx, yyy):
+    def anal_image(self, xxx, yyy, single = False):
 
         imgrec.verbose = 0
         self.buf = self.surface.get_data()
         ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
-        print( "Anal image", xxx, yyy, "ww", self.iww, "hh", self.ihh,
-                        "thresh", THRESH, "markcol", MARKCOL)
+        MARKCOL = int(self.xparent.scale.get_value())
+        THRESH  = int(self.xparent.scale2.get_value())
 
-        imgrec.verbose = 0
+        #imgrec.verbose = 1
+        #avg = imgrec.average()
+        #print( "Anal image", xxx, yyy, "ww", self.iww, "hh", self.ihh,
+        #                "thresh", THRESH, "markcol", MARKCOL, "avg", avg)
+        #imgrec.verbose = 0
 
         # Draw grid:
         if self.xparent.check1.get_active():
@@ -530,9 +545,11 @@ class ImgMain(Gtk.DrawingArea):
         #    self.invalidate(); usleep(.1)
         #return
 
-        imgrec.blank()
-        self.invalidate()
-        usleep(1)
+        #imgrec.blank()  #self.invalidate()   #usleep(1)
+
+        self.xparent.simg.clear()
+        self.xparent.win2.simg.clear()
+
         dones = {}
         nbounds = []
         found = 0
@@ -544,8 +561,11 @@ class ImgMain(Gtk.DrawingArea):
             fparm.stepx = self.stepx; fparm.stepy = self.stepy
             fparm.thresh = THRESH
             fparm.markcol = MARKCOL
-            fparm.colx = int(random.random() * 0xffffff)
-            fparm.verbose = 1
+            #fparm.colx = int(random.random() * 0xffffff)
+            #fparm.verbose = 1
+            if self.xparent.check3.get_active():
+                #print("Grey compare")
+                fparm.grey = True
 
             ret, xxx, yyy = flood.seek(xxx, yyy, fparm, dones)
             #print("seek:", ret, xxx, yyy)
@@ -555,6 +575,7 @@ class ImgMain(Gtk.DrawingArea):
                     continue
                 else:
                     break
+            ttt = time.time()
             ret = flood.flood_one(xxx, yyy, fparm, dones)
             if ret == -1:
                 break
@@ -562,6 +583,7 @@ class ImgMain(Gtk.DrawingArea):
             if len(fparm.bounds) < 32:
                 continue
 
+            print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
 
             #self.xparent.simg.clear()
@@ -589,7 +611,7 @@ class ImgMain(Gtk.DrawingArea):
                     #print("disp nbounds", offs, sys.exc_info())
                     pass
                 self.xparent.simg.invalidate()
-                usleep(5)
+                #usleep(5)
 
             if self.xparent.check2.get_active():
                 if len(nbounds) == 0:
@@ -612,6 +634,9 @@ class ImgMain(Gtk.DrawingArea):
             #    except:
             #        pass
             #self.xparent.simg.invalidate()
+
+            if single:
+                break
 
         print("%d segments found." % found)
 

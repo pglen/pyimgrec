@@ -56,9 +56,64 @@ PyObject *_flood(PyObject *self, PyObject *args, PyObject *kwargs)
     //    {
     //    }
 
-    return Py_BuildValue("");
+    return Py_BuildValue("i", 0);
 }
 
+PyObject *_average(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "startx", "starty","endx", "endy", NULL };
+
+    int arg1 = 0;  int arg2 = 0; int arg3 = dim1;  int arg4 = dim2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiii", kwlist,
+                                        &arg1, &arg2, &arg3, &arg4))
+            return NULL;
+
+    if( is_verbose())
+        printf("flood: %d %d %d %d\n", arg1, arg2, arg3, arg4);
+
+    if(!anchor)
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "anchor must be set before any operation");
+        return NULL;
+        }
+    if (arg1 < 0 || arg2 < 0 ||  arg3 < 0 ||  arg4  < 0 )
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
+        return NULL;
+        }
+     if (arg1 > dim1 || arg2 > dim2 || arg3 > dim1 || arg4  > dim2 )
+        {
+        PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
+        return NULL;
+        }
+
+    int *curr = anchor;
+    int avg = 0, cnt = 0, loop, loop2;
+
+    for (loop = arg2; loop < arg4; loop++)
+        {
+        int offs = loop * dim1;
+
+        for (loop2 = arg1; loop2 < arg3; loop2++)
+            {
+            unsigned int ccc = curr[offs + loop2];
+            int rr, gg, bb, xold;
+
+            // Break color apart:
+            APART(ccc, rr, gg, bb)
+            xold = rr + gg + bb; xold /= 3;
+            avg += xold;
+            cnt += 1;
+            }
+        }
+    int ret = 0;
+    if(cnt)
+        ret = avg / cnt;
+    return Py_BuildValue("i", ret);
+}
+
+// # EOF
 
 
 

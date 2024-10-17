@@ -248,29 +248,4 @@ void    show_crosses(void)
     dealloc();
 }
 
-// Calc avg
-
-int calc_avg(void)
-
-{
-    int avg = 0, cnt = 0, *curr = anchor, loop, loop2;
-
-    for (loop = 0; loop < dim1; loop++)
-        {
-        int offs = loop * dim2;
-
-        for (loop2 = 0; loop2 < dim2; loop2++)
-            {
-            unsigned int ccc = curr[offs + loop2];
-            int rr, gg, bb, xold;
-
-            // Break color apart:
-            APART(ccc, rr, gg, bb)
-            xold = rr + gg + bb; xold /= 3;
-            avg += xold; cnt += 1;
-            }
-        }
-    return avg / cnt;
-}
-
 // EOF

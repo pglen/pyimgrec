@@ -42,9 +42,10 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
         }
 
     // All set, flush it out
-    int *curr = anchor, loop, loop2;
+    int *curr = anchor;
+    int loop, loop2;
 
-    int avg = calc_avg();
+    //int avg = calc_avg();
 
     for (loop = 0; loop < dim2; loop++)
         {
@@ -154,7 +155,7 @@ PyObject *_bw(PyObject *self, PyObject *args, PyObject *kwargs)
     // All set, flush it out
     int *curr = anchor, loop, loop2, avg = 0;
 
-    avg = calc_avg();
+    avg = 0x80; //calc_avg();
 
     for (loop = 0; loop < dim1; loop++)
         {

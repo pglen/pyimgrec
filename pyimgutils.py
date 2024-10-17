@@ -43,7 +43,7 @@ class Imagex(Gtk.DrawingArea):
         self.ww = ww; self.hh = hh
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
-        self.data = self.surface.get_data()
+        self.buf = self.surface.get_data()
         self.connect("draw", self.draw)
         self.clear()
         #print("Imagex create", self.ww, self.hh)
@@ -56,7 +56,7 @@ class Imagex(Gtk.DrawingArea):
         #print("Imagex resize", self.ww, self.hh)
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
-        self.data = self.surface.get_data()
+        self.buf = self.surface.get_data()
 
     def clear(self):
         ctx = cairo.Context(self.surface)
@@ -139,17 +139,20 @@ class ofd():
                 return
                 #area.destroy()
 
-        if  event.type == Gdk.EventType.KEY_PRESS:
             if event.keyval == Gdk.KEY_Return:
-                print("Ret", win)
-                win.response(Gtk.ResponseType.ACCEPT)
-                #area.destroy()
-                return
+                #print("Ret", win)
+                fname = win.get_filename()
+                if os.path.isfile(fname):
+                    win.response(Gtk.ResponseType.ACCEPT)
+                    #area.destroy()
+                else:
+                    #print("Dir", fname)
+                    win.set_current_folder(fname)
+                return True
 
-        if  event.type == Gdk.EventType.KEY_PRESS:
             if event.keyval == Gdk.KEY_BackSpace:
                 os.chdir("..")
-                populate(self)
+                #populate(self)
                 #print "BS"
 
             if event.keyval == Gdk.KEY_Alt_L or \

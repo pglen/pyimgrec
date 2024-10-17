@@ -151,7 +151,7 @@ PyMethodDef imgrec_functions[] =
     { "median",    (PyCFunction)_median,  METH_VARARGS|METH_KEYWORDS,  "Calculate median of range." },
     { "medianmulti",(PyCFunction)_medianmulti,  METH_VARARGS|METH_KEYWORDS,
                                                         "Calculate median of range, multiple colors" },
-    { "grayen",    (PyCFunction)_grayen,  METH_VARARGS|METH_KEYWORDS,  "Grayen range." },
+    { "grayen",    (PyCFunction)_grayen,  METH_VARARGS|METH_KEYWORDS,  "Gray-en range." },
     { "whiten",    (PyCFunction)_whiten,  METH_VARARGS|METH_KEYWORDS,  "Whiten range." },
     { "frame",     (PyCFunction)_frame,   METH_VARARGS|METH_KEYWORDS,  "Frame range." },
     { "line",      (PyCFunction)_line,    METH_VARARGS|METH_KEYWORDS,  "Draw a line." },
@@ -162,9 +162,10 @@ PyMethodDef imgrec_functions[] =
     { "normalize", (PyCFunction)_norm,    METH_VARARGS|METH_KEYWORDS,  "Normalize image" },
     { "bridar",    (PyCFunction)_bridar,  METH_VARARGS|METH_KEYWORDS,  "Brighten / Darken" },
     { "bw",        (PyCFunction)_bw,      METH_VARARGS|METH_KEYWORDS,  "Convert to B/W" },
-    { "walk",      (PyCFunction)_walk,    METH_VARARGS|METH_KEYWORDS,  "Walk on equiline" },
+    { "walk",      (PyCFunction)_walk,    METH_VARARGS|METH_KEYWORDS,  "Walk on equi-line" },
     { "edge",      (PyCFunction)_edge,    METH_VARARGS|METH_KEYWORDS,  "Edge out ridge lines" },
     { "smooth",    (PyCFunction)_smooth,  METH_VARARGS|METH_KEYWORDS,  "Smooth image" },
+    { "average",    (PyCFunction)_average,  METH_VARARGS|METH_KEYWORDS,  "Calculate average" },
 
     {  NULL },
     };

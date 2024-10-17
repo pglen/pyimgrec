@@ -123,7 +123,7 @@ class MainWin():
         #else:
         #    self.window.set_default_size(7*www/8, 7*hhh/8)
 
-        #self.window.set_default_size(6*www/8, 6*hhh/8)
+        self.window.set_default_size(6*www/8, 6*hhh/8)
 
         warnings.simplefilter("default")
 
@@ -143,7 +143,7 @@ class MainWin():
         self.scroller = Gtk.ScrolledWindow()
         self.vport.add(self.area)
         self.scroller.add(self.vport)
-        self.mainbox.add(self.scroller)
+        self.mainbox.pack_start(self.scroller, 1, 1, 0)
 
         self.vport2 = Gtk.Viewport()
         self.scroller2 = Gtk.ScrolledWindow()
@@ -154,17 +154,17 @@ class MainWin():
 
         self.simg = Imagex(200, 200)
 
-        win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
-        win2.ww = 200; win2.hh = 200
-        win2.set_title("Image Show")
-        win2.set_size_request(win2.ww,  win2.hh)
-        win2.simg = Imagex(win2.ww, win2.hh)
-        win2.add(win2.simg)
+        self.win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        self.win2.set_title("Image Show")
+        self.win2.simg = Imagex(200, 200)
+        self.win2.ww = self.win2.simg.ww;
+        self.win2.hh = self.win2.simg.hh
+        #self.win2.set_size_request(self.win2.ww,  self.win2.hh)
+        self.win2.add(self.win2.simg)
 
-        win2.move(100, 100)
+        self.win2.move(100, 100)
         #win2.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        self.win2 = win2
-        win2.show_all()
+        self.win2.show_all()
 
         try:
             # Load default image(s)
@@ -188,16 +188,27 @@ class MainWin():
 
         self.vport2.add(self.simg)
         self.scroller2.add(self.vport2)
-        self.mainbox.add(self.scroller2)
+        self.mainbox.pack_start(self.scroller2, 1, 1, 0)
 
-        if iww > self.wwww or ihh > self.hhhh:
-            self.scroller.set_size_request(self.wwww, self.hhhh)
-        else:
-            self.scroller.set_size_request(iww + 30, ihh + 30)
+        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
+        self.scale.set_value(128)
+        self.scale.set_inverted(True)
+        self.scale.set_tooltip_text("Mark value")
+        self.mainbox.pack_start(self.scale, 0, 0, 0)
+        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
+        self.mainbox.pack_start(self.scale2, 0, 0, 0)
+        self.scale2.set_value(32)
+        self.scale2.set_inverted(True)
+        self.scale2.set_tooltip_text("Threshold diff")
+
+        #if iww > self.wwww or ihh > self.hhhh:
+        #    self.scroller.set_size_request(self.wwww, self.hhhh)
+        #else:
+        #    self.scroller.set_size_request(iww + 30, ihh + 30)
 
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
-        vbox2.pack_start(self.tree.stree, True, 0, 0)
+        vbox2.pack_start(self.tree.stree, 0, 0, 0)
 
         #self.area3 = DrawingArea()
         #vbox2.pack_start(self.area3)
@@ -239,7 +250,7 @@ class MainWin():
         # Move to current app corner
         xxx, yyy = self.window.get_position()
         #print("curr", xxx, yyy)
-        self.win2.move(xxx - 100, yyy - 100)
+        self.win2.move(xxx - 100, yyy)
 
     def set_small_text(self, txt):
         self.lab.set_text(txt)
@@ -291,7 +302,7 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        self.check3 = Gtk.CheckButton.new_with_mnemonic(" _Click heaven ")
+        self.check3 = Gtk.CheckButton.new_with_mnemonic(" Grayscale compare ")
         self.check3.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.check3, False, 0, 0)
 
@@ -329,14 +340,15 @@ class MainWin():
 
         self.fname = fname
         self.area.load(fname)
+
         self.simg.resize(self.area.iww, self.area.ihh)
         self.simg.clear()
-
         self.win2.simg.resize(self.area.iww, self.area.ihh)
         self.win2.simg.clear()
 
-        self.scroller.set_size_request(self.area.iww, self.area.ihh)
-        self.scroller2.set_size_request(self.area.iww, self.area.ihh)
+        if self.area.iww < 500:
+            self.scroller.set_size_request(self.area.iww, self.area.ihh)
+            self.scroller2.set_size_request(self.area.iww, self.area.ihh)
 
     # --------------------------------------------------------------------
     def buttons3(self, hbox, window):

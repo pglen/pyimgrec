@@ -45,7 +45,7 @@ class floodParm():
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
-
+        self.grey = 0
         self.bounds = {};       self.body  = {};
 
         self.stack = stack.Stack()
@@ -97,8 +97,6 @@ def flood_one(xxx, yyy, param, dones):
         reenter -= 1
         return -1
 
-    print("flood_one: (xxx/yyy)", xxx, yyy, "mark:", param.mark)
-
     param.stack.push((xxx, yyy, 0))
     #mark_done(xxx, yyy, 1, param)
 
@@ -140,10 +138,12 @@ def flood_one(xxx, yyy, param, dones):
                 break  # jump to next
             elif  ret == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
-                iut.mark_cell(xxx2, yyy2, 1, param.bounds)
+                xxxx = max(0, min(xxx2, param.iww-1))
+                yyyy = max(0, min(yyy2, param.ihh-1))
+                iut.mark_cell(xxxx, yyyy, 1, param.bounds)
                 # To observe boundary action, if requested
                 if param.callb:
-                    param.callb(xxx, yyy, 0, param);
+                    param.callb(xxxx, yyyy, 0, param);
             elif ret == DOT_BOUND:
                 #print("bound", xxx2, yyy2, end = " ")
                 # Correct to within boundary
@@ -165,11 +165,14 @@ def flood_one(xxx, yyy, param, dones):
 
     # All operations done, pre-process
 
+    xlen = len(param.bounds)
+    if xlen > 16:
+        print("flood_one: xxx", xxx, "yyy", yyy, "mark:", param.mark, "xlen", xlen)
+        #print("loop count", param.cnt, "bounds len", len(param.bounds) )
+
     bound  = _calc_bounds(param.bounds)
     param.minx = bound[0]; param.miny = bound[1]
     param.maxx = bound[2]; param.maxy = bound[3]
-
-    print("loop count", param.cnt, "bounds len", len(param.bounds) )
 
     reenter -=1
     #print("dones", len(param.dones), dones)
@@ -179,12 +182,13 @@ def flood_one(xxx, yyy, param, dones):
 
 def seek(xxx, yyy, param, dones):
 
+    ''' find next floodable region '''
+
     for yy in range(yyy, param.ihh):
         for xx in range(xxx, param.iww):
             if _is_pixel_done(xx, yy, dones):
                 continue
             val = param.darr[yy][xx]
-            #print(val, end = " ")
             cc = (val[1] + val[2] + val[3]) // 3
             #print(cc, end = " ")
             if cc < param.markcol:
@@ -193,12 +197,27 @@ def seek(xxx, yyy, param, dones):
 
 def _coldiff(colm, colx):
 
-    ''' Substruct col avarage from ref avarage '''
+    ''' Substruct col avarage from ref avarage color version '''
 
-    cc = (colm[1] + colm[2] + colm[3]) // 3
-    dd = (colx[1] + colx[2] + colx[3]) // 3
-    ret = abs(cc - dd)
+    cc = abs(colm[0] - colx[0])
+    dd = abs(colm[1] - colx[1])
+    ee = abs(colm[2] - colx[2])
+
+    #ret = (cc + dd + ee) // 3
+    retx = max(cc, dd)
+    ret = max(retx, ee)
+
     #print("coldiff", colm, colx, ret)
+    return ret
+
+def _coldiffbw(colm, colx):
+
+    ''' Substruct col avarage from ref avarage; grayscale version '''
+
+    cc = (colm[0] + colm[1] + colm[2]) // 3
+    dd = (colx[0] + colx[1] + colx[2]) // 3
+    ret = abs(cc - dd)
+    #print("coldiffbw", colm, colx, ret)
     return ret
 
 def _calc_bounds(bounds):
@@ -234,7 +253,10 @@ def _scan_one(xxx2, yyy2, param, dones):
             break
         else:
             try:
-                diff = _coldiff(param.mark, param.darr[yyy2][xxx2])
+                if param.grey:
+                    diff = _coldiffbw(param.mark, param.darr[yyy2][xxx2])
+                else:
+                    diff = _coldiff(param.mark, param.darr[yyy2][xxx2])
                 #print( "diff: 0x%x" % diff, xxx2, yyy2)
             except KeyError:
                 #print( "out of range: ", xxx2, yyy2)
