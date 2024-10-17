@@ -93,5 +93,25 @@ class   TreeHand():
 
     def append_treestore(self, text):
         piter = self.treestore.append(None, [text])
+        self.sel_last()
+
+    def sel_last(self):
+        #print("sel last ...")
+        sel = self.tree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        iterx = self.treestore.get_iter_first()
+        if not iterx:
+            return
+        while True:
+            iter2 = self.treestore.iter_next(iterx)
+            if not iter2:
+                break
+            iterx = iter2.copy()
+        sel.select_iter(iterx)
+        ppp = self.treestore.get_path(iterx)
+        self.tree.set_cursor(ppp, self.tree.get_column(0), False)
+        #pgutils.usleep(1)
+        self.tree.scroll_to_cell(ppp, None, True, 0., 0. )
+
 
 # EOF

@@ -36,7 +36,7 @@ except:
 # This is open source image recognition program. Written in python with
 # plugins in 'C'
 
-version = 0.12
+version = 0.80
 verbose = False
 xstr = ""
 
@@ -44,7 +44,6 @@ xstr = ""
 #got_clock = time.clock()
 # profiled code here
 #print(  "Str", time.clock() - got_clock        )
-
 
 # Where things are stored (backups, orgs, macros)
 config_dir = os.path.expanduser("~/.pyimgrec")
@@ -68,7 +67,7 @@ def help():
 
 class MainWin():
 
-    def __init__(self):
+    def __init__(self, args):
 
         self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_title("Python Image Recognition")
@@ -168,17 +167,20 @@ class MainWin():
         self.win2.show_all()
 
         try:
-            # Load default image(s)
-            #self.load("images/african.jpg")
-            #self.load("images/IMG_0823.jpg")
-            #self.load("images/shapes.png")
-            self.load("images/shapex.png")
-            #self.load("images/Untitled.png")
-            #self.load("images/line.png")
-            #self.load("images/star.png")
-            #self.load("images/rect.png")
-            #self.load("images/IMG_0827.jpg")
-            #self.load("images/enrolled.pgm")
+            if args:
+                self.load(args[0])
+            else:
+                # Load default image(s)
+                #self.load("images/african.jpg")
+                #self.load("images/IMG_0823.jpg")
+                #self.load("images/shapes.png")
+                self.load("images/shapex.png")
+                #self.load("images/Untitled.png")
+                #self.load("images/line.png")
+                #self.load("images/star.png")
+                #self.load("images/rect.png")
+                #self.load("images/IMG_0827.jpg")
+                #self.load("images/enrolled.pgm")
         except:
             print_exception("Load Image")
             #msg("Cannot load file " + self.fname)
@@ -747,7 +749,7 @@ if __name__ == '__main__':
         print( "PyImgRec running on", "'" + os.name + "'",
             "GTK", Gtk.gtk_version, "PyGtk", pygtk_version )
 
-    mainwin = MainWin()
+    mainwin = MainWin(args)
     mainwin.window.show_all()
 
     if autohide:
