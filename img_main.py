@@ -714,7 +714,7 @@ class ImgMain(Gtk.DrawingArea):
                             (cmp[0][1], coord[0][0], coord[0][1],
                                     coord[0][2], cmp[0][0], )
             self.xparent.tree.append_treestore(strx)
-
+            print("compare:", strx)
         #self.aframe += self.bframe
         ## Reference position
         #self.aframe.append((xxx, yyy, 0xff8888ff))

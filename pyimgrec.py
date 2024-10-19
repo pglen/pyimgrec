@@ -168,6 +168,7 @@ class MainWin():
 
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
+        self.tree.stree.set_size_request(-1, 200)
         vbox2.pack_start(self.tree.stree, 0, 0, 0)
 
         try:

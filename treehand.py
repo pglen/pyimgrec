@@ -41,8 +41,8 @@ class   TreeHand():
             #print  sys.exc_info()
             pass
 
-        piter = self.treestore.append(None, ["Ready."])
-        self.treestore.append(piter, ["None .."])
+        #piter = self.treestore.append(None, ["Ready."])
+        #self.treestore.append(piter, ["None .."])
 
     # -------------------------------------------------------------------------
     def create_tree(self,  match, text = None):

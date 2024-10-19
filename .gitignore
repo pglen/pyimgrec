@@ -17,6 +17,10 @@ pyedpro.build/
 *.AppImage
 pyedpro.bin
 
+# Download related
+*.zip
+*.part
+
 # C extensions
 *.so
 
