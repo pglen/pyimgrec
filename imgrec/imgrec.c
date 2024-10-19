@@ -143,7 +143,6 @@ char blankdoc[] = "Blank part of an image. Args: startx, starty, endx, endy.";
 
 PyMethodDef imgrec_functions[] =
     {
-
     { "version",   (PyCFunction)_version, METH_VARARGS|METH_KEYWORDS, "Image recognition version."},
     { "builddate", (PyCFunction)_bdate,   METH_VARARGS|METH_KEYWORDS, "Image recognition build date."},
     { "anchor",    (PyCFunction)_anchor,  METH_VARARGS|METH_KEYWORDS, "Set anchor to image."},
