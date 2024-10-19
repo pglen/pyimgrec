@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:export-filename="/home/peterglen/pgpygtk/pyimgrec/images/letter_abc2.png"
+   inkscape:export-xdpi="95.779999"
+   inkscape:export-ydpi="95.779999"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="letter_abc2.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.0618967"
+     inkscape:cx="71.57005"
+     inkscape:cy="193.05079"
+     inkscape:window-width="1596"
+     inkscape:window-height="833"
+     inkscape:window-x="2"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showguides="false">
+    <sodipodi:guide
+       position="-68.270133,214.77685"
+       orientation="1,0"
+       id="guide28299" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke-width:1.14504"
+       id="rect27712"
+       width="95.473885"
+       height="94.122772"
+       x="0.4939405"
+       y="1.7068837"
+       ry="0"
+       inkscape:export-filename="/home/peterglen/pgpygtk/pyimgrec/images/letter_abc2.png"
+       inkscape:export-xdpi="95.779999"
+       inkscape:export-ydpi="95.779999" />
+    <text
+       xml:space="preserve"
+       style="font-size:19.7556px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="24.802446"
+       y="53.498482"
+       id="text2564"><tspan
+         sodipodi:role="line"
+         id="tspan2562"
+         style="font-size:19.7556px;stroke-width:0.264583"
+         x="24.802446"
+         y="53.498482">a b</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.4px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="50.791191"
+       y="81.392303"
+       id="text13744"
+       inkscape:export-filename="/home/peterglen/pgpygtk/pyimgrec/images/abc.png"
+       inkscape:export-xdpi="95.782341"
+       inkscape:export-ydpi="95.782341"><tspan
+         sodipodi:role="line"
+         id="tspan13742"
+         style="font-size:25.4px;stroke-width:0.264583"
+         x="50.791191"
+         y="81.392303">c</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="14.792213"
+       y="18.115526"
+       id="text2786"><tspan
+         sodipodi:role="line"
+         id="tspan2784"
+         style="stroke-width:0.264583"
+         x="14.792213"
+         y="18.115526">a</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:59.6152px;line-height:1.25;font-family:sans-serif;stroke-width:1.11778"
+       x="44.08102"
+       y="45.072819"
+       id="text11634"
+       transform="scale(1.1135488,0.89802979)"><tspan
+         sodipodi:role="line"
+         id="tspan11632"
+         style="stroke-width:1.11778"
+         x="44.08102"
+         y="45.072819">c</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16.8508px;line-height:1.25;font-family:sans-serif;stroke-width:0.315953"
+       x="10.138753"
+       y="84.79718"
+       id="text15186"
+       transform="scale(1.1171026,0.89517296)"><tspan
+         sodipodi:role="line"
+         id="tspan15184"
+         style="stroke-width:0.315953"
+         x="10.138753"
+         y="84.79718">b</tspan></text>
+  </g>
+</svg>

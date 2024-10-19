@@ -43,5 +43,6 @@ PyObject *_bridar(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_edge(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs);
+PyObject *_smoothv(PyObject *self, PyObject *args, PyObject *kwargs);
 
 //# EOF

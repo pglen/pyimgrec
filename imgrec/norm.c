@@ -227,40 +227,41 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
         }
 
-    int *curr = anchor, loop, loop2, loop3, xold;
-    unsigned int ccc, prev, pprev, offs;
+    int *curr = anchor, loop, loop2, loop3, offs;
 
     //printf("sizeof(int) %d\n", sizeof(int) );
 
-    for(loop3 = 0; loop3 < arg1; loop3++)           // Smooth Level
+    for(loop3 = 0; loop3 < arg1; loop3++)           // Smooth Level, repeat
         {
         for (loop = 0; loop < dim2; loop++)        // yy
             {
             offs = loop * dim1;
-            pprev = curr[offs];
-            prev = curr[offs + 1];
 
             int rr, gg, bb, rrr, ggg, bbb, rrrr, gggg, bbbb, rr2, gg2, bb2;
-
-            memset(bline, '\0', dim1 * sizeof(int));
-            for (loop2 = 2; loop2 < dim1; loop2++) // xx
+            unsigned int currx, nextx, prevx, xold;
+            memset(bline, 0xff, dim1 * sizeof(int));
+            for (loop2 = 0; loop2 < dim1; loop2++) // xx
                 {
-                ccc = curr[offs + loop2];
-
-                APART(ccc,  rr,   gg,   bb);
-                APART(prev, rrr,  ggg,  bbb);
-                APART(pprev, rrrr, gggg, bbbb);
+                if(loop2 == 0)
+                    prevx = curr[offs + loop2];
+                else
+                    prevx = curr[offs + loop2 - 1];
+                currx = curr[offs + loop2];
+                if (loop2 == dim1 - 1)
+                    nextx = curr[offs + loop2];
+                else
+                    nextx = curr[offs + loop2 + 1];
+                APART(currx,  rr,   gg,   bb);
+                APART(nextx, rrr,  ggg,  bbb);
+                APART(prevx, rrrr, gggg, bbbb);
 
                 rr2 = (rr + rrr + rrrr) / 3;
                 gg2 = (gg + ggg + gggg) / 3;
                 bb2 = (bb + bbb + bbbb) / 3;
-
                 ASSEM(xold, rr2, gg2, bb2);
 
                 // Write back
-                bline[loop2-1] = xold;
-
-                pprev = prev; prev = ccc;
+                bline[loop2] = xold;
                 }
 
             // Put line back
@@ -272,6 +273,90 @@ PyObject *_smooth(PyObject *self, PyObject *args, PyObject *kwargs)
     return Py_BuildValue("");
 }
 
+// Same for vertical
+
+PyObject *_smoothv(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "cycles", NULL };
+
+    int arg1 = 1;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i", kwlist, &arg1))
+            return NULL;
+
+    if( is_verbose() >  1)
+        printf("Smooth factor: %d\n", arg1);
+
+    if(!anchor)
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "anchor must be set before any operation");
+        return NULL;
+        }
+    if (arg1 < 0)
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
+        return NULL;
+        }
+    if(reent)
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "Cannot reenter");
+        return NULL;
+        }
+    reent = 1;
+
+    int *bline = malloc(dim2 * sizeof(int));
+    if (!bline)
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "Cannot alloc memory for temp line");
+        return NULL;
+        }
+
+    int *curr = anchor, loop, loop2, loop3, xold;
+    unsigned int now, prev, nextv, offs, offsp, offsn;
+
+    //printf("sizeof(int) %d\n", sizeof(int) );
+
+    for(loop3 = 0; loop3 < arg1; loop3++)           // Smooth Level, repeat
+        {
+        for (loop = 0; loop < dim1; loop++)        // xx
+            {
+            memset(bline, 0xff, dim2 * sizeof(int));
+            for (loop2 = 1; loop2 < dim2 - 1; loop2++) // yy
+                {
+                int rr, gg, bb, rrr, ggg, bbb, rrrr, gggg, bbbb, rr2, gg2, bb2;
+
+                offsp = (loop2-1) * dim1 + loop;
+                offs =  loop2     * dim1 + loop;
+                offsn = (loop2+1) * dim1 + loop;
+
+                prev  = curr[offsp];
+                now   = curr[offs];
+                nextv  = curr[offsn];
+
+                APART(now,  rr,   gg,   bb);
+                APART(prev, rrr,  ggg,  bbb);
+                APART(nextv, rrrr, gggg, bbbb);
+
+                rr2 = (rr + rrr + rrrr) / 3;
+                gg2 = (gg + ggg + gggg) / 3;
+                bb2 = (bb + bbb + bbbb) / 3;
+
+                ASSEM(xold, rr2, gg2, bb2);
+
+                // Write to local
+                bline[loop2] = xold;
+                }
+            // Put line back
+            for(int aa = 0; aa < dim2; aa++)
+                {
+                curr[aa * dim1 + loop] = bline[aa];
+                }
+            }
+        }
+    free(bline);
+    reent = 0;
+    return Py_BuildValue("");
+}
 
 // This is to prevent the macros from polluting the compilation screen
 

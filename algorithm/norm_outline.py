@@ -120,7 +120,30 @@ def scale_magnitude(carr, size):
         resarr.append( (int(xx), int(yy)) )
     return resarr
 
-def cmp_arrays(arr1, arr2):
+def cmp_arrays(arr1, arr2, span = 3):
+
+    ''' Compare two arrays, look sideways for closer match '''
+
+    xlen = min(len(arr1), len(arr2))
+    if xlen < span + 2:
+        print("Array not long enough")
+        return
+
+    ret = 0;
+    for aa in range(span, xlen - (span+1)):
+        ref = arr1[aa][0]; ref2 = arr1[aa][1]
+        inter = 0xffff
+        for bb in range(-span, span+1):
+            xx1 = abs(ref - arr2[aa+bb][0])
+            yy1 = abs(ref2 - arr2[aa+bb][1])
+            #dd = math.sqrt(xx1 * xx1 + yy1 * yy1)
+            dd = abs(xx1 + yy1)
+            #print("eval %d %.2f " % (bb, dd), xx1, yy1)
+            inter = min(dd, inter)
+        ret += inter
+    return int(ret)
+
+def cmp_arrays2(arr1, arr2):
     ret = 0; xlen = min(len(arr1), len(arr2))
     for aa in range(1, xlen - 1):
 

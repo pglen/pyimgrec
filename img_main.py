@@ -79,6 +79,12 @@ class ImgMain(Gtk.DrawingArea):
         #self.connect("expose-event", self.expose)
         self.connect("draw", self.draw)
         self.connect("motion-notify-event", self.area_motion)
+        self.connect("leave_notify_event", self.area_leave)
+
+    def area_leave(self, win, area):
+        self.xparent.labx.set_text("")
+        self.xparent.laby.set_text("")
+        self.xparent.labz.set_text("")
 
     def add_to_dict(self, xdic, xxx, yyy, val):
         try:
@@ -93,8 +99,21 @@ class ImgMain(Gtk.DrawingArea):
         #print(  event.x, event.y)
         self.event_x = event.x
         self.event_y = event.y
-        if self.mag:
-            self.invalidate()
+
+        self.xparent.labx.set_text("x = %.2f" % (event.x))
+        self.xparent.laby.set_text("y = %.2f" % (event.y))
+
+        buf = self.surface.get_data()
+        xxx = int(event.x); yyy = int(event.y)
+
+        try:
+            col =  buf[4 * (xxx + yyy * self.iww) + 1]
+            self.xparent.labz.set_text("col = %d" % col)
+        except:
+            pass
+
+        #if self.mag:
+        #    self.invalidate()
 
     # Paint the image
     def draw(self, me, gc):
@@ -220,7 +239,11 @@ class ImgMain(Gtk.DrawingArea):
         curs = Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "wait")
         self.get_window().set_cursor(curs)
 
-        self.anal_image(int(event.x), int(event.y), True)
+        addx = event.state & Gdk.ModifierType.SHIFT_MASK
+        #print("mou", event.state)
+
+        self.anal_image(int(event.x), int(event.y), True, addx)
+
         self.get_window().set_cursor(None)
 
     def toggle_mag(self):
@@ -303,6 +326,8 @@ class ImgMain(Gtk.DrawingArea):
             #msg("  Cannot load image:\n '%s' " % fname)
             raise
 
+        self.xparent.tree.append_treestore("Loaded: '%s'" % fname)
+
     def refresh(self):
         #pix = self.image.get_pixbuf()
         #iww = pix.get_width(); ihh = pix.get_height()
@@ -356,9 +381,11 @@ class ImgMain(Gtk.DrawingArea):
         buf = self.surface.get_data()
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
+        #print("Smooth")
         old = imgrec.verbose
         imgrec.verbose = 0
-        imgrec.smooth(10)
+        imgrec.smooth(3)
+        imgrec.smoothv(3)
         imgrec.verbose = old
 
         self.invalidate()
@@ -461,17 +488,19 @@ class ImgMain(Gtk.DrawingArea):
         #print( "callb", xxx, yyy, fparam)
         #return
         try:
-            if kind == 2:
+            if kind == 3:
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww+0]   = 0xff
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww+1]   = 0xff
+                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww+2]   = 0x00
+            elif kind == 2:
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]   = 0x00
             elif kind == 1:
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
 
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
+                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww] = 0x00
                 self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
             elif kind == 0:
-                pass
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
                 self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
@@ -490,6 +519,7 @@ class ImgMain(Gtk.DrawingArea):
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
                 self.xparent.simg.invalidate()
+                #usleep(5)
 
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
@@ -499,7 +529,7 @@ class ImgMain(Gtk.DrawingArea):
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
-    def anal_image(self, xxx, yyy, single = False):
+    def anal_image(self, xxx, yyy, single = False, addx = False):
 
         imgrec.verbose = 0
         self.buf = self.surface.get_data()
@@ -510,8 +540,8 @@ class ImgMain(Gtk.DrawingArea):
 
         #imgrec.verbose = 1
         #avg = imgrec.average()
-        #print( "Anal image", xxx, yyy, "ww", self.iww, "hh", self.ihh,
-        #                "thresh", THRESH, "markcol", MARKCOL, "avg", avg)
+        print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
+                        "thresh", THRESH, "markcol", MARKCOL)
         #imgrec.verbose = 0
 
         # Draw grid:
@@ -561,6 +591,9 @@ class ImgMain(Gtk.DrawingArea):
         found = 0
         # Iterate all shapes
         while True:
+            if yyy >= self.iww:
+                    break
+
             # Set up flood fill parameters
             fparam = flood.floodParm(darr, self.callb);
             fparam.iww = self.iww;  fparam.ihh = self.ihh
@@ -574,30 +607,32 @@ class ImgMain(Gtk.DrawingArea):
                 fparam.grey = True
 
             if not single:
+                #print("seek start:", xxx, yyy, end = " ")
                 ret, xxx, yyy = flood.seek(xxx, yyy, fparam, dones)
-                #print("seek:", ret, xxx, yyy)
+                #print("seek ret:", ret, xxx, yyy)
                 if not ret:
-                    if xxx > 0:
+                    if xxx >= 0:
                         xxx = 0; yyy += 1
                         continue
                     else:
                         break
+
             ttt = time.time()
             ret = flood.flood_one(xxx, yyy, fparam, dones)
             if ret == -1:
                 break
 
-            if len(fparam.bounds) < 32:
-                print("Short buffer", xxx, yyy, "len",
-                            len(fparam.bounds), fparam.bounds[:4])
+            #if not single:
+
+            if len(fparam.bounds) < 64:
+                #print("Short buffer", xxx, yyy, "len",
+                #            len(fparam.bounds), fparam.bounds[:4])
                 xxx+= 1
                 yyy+= 1
                 continue
 
-            print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
+            #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
-
-            #self.xparent.simg.clear()
 
             # Process data from flood
             #nbounds = norm.norm_array(fparam)
@@ -605,16 +640,18 @@ class ImgMain(Gtk.DrawingArea):
             nbs = norm.scale_vectors(uls, norm.ARRLEN)
             nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
             nbounds.sort()
-            print("nbounds len", len(nbounds))
+            #print("nbounds len", len(nbounds))
             # Save last
             if nbounds:
                 self.xparent.narr = ("", fparam.minx, fparam.miny, fparam.mark, nbounds)
 
             # Compare with stock
-            self.compare(nbounds)
+            self.compare(nbounds, fparam)
+
+            if not addx:
+                self.xparent.simg2.clear()
 
             # Display results
-            self.xparent.simg2.clear()
             for aa in nbounds:
                 #print(aa[0], aa[1])
                 offs = 4 * (aa[0] + aa[1] * self.xparent.simg2.ww)
@@ -658,21 +695,25 @@ class ImgMain(Gtk.DrawingArea):
 
         print("%d segments found." % found)
 
-    def compare(self, xarr):
+    def compare(self, xarr, fbounds):
 
         # Compare shape with saved ones
-        cmp = []
+        cmp = []; coord = []
         for cc in self.xparent.shapes:
             res = norm.cmp_arrays(cc[4], xarr)
             #print("comp", res, cc[0])
-            cmp.append((res, cc[0]))
-
+            cmp.append( (res, cc[0]) )
+            coord.append( (fbounds.minx, fbounds.miny, fbounds.mark) )
         if(len(cmp)):
             cmp.sort()
-            for aa in cmp:
-                print( "cmp %.2f %s" % (aa[0], aa[1]) )
+            #for aa in cmp:
+            #    print( "cmp %.2f %s" % (aa[0], aa[1]) )
             #self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
-            self.xparent.tree.append_treestore(cmp[0][1])
+
+            strx = "%-12s x=%2d y=%2d col=%s cmp=%.f " % \
+                            (cmp[0][1], coord[0][0], coord[0][1],
+                                    coord[0][2], cmp[0][0], )
+            self.xparent.tree.append_treestore(strx)
 
         #self.aframe += self.bframe
         ## Reference position

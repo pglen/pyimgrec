@@ -166,6 +166,10 @@ class MainWin():
         #win2.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.win2.show_all()
 
+        vbox2 = Gtk.VBox()
+        self.tree = treehand.TreeHand(self.tree_sel_row)
+        vbox2.pack_start(self.tree.stree, 0, 0, 0)
+
         try:
             if args:
                 self.load(args[0])
@@ -193,7 +197,17 @@ class MainWin():
         self.scroller2.add(self.vport2)
         self.mainbox.pack_start(self.scroller2, 1, 1, 4)
 
-        self.mainbox.pack_start(self.simg2, 0, 0, 4)
+        self.labx = Gtk.Label(label="")
+        self.laby = Gtk.Label(label="")
+        self.labz = Gtk.Label(label="")
+        vimgbox = Gtk.VBox()
+        vimgbox.pack_start(self.labx, 0, 0, 0)
+        vimgbox.pack_start(self.laby, 0, 0, 0)
+        vimgbox.pack_start(self.labz, 0, 0, 0)
+        vimgbox.pack_start(self.simg2, 0, 0, 0)
+        self.lab = Gtk.Label(label=" None ")
+        vimgbox.pack_start(self.lab, 0, 0, 0)
+        self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
         self.scale.set_value(128)
@@ -210,10 +224,6 @@ class MainWin():
         #    self.scroller.set_size_request(self.wwww, self.hhhh)
         #else:
         #    self.scroller.set_size_request(iww + 30, ihh + 30)
-
-        vbox2 = Gtk.VBox()
-        self.tree = treehand.TreeHand(self.tree_sel_row)
-        vbox2.pack_start(self.tree.stree, 0, 0, 0)
 
         #self.area3 = DrawingArea()
         #vbox2.pack_start(self.area3)
@@ -245,8 +255,6 @@ class MainWin():
         #frame = Gtk.Frame(); frame.add(self.img)
         #vbox2.pack_start(frame, 1, 1, 0)
         #
-        #self.lab = Gtk.Label("idle")
-        #self.vbox.pack_start(self.lab, False, 0, 0)
 
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
@@ -592,6 +600,7 @@ class MainWin():
         self.area.refresh()
         self.area.invalidate()
         self.simg.clear()
+        self.tree.update_treestore("")
 
     def invalidate(self):
         self.area.invalidate()
@@ -612,7 +621,7 @@ class MainWin():
         self.area.clear_annote()
         #self.set_small_text("annote cleared")
 
-    def pickle_shapes(self, win, a3):
+    def pickle_shapes(self, win = None, a3 = None):
         try:
             fp = open("shapes.txt", "wb")
             pickle.dump(self.shapes, fp)
@@ -662,6 +671,7 @@ class MainWin():
         for ss in self.shapes:
             self.simg2.clear()
             print( ss[0:4], "len:", len(ss[4]), ss[4][:3])
+            self.lab.set_text(ss[0])
             #ctx = cairo.Context(self.simg2.surface)
             for aa in ss[4]:
                 #print(aa[0], aa[1])
@@ -677,12 +687,16 @@ class MainWin():
                 self.simg2.invalidate()
                 usleep(5)
             usleep(100)
+            self.lab.set_text("")
+
     # --------------------------------------------------------------------
 
     def exit_all(self, area):
         Gtk.main_quit()
 
     def OnExit(self, aa):
+        #print("Saving shapes")
+        self.pickle_shapes()
         Gtk.main_quit()
 
     def tree_sel_row(self, xtree):

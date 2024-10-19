@@ -92,7 +92,7 @@ def flood_one(xxx, yyy, param, dones):
     try:
         param.mark = param.darr[yyy][xxx]
     except KeyError:
-        print( "Start pos past allocated array %d / %d (%d)" % (xxx, yyy))
+        print( "Start pos past end %d / %d" % (xxx, yyy))
         reenter -= 1
         return -1
 
@@ -120,6 +120,7 @@ def flood_one(xxx, yyy, param, dones):
         while 1:
             if nnn+startop >= len(scan_ops):
                 break
+
             #print("nnn", nnn)
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
@@ -155,6 +156,8 @@ def flood_one(xxx, yyy, param, dones):
                 if param.callb:
                     param.callb(xxxx, yyyy, 1, param);
             elif  ret == DOT_MARKED:
+                #if param.callb:
+                #    param.callb(xxxx, yyyy, 3, param);
                 pass
             else:
                 print("invalid ret from scan_one", ret)
@@ -163,7 +166,7 @@ def flood_one(xxx, yyy, param, dones):
         if  nnn+startop == len(scan_ops):
             #print("eval", nnn+startop, "stack", param.stack.stacklen())
             #iut.mark_cell((xxx, yyy, nnn+startop), dones)
-            xxx, yyy, startop = param.stack.pop()
+            xxx, yyy, startop2 = param.stack.pop()
 
     # All operations done, pre-process
 
@@ -184,18 +187,27 @@ def flood_one(xxx, yyy, param, dones):
 
 def seek(xxx, yyy, param, dones):
 
-    ''' find next floodable region '''
+    ''' find next floodable region / non background pixel.
+    History:
+            Sat 19.Oct.2024  start xxx from zero
+    '''
+
+    xx = xxx; yy = yyy
 
     for yy in range(yyy, param.ihh):
-        for xx in range(xxx, param.iww):
+        for xx in range(0, param.iww):
             if _is_pixel_done(xx, yy, dones):
                 continue
             val = param.darr[yy][xx]
-            cc = (val[1] + val[2] + val[3]) // 3
+
+            #if val[1] < 200:
+            #    print("val", xx, yy, val, end = " ")
+
+            cc = (val[0] + val[1] + val[2]) // 3
             #print(cc, end = " ")
             if cc < param.markcol:
                 return (1, xx, yy)
-    return  (0, xxx, yyy)
+    return  (0, xx, yy)
 
 def _coldiff(colm, colx):
 

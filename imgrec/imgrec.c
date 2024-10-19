@@ -165,7 +165,8 @@ PyMethodDef imgrec_functions[] =
     { "walk",      (PyCFunction)_walk,    METH_VARARGS|METH_KEYWORDS,  "Walk on equi-line" },
     { "edge",      (PyCFunction)_edge,    METH_VARARGS|METH_KEYWORDS,  "Edge out ridge lines" },
     { "smooth",    (PyCFunction)_smooth,  METH_VARARGS|METH_KEYWORDS,  "Smooth image" },
-    { "average",    (PyCFunction)_average,  METH_VARARGS|METH_KEYWORDS,  "Calculate average" },
+    { "smoothv",   (PyCFunction)_smoothv, METH_VARARGS|METH_KEYWORDS,  "Smooth image vertical" },
+    { "average",   (PyCFunction)_average,  METH_VARARGS|METH_KEYWORDS, "Calculate average" },
 
     {  NULL },
     };

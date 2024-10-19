@@ -17,7 +17,8 @@ class   TreeHand():
         self.treestore = None
         self.tree = self.create_tree(self)
         self.tree.set_headers_visible(False)
-        self.tree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
+        #self.tree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
+        self.tree.get_selection().set_mode(Gtk.SelectionMode.SINGLE)
 
         self.tree.set_size_request(200, 200)
 
@@ -98,6 +99,8 @@ class   TreeHand():
     def sel_last(self):
         #print("sel last ...")
         sel = self.tree.get_selection()
+        if not sel:
+            return
         xmodel, xiter = sel.get_selected()
         iterx = self.treestore.get_iter_first()
         if not iterx:
