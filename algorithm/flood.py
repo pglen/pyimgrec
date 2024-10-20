@@ -10,7 +10,7 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
 
-import pyimgutils as iut
+import  pyimgutils as iut
 import  stack
 
 import imgrec.imgrec as imgrec
@@ -127,37 +127,43 @@ def flood_one(xxx, yyy, param, dones):
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = _scan_one(xxx2, yyy2, param, dones)
 
-            iut.mark_cell(xxx, yyy, 1, dones)
+            _mark_cell_done(xxx, yyy, 1, dones)
+            _mark_cell_done(xxx2, yyy2, 1, dones)
+
+            #if param.callb:
+            #    param.callb(xxx, yyy, DOT_MARKED, param);
+
             if  ret == DOT_YES:
-                #iut.mark_cell(xxx2, yyy2, 1, param.body)
-                param.body.append((xxx2, yyy2))
                 param.stack.push((xxx, yyy, nnn))
+                xxxx = max(0, min(xxx2, param.iww-1))
+                yyyy = max(0, min(yyy2, param.ihh-1))
+                param.body.append((xxxx, yyyy))
                 xxx = xxx2; yyy = yyy2
                 # To observe fill action, if requested
-                if param.callb:
-                    param.callb(xxx, yyy, 2, param);
+                #if param.callb:
+                #    param.callb(xxx, yyy, DOT_YES, param);
                 break  # jump to next
             elif  ret == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
-                #iut.mark_cell(xxxx, yyyy, 1, param.bounds)
                 param.bounds.append((xxxx, yyyy))
                 # To observe boundary action, if requested
                 if param.callb:
-                    param.callb(xxxx, yyyy, 0, param);
+                    param.callb(xxx2, yyy2, DOT_NO, param);
             elif ret == DOT_BOUND:
                 #print("bound", xxx2, yyy2, end = " ")
                 # Correct to within boundary
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
-                #iut.mark_cell(xxxx, yyyy, 1, param.bounds)
                 param.bounds.append((xxxx, yyyy))
                 if param.callb:
-                    param.callb(xxxx, yyyy, 1, param);
-            elif  ret == DOT_MARKED:
-                #if param.callb:
-                #    param.callb(xxxx, yyyy, 3, param);
+                    param.callb(xxxx, yyyy, DOT_BOUND, param);
+            elif ret == DOT_MARKED:
+                xxxx = max(0, min(xxx2, param.iww-1))
+                yyyy = max(0, min(yyy2, param.ihh-1))
+                if param.callb:
+                    param.callb(xxxx, yyyy, DOT_MARKED, param);
                 pass
             else:
                 print("invalid ret from scan_one", ret)
@@ -165,7 +171,6 @@ def flood_one(xxx, yyy, param, dones):
 
         if  nnn+startop == len(scan_ops):
             #print("eval", nnn+startop, "stack", param.stack.stacklen())
-            #iut.mark_cell((xxx, yyy, nnn+startop), dones)
             xxx, yyy, startop2 = param.stack.pop()
 
     # All operations done, pre-process
@@ -292,6 +297,19 @@ def _scan_one(xxx2, yyy2, param, dones):
 
     #print("scan_one:", xxx2, yyy2, dot_strs[ret])
     return ret
+
+def _mark_cell_done(xxx, yyy, flag, dones):
+
+    '''  Mark a cell done. Create dimention if not present '''
+
+    try:
+        dones[xxx, yyy] = flag
+    except:
+        try:
+            dones[xxx] = {}
+            dones[xxx, yyy] = flag
+        except:
+            print("mark cell", sys.exc_info())
 
 # ------------------------------------------------------------------------
 # Return flag if visited before

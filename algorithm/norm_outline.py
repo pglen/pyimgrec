@@ -5,9 +5,13 @@ import pyimgutils as iut
 
 ARRLEN = 128
 
-# Process the array for vector rotation. Return normalized coordinate array.
 
 def norm_array(fparm):
+
+    '''
+        Process the array for vector rotation. Return normalized coordinate array.
+        This is superseeded by simple sorting, with similar results.
+    '''
 
     resarr = [];
 
@@ -102,22 +106,26 @@ def scale_vectors(carr, newsize):
             print("exc scale", aa, arrlen) #, sys.exc_info())
     return resarr
 
-# ========================================================================
-# Scale array to preset value range.
+def scale_magnitude(carr, newval):
 
-def scale_magnitude(carr, size):
+    ''' Scale array to preset value range. Note that the value has
+        to be index ARRLEN, which is one less than ARRLEN.
+    '''
 
     resarr = [];  maxval = 0;
     # Calculate maximum value
     for aa in carr:
-        maxval = max(maxval, aa[0]);  maxval = max(maxval, aa[1])
+        maxval = max(maxval, aa[0]);
+        maxval = max(maxval, aa[1])
 
-    rat = float(maxval) / size
-    #print( "maxval", maxval, "rat", rat)
+    rat = float(maxval) / (newval - 1)
+    #print( "maxval", maxval, "rat", rat, "len", len(carr))
+
     # Scale it
     for aa in range(len(carr)):
         xx = float(carr[aa][0]) / rat;  yy = float(carr[aa][1]) / rat
-        resarr.append( (int(xx), int(yy)) )
+        resarr.append( (int(math.floor(xx)), int(math.floor(yy))) )
+    #print("resarr", resarr)
     return resarr
 
 def cmp_arrays(arr1, arr2, span = 3):

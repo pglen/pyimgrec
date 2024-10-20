@@ -487,34 +487,27 @@ class ImgMain(Gtk.DrawingArea):
     def callb(self, xxx, yyy, kind, fparam):
         #print( "callb", xxx, yyy, fparam)
         #return
+        row =  4 * yyy * self.iww
         try:
-            if kind == 3:
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww+0]   = 0xff
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww+1]   = 0xff
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww+2]   = 0x00
-            elif kind == 2:
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]   = 0x00
-            elif kind == 1:
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
-
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww] = 0x00
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
-            elif kind == 0:
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
-                self.xparent.win2.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
-
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww]    = 0x00
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +1] = 0x00
-                self.xparent.simg.buf[4*xxx + 4*yyy * self.iww +2] = 0x00
-
-                #if fparam.cnt % fparam.breath == 0:
-                #    #self.xparent.win2.simg.invalidate()
-                #    self.xparent.simg.invalidate()
-                #    usleep(5)
+            if kind == flood.DOT_YES:
+                newcol = (0x00, 0x00, 0x00, 0xff)
+            elif kind == flood.DOT_NO:
+                newcol = (0xff, 0xff, 0x00, 0xff)
+            elif kind == flood.DOT_MARKED:
+                newcol = (0x00, 0xff, 0x00, 0xff)
+            elif kind == flood.DOT_BOUND:
+                newcol = None #(0x00, 0x00, 0xff, 0xff)
             else:
                 print("unkown kind in callb")
+                newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
+            if newcol:
+                for cnt, aa in enumerate(newcol):
+                    self.xparent.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
+
+            if kind == flood.DOT_NO or kind == flood.DOT_BOUND:
+                newcol = (0x00, 0x00, 0xff, 0xff)
+                for cnt, aa in enumerate(newcol):
+                    self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
 
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
@@ -586,9 +579,8 @@ class ImgMain(Gtk.DrawingArea):
         self.xparent.simg.clear()
         self.xparent.win2.simg.clear()
 
-        dones = {}
-        nbounds = []
-        found = 0
+        dones = {}; nbounds = []; found = 0
+
         # Iterate all shapes
         while True:
             if yyy >= self.iww:
@@ -611,46 +603,39 @@ class ImgMain(Gtk.DrawingArea):
                 ret, xxx, yyy = flood.seek(xxx, yyy, fparam, dones)
                 #print("seek ret:", ret, xxx, yyy)
                 if not ret:
-                    if xxx >= 0:
+                    if xxx > 0:
                         xxx = 0; yyy += 1
                         continue
                     else:
                         break
 
-            ttt = time.time()
+            #ttt = time.time()
             ret = flood.flood_one(xxx, yyy, fparam, dones)
             if ret == -1:
                 break
-
-            #if not single:
-
             if len(fparam.bounds) < 64:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
-                xxx+= 1
-                yyy+= 1
+                xxx += 1
+                yyy += 1
                 continue
-
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
 
             # Process data from flood
-            #nbounds = norm.norm_array(fparam)
             uls = norm.flush_upleft(fparam)
             nbs = norm.scale_vectors(uls, norm.ARRLEN)
             nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
             nbounds.sort()
             #print("nbounds len", len(nbounds))
+
             # Save last
             if nbounds:
                 self.xparent.narr = ("", fparam.minx, fparam.miny, fparam.mark, nbounds)
-
             # Compare with stock
             self.compare(nbounds, fparam)
-
             if not addx:
                 self.xparent.simg2.clear()
-
             # Display results
             for aa in nbounds:
                 #print(aa[0], aa[1])

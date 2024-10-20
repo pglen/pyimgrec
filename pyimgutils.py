@@ -245,19 +245,6 @@ def  usleep(msec):
         #print ("Sleeping")
         Gtk.main_iteration_do(False)
 
-def mark_cell(xxx, yyy, flag, dictx):
-
-    '''  Mark a cell done. Create dimention if not prese]nt '''
-
-    try:
-        dictx[xxx, yyy] = flag
-    except:
-        try:
-            dictx[xxx] = {}
-            dictx[xxx, yyy] = flag
-        except:
-            print("cell", sys.exc_info())
-
 def printarr(arr):
     for aa in arr:
         print( "%.2d %d  " % (aa[0], aa[1]),)

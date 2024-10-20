@@ -359,44 +359,8 @@ PyObject *_smoothv(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 // This is to prevent the macros from polluting the compilation screen
-
 //pragma GCC diagnostic push
 //pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-
-// -----------------------------------------------------------------------
-#if 0
-
-static int  smooth_line(int arg1, int arg2, int loop)
-
-{
-    int *curr = anchor, loop2, xold, offs =  arg2 * dim2;
-    unsigned int prev = curr[offs + arg1], ccc;
-
-    for (loop2 = arg1 + 1; loop2 < dim2; loop2++) // xx
-        {
-        int rr, gg, bb, rrr, ggg, bbb, rrrr, gggg, bbbb;
-        ccc = curr[offs + loop2];
-
-        APART(ccc, rr, gg, bb);
-        APART(prev, rrr, ggg, bbb);
-
-        rrrr = (rr + rrr) / 2;
-        gggg = (gg + ggg) / 2;
-        bbbb = (bb + bbb) / 2;
-
-        ASSEM(xold, rrrr, gggg, bbbb);
-        //printf("%d %d %d - %d %d %d = %d %d %d\n",
-        //             rr, gg, bb, rrr,ggg,bbb,rrrr,gggg,bbbb);
-
-        // Write back
-        curr[offs + loop2 - 1] = xold;
-        prev = ccc;
-    }
-    return 0;
-}
-
-#endif
-
 //pragma GCC diagnostic pop
 
 // --------------------------------------------------------------------

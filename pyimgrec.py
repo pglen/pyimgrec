@@ -22,6 +22,9 @@ from random import *
 from pyimgutils import *
 
 import treehand, img_main
+import algorithm.norm_outline as ol
+
+ol.ARRLEN
 
 try:
     import imgrec.imgrec as imgrec
@@ -151,8 +154,8 @@ class MainWin():
         #a2 = self.simg.get_pixbuf()
         #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
 
-        self.simg = Imagex(200, 200)
-        self.simg2 = Imagex(128, 128)
+        self.simg  = Imagex(ol.ARRLEN, ol.ARRLEN)
+        self.simg2 = Imagex(ol.ARRLEN, ol.ARRLEN)
 
         self.win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.win2.set_title("Image Show")

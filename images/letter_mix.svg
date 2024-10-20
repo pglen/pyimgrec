@@ -26,9 +26,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.53094837"
-     inkscape:cx="369.15077"
-     inkscape:cy="561.25984"
+     inkscape:zoom="1.1062103"
+     inkscape:cx="396.85039"
+     inkscape:cy="406.79425"
      inkscape:window-width="1596"
      inkscape:window-height="833"
      inkscape:window-x="2"
@@ -108,15 +108,27 @@
          y="114.13264">c</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:14.1111px;line-height:1.25;font-family:serif;stroke-width:0.264583;-inkscape-font-specification:serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;line-height:1.25;font-family:serif;-inkscape-font-specification:serif;stroke-width:0.264583"
        x="87.418053"
        y="40.623192"
        id="text10982"><tspan
          sodipodi:role="line"
          id="tspan10980"
-         style="stroke-width:0.264583;-inkscape-font-specification:serif;font-family:serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:serif;-inkscape-font-specification:serif;stroke-width:0.264583"
          x="87.418053"
          y="40.623192">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;line-height:1.25;font-family:serif;-inkscape-font-specification:serif;stroke-width:0.264583"
+       x="92.156891"
+       y="30.185961"
+       id="text10982-3"
+       transform="rotate(20.294324)"><tspan
+         sodipodi:role="line"
+         id="tspan10980-6"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:serif;-inkscape-font-specification:serif;stroke-width:0.264583"
+         x="92.156891"
+         y="30.185961">A</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:14.1111px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"

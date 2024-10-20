@@ -70,7 +70,7 @@ class   TreeHand():
             pass
             #print  sys.exc_info()
         if not text:
-            self.treestore.append(None, ["No Match",])
+            self.treestore.append(None, ["Matches",])
             return
 
         cnt = 0; piter2 = None; next = False
