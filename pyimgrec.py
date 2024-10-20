@@ -157,22 +157,12 @@ class MainWin():
         self.simg  = Imagex(ol.ARRLEN, ol.ARRLEN)
         self.simg2 = Imagex(ol.ARRLEN, ol.ARRLEN)
 
-        self.win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
-        self.win2.set_title("Image Show")
-        self.win2.simg = Imagex(200, 200)
-        self.win2.ww = self.win2.simg.ww;
-        self.win2.hh = self.win2.simg.hh
-        #self.win2.set_size_request(self.win2.ww,  self.win2.hh)
-        self.win2.add(self.win2.simg)
-
-        self.win2.move(100, 100)
-        #win2.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        self.win2.show_all()
-
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
         self.tree.stree.set_size_request(-1, 200)
         vbox2.pack_start(self.tree.stree, 0, 0, 0)
+
+        self.win2 = self.add_win()
 
         try:
             if args:
@@ -263,6 +253,20 @@ class MainWin():
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
 
+    def add_win(self):
+
+        win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        win2.set_title("Image Show")
+        win2.simg = Imagex(200, 200)
+        win2.ww = win2.simg.ww;
+        win2.hh = win2.simg.hh
+        win2.set_size_request(win2.ww, win2.hh)
+        win2.add(win2.simg)
+        win2.move(100, 100)
+        #.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        win2.show_all()
+        return win2
+
     def after(self):
         # Move to current app corner
         xxx, yyy = self.window.get_position()
@@ -325,22 +329,22 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        self.radio1 = Gtk.RadioButton.new_with_mnemonic_from_widget(None, " Flood ")
-        self.radio1.connect("clicked", self.check_hell, window)
-        hbox.pack_start(self.radio1, False, 0, 0)
-
-        self.spacer(hbox, False )
-
-        self.radio2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, " Rect Flood ")
-        self.radio2.connect("clicked", self.check_hell, window)
-        hbox.pack_start(self.radio2, False, 0, 0)
-
-        self.spacer(hbox, False )
-
-        self.radio3 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, " Walk ")
-        self.radio3.connect("clicked", self.check_hell, window)
-        hbox.pack_start(self.radio3, False, 0, 0)
-
+        #self.radio1 = Gtk.RadioButton.new_with_mnemonic_from_widget(None, " Flood ")
+        #self.radio1.connect("clicked", self.check_hell, window)
+        #hbox.pack_start(self.radio1, False, 0, 0)
+        #
+        #self.spacer(hbox, False )
+        #
+        #self.radio2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, " Rect Flood ")
+        #self.radio2.connect("clicked", self.check_hell, window)
+        #hbox.pack_start(self.radio2, False, 0, 0)
+        #
+        #self.spacer(hbox, False )
+        #
+        #self.radio3 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, " Walk ")
+        #self.radio3.connect("clicked", self.check_hell, window)
+        #hbox.pack_start(self.radio3, False, 0, 0)
+        #
         self.spacer(hbox, True )
 
     def check_hell(self, arg, ww):
@@ -468,6 +472,18 @@ class MainWin():
 
         self.spacer(hbox)
 
+        butt6 = Gtk.Button.new_with_mnemonic(" _Histogram ")
+        butt6.connect("clicked", self.histo, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt6 = Gtk.Button.new_with_mnemonic(" _Grey ")
+        butt6.connect("clicked", self.grey, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
         butt7 = Gtk.Button.new_with_mnemonic(" _Brighten ")
         butt7.connect("clicked", self.bri, window)
         hbox.pack_start(butt7, False,0 ,0)
@@ -546,6 +562,14 @@ class MainWin():
     def norm(self, butt, window):
         #print( "Norm" #,butt, window)
         self.area.norm_image()
+
+    def histo(self, butt, window):
+        #print( "Norm" #,butt, window)
+        self.area.histo_image()
+
+    def grey(self, butt, window):
+        #print( "Norm" #,butt, window)
+        self.area.grey_image()
 
     def walk(self, butt, window):
         #print( "Walk" #,butt, window)

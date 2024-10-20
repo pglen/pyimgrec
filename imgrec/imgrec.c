@@ -9,7 +9,7 @@
 //
 //   anchor(arr)                    - associate image arr
 //   blank(x, y, x2, y2, color)     - blank rect with color
-//   grayen(x, y, x2, y2, addcolor) - blank rect with color
+//   greyen(x, y, x2, y2, addcolor) - blank rect with color
 //   whiten(x, y, x2, y2, subcolor) - blank rect with color
 //   frame(x, y, x2, y2, color)     - draw frame with color
 //   line(x, y, x2, y2, color)      - draw line with color
@@ -150,7 +150,7 @@ PyMethodDef imgrec_functions[] =
     { "median",    (PyCFunction)_median,  METH_VARARGS|METH_KEYWORDS,  "Calculate median of range." },
     { "medianmulti",(PyCFunction)_medianmulti,  METH_VARARGS|METH_KEYWORDS,
                                                         "Calculate median of range, multiple colors" },
-    { "grayen",    (PyCFunction)_grayen,  METH_VARARGS|METH_KEYWORDS,  "Gray-en range." },
+    { "greyen",    (PyCFunction)_greyen,  METH_VARARGS|METH_KEYWORDS,  "Grey-en range." },
     { "whiten",    (PyCFunction)_whiten,  METH_VARARGS|METH_KEYWORDS,  "Whiten range." },
     { "frame",     (PyCFunction)_frame,   METH_VARARGS|METH_KEYWORDS,  "Frame range." },
     { "line",      (PyCFunction)_line,    METH_VARARGS|METH_KEYWORDS,  "Draw a line." },
@@ -159,6 +159,7 @@ PyMethodDef imgrec_functions[] =
     { "diffmulcol",(PyCFunction)_diffcol, METH_VARARGS|METH_KEYWORDS,  "Diff multiple colors" },
 
     { "normalize", (PyCFunction)_norm,    METH_VARARGS|METH_KEYWORDS,  "Normalize image" },
+    { "histogram", (PyCFunction)_histo,   METH_VARARGS|METH_KEYWORDS,  "Return histogram" },
     { "bridar",    (PyCFunction)_bridar,  METH_VARARGS|METH_KEYWORDS,  "Brighten / Darken" },
     { "bw",        (PyCFunction)_bw,      METH_VARARGS|METH_KEYWORDS,  "Convert to B/W" },
     { "walk",      (PyCFunction)_walk,    METH_VARARGS|METH_KEYWORDS,  "Walk on equi-line" },

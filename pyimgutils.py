@@ -60,7 +60,7 @@ class Imagex(Gtk.DrawingArea):
 
     def clear(self):
         ctx = cairo.Context(self.surface)
-        ctx.set_source_rgba(0.7, 0.7, 0.7 )
+        ctx.set_source_rgba(0.5, 0.5, 0.4 )
         ctx.rectangle(0, 0, self.ww, self.hh)
         ctx.fill()
         self.invalidate()

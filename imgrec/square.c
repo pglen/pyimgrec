@@ -52,17 +52,17 @@ PyObject *_blank(PyObject *self, PyObject *args, PyObject *kwargs)
     return Py_BuildValue("");
 }
 
-PyObject *_grayen(PyObject *self, PyObject *args, PyObject *kwargs)
+PyObject *_greyen(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "startx", "starty","endx", "endy", "color", NULL };
 
-    int arg1 = 0;  int arg2 = 0; int arg3 = 0;  int arg4 = 0; int arg5 = 0;
+    int arg1 = 0; int arg2 = 0; int arg3 = dim1;  int arg4 = dim2; int arg5 = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iiiiI", kwlist, &arg1, &arg2, &arg3, &arg4, &arg5))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiiiI", kwlist, &arg1, &arg2, &arg3, &arg4, &arg5))
             return NULL;
 
     if( is_verbose())
-        printf("Blanking %d %d %d %d color=0x%x\n", arg1, arg2, arg3, arg4, arg5);
+        printf("Greyen %d %d %d %d color=0x%x\n", arg1, arg2, arg3, arg4, arg5);
 
     if(!anchor)
         {
@@ -74,7 +74,7 @@ PyObject *_grayen(PyObject *self, PyObject *args, PyObject *kwargs)
         PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
         return NULL;
         }
-     if (arg1 > dim2 || arg2 > dim1 || arg3 > dim2 || arg4  > dim1 )
+     if (arg1 > dim1 || arg2 > dim2 || arg3 > dim1 || arg4  > dim2 )
         {
         PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
         return NULL;
@@ -84,25 +84,20 @@ PyObject *_grayen(PyObject *self, PyObject *args, PyObject *kwargs)
     int *curr = anchor, loop, loop2;
     for (loop = arg2; loop < arg4; loop++)
         {
-        unsigned char rr, gg, bb;
-
-        int old, offs = loop * dim2;
+        int offs = loop * dim1;
         for (loop2 = arg1; loop2 < arg3; loop2++)
             {
-             old = curr[offs + loop2];
+            unsigned int xold, ccc = curr[offs + loop2];
+            int rr, gg, bb;
+            // Break apart
+            APART(ccc, rr, gg, bb)
+            // Calc
+            unsigned int medi = (rr + gg + bb ) / 3;
+            // Assemble
+            ASSEM(xold, medi, medi, medi)
 
-             // Break apart
-             rr = old & 0xff; gg = (old>>8) & 0xff; bb = (old>>16) & 0xff;
-             // Clip to 0
-             if (rr > arg5) rr -= arg5; else  rr = 0;
-             if (gg > arg5) gg -= arg5; else  gg = 0;
-             if (bb > arg5) bb -= arg5; else  bb = 0;
-             // Assemble
-             old = 0xff; old <<= 8; old |= bb; old <<= 8;
-             old |= gg; old <<= 8; old |= rr;
-
-             curr[offs + loop2] = old;
-             }
+            curr[offs + loop2] = xold;
+            }
         }
     return Py_BuildValue("");
 }

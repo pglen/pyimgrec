@@ -33,9 +33,10 @@ except:
 import  algorithm.flood  as flood
 import  algorithm.norm_outline as norm
 
+DIVIDER     = 32                 # How many divisions, mostly for testing
 MAG_FACT    = 2
 MAG_SIZE    = 300
-DIVIDER     = 64                 # How many divisions, testing
+
 THRESH      = 20                 # Color diff for boundary
 MARKCOL     = 180                # Color counts as mark
 
@@ -107,10 +108,13 @@ class ImgMain(Gtk.DrawingArea):
         xxx = int(event.x); yyy = int(event.y)
 
         try:
-            col =  buf[4 * (xxx + yyy * self.iww) + 1]
-            self.xparent.labz.set_text("col = %d" % col)
+            col  =  buf[4 * (xxx + yyy * self.iww)   ]
+            col2 =  buf[4 * (xxx + yyy * self.iww)+1 ]
+            col3 =  buf[4 * (xxx + yyy * self.iww)+2 ]
+            self.xparent.labz.set_text("%x%x%x" % (col, col2, col3))
         except:
             pass
+            #print(sys.exc_info())
 
         #if self.mag:
         #    self.invalidate()
@@ -373,7 +377,27 @@ class ImgMain(Gtk.DrawingArea):
         ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
 
         print( "Norm Image")
-        imgrec.normalize()
+        nnn = imgrec.normalize()
+        #print(nnn)
+        self.invalidate()
+
+    def histo_image(self):
+
+        #imgrec.verbose = 0
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        print( "Histo Image")
+        nnn = imgrec.histogram()
+        print("histogram", nnn)
+        self.invalidate()
+
+    def grey_image(self):
+
+        #imgrec.verbose = 0
+        buf = self.surface.get_data()
+        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        print( "Grey Image")
+        imgrec.greyen()
         self.invalidate()
 
     def smooth_image(self):
@@ -490,7 +514,9 @@ class ImgMain(Gtk.DrawingArea):
         row =  4 * yyy * self.iww
         try:
             if kind == flood.DOT_YES:
-                newcol = (0x00, 0x00, 0x00, 0xff)
+                #newcol = (0x00, 0x00, 0x00), 0xff)
+                #newcol = fparam.colx
+                newcol = fparam.mark
             elif kind == flood.DOT_NO:
                 newcol = (0xff, 0xff, 0x00, 0xff)
             elif kind == flood.DOT_MARKED:
@@ -504,7 +530,7 @@ class ImgMain(Gtk.DrawingArea):
                 for cnt, aa in enumerate(newcol):
                     self.xparent.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
 
-            if kind == flood.DOT_NO or kind == flood.DOT_BOUND:
+            if kind == flood.DOT_YES:
                 newcol = (0x00, 0x00, 0xff, 0xff)
                 for cnt, aa in enumerate(newcol):
                     self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
@@ -537,6 +563,8 @@ class ImgMain(Gtk.DrawingArea):
                         "thresh", THRESH, "markcol", MARKCOL)
         #imgrec.verbose = 0
 
+        self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
+
         # Draw grid:
         if self.xparent.check1.get_active():
             try:
@@ -549,6 +577,7 @@ class ImgMain(Gtk.DrawingArea):
                     imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
 
                 self.invalidate()
+                usleep(10)
             except:
                 print_exception("grid")
 
@@ -613,12 +642,13 @@ class ImgMain(Gtk.DrawingArea):
             ret = flood.flood_one(xxx, yyy, fparam, dones)
             if ret == -1:
                 break
-            if len(fparam.bounds) < 64:
+            if len(fparam.bounds) < 32:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
                 xxx += 1
                 yyy += 1
                 continue
+
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
 
@@ -695,7 +725,7 @@ class ImgMain(Gtk.DrawingArea):
             #    print( "cmp %.2f %s" % (aa[0], aa[1]) )
             #self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
 
-            strx = "%-12s x=%2d y=%2d col=%s cmp=%.f " % \
+            strx = "%-8s x=%2d y=%2d col=%s cmp=%.f " % \
                             (cmp[0][1], coord[0][0], coord[0][1],
                                     coord[0][2], cmp[0][0], )
             self.xparent.tree.append_treestore(strx)

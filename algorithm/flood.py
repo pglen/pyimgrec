@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import  os, sys, getopt, signal, array
+import  os, sys, getopt, signal, array, random
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -46,7 +46,7 @@ class floodParm():
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
         self.bounds = [];       self.body  = []
-
+        self.colx   =  (0,0,0,0)
         self.stack = stack.Stack()
 
 # ------------------------------------------------------------------------
@@ -90,16 +90,38 @@ def flood_one(xxx, yyy, param, dones):
 
     # Mark initial position's color
     try:
-        param.mark = param.darr[yyy][xxx]
+        # Attempt avaraging staring point
+        try:
+            pt1 = param.darr[yyy][xxx]
+            pt2 = param.darr[yyy][xxx+1]
+            pt3 = param.darr[yyy+1][xxx+1]
+            pt4 = param.darr[yyy+1][xxx]
+
+            arr = (pt1, pt2, pt3,  pt4)
+            sum1 = 0; sum2 = 0; sum3 = 0
+            for aaa in arr:
+                sum1 += aaa[0]
+                sum2 += aaa[1]
+                sum3 += aaa[2]
+            param.mark  = (sum1//4, sum2//4, sum3//4, 255)
+            #param.mark  = param.darr[yyy][xxx]
+            print("mark", param.mark,  "darr", param.darr[yyy][xxx])
+        except:
+            print("mark dist", sys.exc_info())
+            param.mark = param.darr[yyy][xxx]
+
     except KeyError:
         print( "Start pos past end %d / %d" % (xxx, yyy))
         reenter -= 1
         return -1
+        #param.mark = param.darr[yyy][xxx]
 
     param.stack.push((xxx, yyy, 0))
     #mark_done(xxx, yyy, 1, param)
 
     # Walk the patches, loop until done
+    param.colx = (random.randint(0, 0xff), random.randint(0, 0xff),
+                            random.randint(0, 0xff), 0xff)
     startop = 0
     while True :
         #print("new loop", xxx, yyy, startop)
@@ -127,7 +149,7 @@ def flood_one(xxx, yyy, param, dones):
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = _scan_one(xxx2, yyy2, param, dones)
 
-            _mark_cell_done(xxx, yyy, 1, dones)
+            #_mark_cell_done(xxx, yyy, 1, dones)
             _mark_cell_done(xxx2, yyy2, 1, dones)
 
             #if param.callb:
@@ -140,8 +162,8 @@ def flood_one(xxx, yyy, param, dones):
                 param.body.append((xxxx, yyyy))
                 xxx = xxx2; yyy = yyy2
                 # To observe fill action, if requested
-                #if param.callb:
-                #    param.callb(xxx, yyy, DOT_YES, param);
+                if param.callb:
+                    param.callb(xxx, yyy, DOT_YES, param);
                 break  # jump to next
             elif  ret == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
@@ -157,13 +179,13 @@ def flood_one(xxx, yyy, param, dones):
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
                 param.bounds.append((xxxx, yyyy))
-                if param.callb:
-                    param.callb(xxxx, yyyy, DOT_BOUND, param);
+                #if param.callb:
+                #    param.callb(xxxx, yyyy, DOT_BOUND, param);
             elif ret == DOT_MARKED:
                 xxxx = max(0, min(xxx2, param.iww-1))
                 yyyy = max(0, min(yyy2, param.ihh-1))
-                if param.callb:
-                    param.callb(xxxx, yyyy, DOT_MARKED, param);
+                #if param.callb:
+                #    param.callb(xxxx, yyyy, DOT_MARKED, param);
                 pass
             else:
                 print("invalid ret from scan_one", ret)
@@ -210,13 +232,13 @@ def seek(xxx, yyy, param, dones):
 
             cc = (val[0] + val[1] + val[2]) // 3
             #print(cc, end = " ")
-            if cc < param.markcol:
+            if cc <= param.markcol:
                 return (1, xx, yy)
     return  (0, xx, yy)
 
 def _coldiff(colm, colx):
 
-    ''' Substruct col avarage from ref avarage color version '''
+    ''' Substruct col avarage from ref avarage. RGB version '''
 
     cc = abs(colm[0] - colx[0])
     dd = abs(colm[1] - colx[1])
@@ -225,7 +247,7 @@ def _coldiff(colm, colx):
     # Average
     ret = (cc + dd + ee) // 3
 
-    # maxdiff
+    # Maxdiff
     #retx = max(cc, dd)
     #ret = max(retx, ee)
 

@@ -44,34 +44,151 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
     // All set, flush it out
     int *curr = anchor;
     int loop, loop2;
+    unsigned int histo[256] = {0, };
+    int xlen = sizeof(histo) / sizeof(int);
 
-    //int avg = calc_avg();
-
+    // Calc histogram
     for (loop = 0; loop < dim2; loop++)
         {
         int offs = loop * dim1;
-
         for (loop2 = 0; loop2 < dim1; loop2++)
             {
             unsigned int ccc = curr[offs + loop2];
-            int rr, gg, bb, xold, rrr, ggg, bbb;
+            int rr, gg, bb;
+            // Break apart
+            APART(ccc, rr, gg, bb)
+            unsigned int medi = (rr + gg + bb ) / 3;
+            histo[medi % 256] ++;
+            }
+        }
+    // Calc possible shortenings
+    int peak = 0, avg = 0; int breaks = 0;
+    for(int aa = 0; aa < xlen; aa++)
+        {
+        //printf("%3d-%4d  ", aa, histo[aa]);
+        peak = MAX(peak, histo[aa]);
+        avg += histo[aa];
+        }
+    avg /=  xlen;
+    int thresh = avg / 10;
+    for(int aa = 0; aa < sizeof(histo) / sizeof(int); aa++)
+        {
+        if (histo[aa] > thresh)
+            {
+            breaks = aa;
+            break;
+            }
+        }
+    printf("peak %d avg %d breaks %d\n", peak, avg, breaks);
+    // Re write histogram, spread beginnning
+    float fact = (float)(xlen - breaks) / xlen;
+    //printf("fact %f", fact);
+
+    int conv[256] = {0,};
+    for(int aa = 0; aa < xlen; aa++)
+        {
+        conv[aa] = breaks + (int)(fact * aa);
+        printf("%3d-%4d  ", aa, conv[aa]);
+        }
+    printf("\n");
+
+    // Reverse histogram
+    for (loop = 0; loop < dim2; loop++)
+        {
+        int offs = loop * dim1;
+        for (loop2 = 0; loop2 < dim1; loop2++)
+            {
+            unsigned int ccc = curr[offs + loop2];
+            int rr, gg, bb, rrr, ggg, bbb;
 
             // Break apart
             APART(ccc, rr, gg, bb)
 
-            // Operate: add / clip
-            rrr = rr - 10; DCLIP(rrr)
-            ggg = gg - 10; DCLIP(ggg)
-            bbb = bb - 10; DCLIP(bbb)
+            // Operate: reverse histo
+            rrr = conv[rr]; //DCLIP(rrr)
+            ggg = conv[gg]; //DCLIP(ggg)
+            bbb = conv[bb]; //DCLIP(bbb)
 
             // Assemble
+            int xold;
             ASSEM(xold, rrr, ggg, bbb)
 
             // disabled for now
-            //curr[offs + loop2] = xold;
+            curr[offs + loop2] = xold;
             }
         }
     return Py_BuildValue("");
+}
+
+PyObject *_histo(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "startx", "starty","endx", "endy", NULL };
+
+    int arg1 = 0;  int arg2 = 0; int arg3 = dim1;  int arg4 = dim2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiii", kwlist, &arg1, &arg2, &arg3, &arg4))
+            return NULL;
+
+    if( is_verbose())
+        printf("Normalizing %d %d %d %d\n", arg1, arg2, arg3, arg4);
+
+    if(!anchor)
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "anchor must be set before any operation");
+        return NULL;
+        }
+    if (arg1 < 0 || arg2 < 0 ||  arg3 < 0 ||  arg4  < 0 )
+        {
+        PyErr_Format(PyExc_ValueError, "%s", "argument(s) cannot be negative");
+        return NULL;
+        }
+     if (arg3 > dim1 || arg4  > dim2 )
+        {
+        PyErr_Format(PyExc_ValueError, "%s (%ld %ld)", "must be within array limits", dim1, dim2);
+        return NULL;
+        }
+
+    // All set, flush it out
+    int *curr = anchor;
+    int loop, loop2;
+
+    unsigned int histo[256] = {0, };
+
+    // Calc histogram
+    for (loop = 0; loop < dim2; loop++)
+        {
+        int offs = loop * dim1;
+        for (loop2 = 0; loop2 < dim1; loop2++)
+            {
+            unsigned int ccc = curr[offs + loop2];
+            //int rrr, ggg, bbb;
+            int rr, gg, bb;
+            unsigned int xold;
+
+            // Break apart
+            APART(ccc, rr, gg, bb)
+
+            unsigned int medi = (rr + gg + bb ) / 3;
+            histo[medi % 256] ++;
+
+            // Assemble
+            //ASSEM(xold, rrr, ggg, bbb)
+            ASSEM(xold, medi, medi, medi)
+
+            //curr[offs + loop2] = xold;
+            }
+        }
+    Py_ssize_t size = sizeof(histo) / sizeof(int);
+    PyObject *the_tuple = PyTuple_New(size);
+
+    for(int aa = 0; aa < sizeof(histo) / sizeof(int); aa++)
+        {
+        int err = PyTuple_SetItem(the_tuple, (Py_ssize_t) aa, PyLong_FromLong(histo[aa]));
+        if (err < 0) {
+            printf("Cannot gen tuple\n");
+            }
+        }
+    return Py_BuildValue("O", the_tuple);
 }
 
 PyObject *_bridar(PyObject *self, PyObject *args, PyObject *kwargs)

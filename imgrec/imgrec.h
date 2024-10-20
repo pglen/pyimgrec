@@ -28,7 +28,7 @@ PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_whiten(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_median(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_blank(PyObject *self, PyObject *args, PyObject *kwargs);
-PyObject *_grayen(PyObject *self, PyObject *args, PyObject *kwargs);
+PyObject *_greyen(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_medianmulti(PyObject *self, PyObject *args, PyObject *kwargs);
 
 // Colors:
@@ -38,6 +38,7 @@ PyObject *_diffcol(PyObject *self, PyObject *args, PyObject *kwargs);
 // Norm
 
 PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs);
+PyObject *_histo(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_bw(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_bridar(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_walk(PyObject *self, PyObject *args, PyObject *kwargs);
