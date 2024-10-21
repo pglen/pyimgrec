@@ -104,13 +104,12 @@ class ImgMain(Gtk.DrawingArea):
         self.xparent.labx.set_text("x = %.2f" % (event.x))
         self.xparent.laby.set_text("y = %.2f" % (event.y))
 
-        buf = self.surface.get_data()
         xxx = int(event.x); yyy = int(event.y)
 
         try:
-            col  =  buf[4 * (xxx + yyy * self.iww)   ]
-            col2 =  buf[4 * (xxx + yyy * self.iww)+1 ]
-            col3 =  buf[4 * (xxx + yyy * self.iww)+2 ]
+            col  =  self.buf[4 * (xxx + yyy * self.iww)   ]
+            col2 =  self.buf[4 * (xxx + yyy * self.iww)+1 ]
+            col3 =  self.buf[4 * (xxx + yyy * self.iww)+2 ]
             self.xparent.labz.set_text("%x%x%x" % (col, col2, col3))
         except:
             pass
@@ -293,6 +292,7 @@ class ImgMain(Gtk.DrawingArea):
 
             # Create guest surface
             self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.iww, self.ihh)
+            self.buf = self.surface.get_data()
             #self.surface = cairo.ImageSurface.create_from_png(fname)
             #print("surface", self.surface, self.surface.get_width(), self.surface.get_height)
 
@@ -318,8 +318,7 @@ class ImgMain(Gtk.DrawingArea):
 
             # "mul",  self.iww*self.ihh*bpx, len(buf))
             imgrec.verbose = 0
-            buf = self.surface.get_data()
-            imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+            imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
             imgrec.verbose = 0
 
             self.stepx = float(self.iww)/self.divider;
@@ -373,8 +372,7 @@ class ImgMain(Gtk.DrawingArea):
     def norm_image(self):
 
         #imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         print( "Norm Image")
         nnn = imgrec.normalize()
@@ -384,8 +382,7 @@ class ImgMain(Gtk.DrawingArea):
     def histo_image(self):
 
         #imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         print( "Histo Image")
         nnn = imgrec.histogram()
         print("histogram", nnn)
@@ -394,16 +391,14 @@ class ImgMain(Gtk.DrawingArea):
     def grey_image(self):
 
         #imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         print( "Grey Image")
         imgrec.greyen()
         self.invalidate()
 
     def smooth_image(self):
 
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         #print("Smooth")
         old = imgrec.verbose
@@ -426,8 +421,7 @@ class ImgMain(Gtk.DrawingArea):
         arr = pixb.get_pixels()
 
         imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.bridar(10)
 
@@ -436,15 +430,13 @@ class ImgMain(Gtk.DrawingArea):
     def dar_image(self):
 
         imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.bridar(-10)
         self.invalidate()
 
     def line_image(self):
 
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.verbose = 0
 
         imgrec.line(10, 20, 10,  100,  0xffff0000)
@@ -468,8 +460,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def frame_image(self):
 
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.verbose = 0
         imgrec.frame(10, 10, 100, 100, 0xff0000ff)
         imgrec.verbose = 0
@@ -477,8 +468,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def blank_image(self):
 
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         #imgrec.verbose = 1
         imgrec.blank() #color=0xffffffff)
@@ -493,8 +483,7 @@ class ImgMain(Gtk.DrawingArea):
 
         #print( "walk_image() dim =", iw, ih, "pos =", xx, yy )
         imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         ret2 = imgrec.walk(int(xx), int(yy))
         print("ret2", ret2)
         self.invalidate()
@@ -502,8 +491,7 @@ class ImgMain(Gtk.DrawingArea):
     def edge_image(self):
 
         #imgrec.verbose = 0
-        buf = self.surface.get_data()
-        ret = imgrec.anchor(buf, shape=(self.iww, self.ihh, self.bpx))
+        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.edge()
         self.invalidate()
@@ -551,7 +539,6 @@ class ImgMain(Gtk.DrawingArea):
     def anal_image(self, xxx, yyy, single = False, addx = False):
 
         imgrec.verbose = 0
-        self.buf = self.surface.get_data()
         ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         MARKCOL = int(self.xparent.scale.get_value())

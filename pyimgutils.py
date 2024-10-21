@@ -38,13 +38,17 @@ def print_exception(xstr):
 
 class Imagex(Gtk.DrawingArea):
 
-    def __init__(self, ww, hh):
+    def __init__(self, xparent, ww = 200, hh = 200):
         super().__init__()
         self.ww = ww; self.hh = hh
+        self.xparent = xparent
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
         self.buf = self.surface.get_data()
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
+
         self.connect("draw", self.draw)
+        self.connect("motion-notify-event", self.area_motion)
         self.clear()
         #print("Imagex create", self.ww, self.hh)
 
@@ -80,6 +84,28 @@ class Imagex(Gtk.DrawingArea):
         ctx.line_to(1, 0)
         ctx.stroke()
         self.queue_draw()
+
+    def area_motion(self, area, event):
+        #print("motion", event.x, event.y)
+        self.event_x = event.x
+        self.event_y = event.y
+
+        self.xparent.labx.set_text("x = %.2f" % (event.x))
+        self.xparent.laby.set_text("y = %.2f" % (event.y))
+
+        buf = self.surface.get_data()
+        xxx = int(event.x); yyy = int(event.y)
+
+        try:
+            col  =  buf[4 * (xxx + yyy * self.iww)   ]
+            col2 =  buf[4 * (xxx + yyy * self.iww)+1 ]
+            col3 =  buf[4 * (xxx + yyy * self.iww)+2 ]
+            self.xparent.labz.set_text("%x%x%x" % (col, col2, col3))
+        except:
+            pass
+            #print(sys.exc_info())
+
+
 
 old_dir = ""
 

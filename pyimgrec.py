@@ -154,8 +154,8 @@ class MainWin():
         #a2 = self.simg.get_pixbuf()
         #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
 
-        self.simg  = Imagex(ol.ARRLEN, ol.ARRLEN)
-        self.simg2 = Imagex(ol.ARRLEN, ol.ARRLEN)
+        self.simg  = Imagex(self, ol.ARRLEN, ol.ARRLEN)
+        self.simg2 = Imagex(self, ol.ARRLEN, ol.ARRLEN)
 
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
@@ -204,13 +204,13 @@ class MainWin():
         self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
-        self.scale.set_value(128)
+        self.scale.set_value(255)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
         self.mainbox.pack_start(self.scale, 0, 0, 0)
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(32)
+        self.scale2.set_value(40)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -257,7 +257,7 @@ class MainWin():
 
         win2 =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         win2.set_title("Image Show")
-        win2.simg = Imagex(200, 200)
+        win2.simg = Imagex(self)
         win2.ww = win2.simg.ww;
         win2.hh = win2.simg.hh
         win2.set_size_request(win2.ww, win2.hh)

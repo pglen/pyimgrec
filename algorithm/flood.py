@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import  os, sys, getopt, signal, array, random
+import  os, sys, getopt, signal, array, random, math
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -90,34 +90,36 @@ def flood_one(xxx, yyy, param, dones):
 
     # Mark initial position's color
     try:
-        # Attempt avaraging staring point
-        try:
+        # Attempt averaging the staring point: (+x,+y)
+        # |  o      |  o +1+0 |
+        # |  o +0+1 |  o +1+1 |
+        ''' try:
             pt1 = param.darr[yyy][xxx]
             pt2 = param.darr[yyy][xxx+1]
             pt3 = param.darr[yyy+1][xxx+1]
             pt4 = param.darr[yyy+1][xxx]
-
             arr = (pt1, pt2, pt3,  pt4)
-            sum1 = 0; sum2 = 0; sum3 = 0
+            sumr = 0; sumg = 0; sumb = 0;
             for aaa in arr:
-                sum1 += aaa[0]
-                sum2 += aaa[1]
-                sum3 += aaa[2]
-            param.mark  = (sum1//4, sum2//4, sum3//4, 255)
+                #print("aaa", aaa)
+                sumr += aaa[0]
+                sumg += aaa[1]
+                sumb += aaa[2]
+            param.mark  = (sumr//3, sumg//3, sumb//3, 255)
             #param.mark  = param.darr[yyy][xxx]
             print("mark", param.mark,  "darr", param.darr[yyy][xxx])
         except:
-            print("mark dist", sys.exc_info())
+            print("mark dist", xxx, yyy, sys.exc_info())
             param.mark = param.darr[yyy][xxx]
-
+        '''
+        param.mark = param.darr[yyy][xxx]  # override
     except KeyError:
         print( "Start pos past end %d / %d" % (xxx, yyy))
         reenter -= 1
         return -1
-        #param.mark = param.darr[yyy][xxx]
 
     param.stack.push((xxx, yyy, 0))
-    #mark_done(xxx, yyy, 1, param)
+    #_mark_cell_done(xxx, yyy, 1, dones)
 
     # Walk the patches, loop until done
     param.colx = (random.randint(0, 0xff), random.randint(0, 0xff),
@@ -141,6 +143,7 @@ def flood_one(xxx, yyy, param, dones):
         # Iterate operators
         while 1:
             if nnn+startop >= len(scan_ops):
+                _mark_cell_done(xxx, yyy, 1, dones)
                 break
 
             #print("nnn", nnn)
@@ -148,9 +151,6 @@ def flood_one(xxx, yyy, param, dones):
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = _scan_one(xxx2, yyy2, param, dones)
-
-            #_mark_cell_done(xxx, yyy, 1, dones)
-            _mark_cell_done(xxx2, yyy2, 1, dones)
 
             #if param.callb:
             #    param.callb(xxx, yyy, DOT_MARKED, param);
@@ -236,21 +236,26 @@ def seek(xxx, yyy, param, dones):
                 return (1, xx, yy)
     return  (0, xx, yy)
 
+def sqr(val):
+    return val * val
+
 def _coldiff(colm, colx):
 
     ''' Substruct col avarage from ref avarage. RGB version '''
+
+    #cc = math.sqrt(abs(sqr(colm[0]) - sqr(colx[0]) ))
+    #dd = math.sqrt(abs(sqr(colm[1]) - sqr(colx[1]) ))
+    #ee = math.sqrt(abs(sqr(colm[2]) - sqr(colx[2]) ))
 
     cc = abs(colm[0] - colx[0])
     dd = abs(colm[1] - colx[1])
     ee = abs(colm[2] - colx[2])
 
     # Average
-    ret = (cc + dd + ee) // 3
+    #ret = cc + dd + ee) // 3
 
-    # Maxdiff
-    #retx = max(cc, dd)
-    #ret = max(retx, ee)
-
+    # Maxdiff   Mon 21.Oct.2024 looks like this one
+    ret = max(max(cc, dd), ee)
     #print("coldiff", colm, colx, ret)
     return ret
 
@@ -331,7 +336,7 @@ def _mark_cell_done(xxx, yyy, flag, dones):
             dones[xxx] = {}
             dones[xxx, yyy] = flag
         except:
-            print("mark cell", sys.exc_info())
+            print("exc mark cell", sys.exc_info())
 
 # ------------------------------------------------------------------------
 # Return flag if visited before
