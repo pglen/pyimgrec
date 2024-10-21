@@ -143,7 +143,6 @@ def flood_one(xxx, yyy, param, dones):
         # Iterate operators
         while 1:
             if nnn+startop >= len(scan_ops):
-                _mark_cell_done(xxx, yyy, 1, dones)
                 break
 
             #print("nnn", nnn)
@@ -151,6 +150,7 @@ def flood_one(xxx, yyy, param, dones):
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = _scan_one(xxx2, yyy2, param, dones)
+            _mark_cell_done(xxx2, yyy2, 1, dones)
 
             #if param.callb:
             #    param.callb(xxx, yyy, DOT_MARKED, param);
