@@ -350,20 +350,18 @@ class ImgMain(Gtk.DrawingArea):
         print( "Do not call")
         return
 
-        iw = self.image.get_pixbuf().get_width()
-        ih = self.image.get_pixbuf().get_height()
+        #iw = self.image.get_pixbuf().get_width()
+        #ih = self.image.get_pixbuf().get_height()
         #ww, hh = self.get_size_request()
         #print( "Window Size:", ww, hh)
-        print( "Image Size:", iw, ih)
-        if iw > ih:
-            self.scalef = float(ww)/iw
-        else:
-            self.scalef = float(hh)/ih
-            iww = iw * self.scalef
-
+        #print( "Image Size:", iw, ih)
+        #if iw > ih:
+        #    self.scalef = float(ww)/iw
+        #else:
+        #    self.scalef = float(hh)/ih
+        #    iww = iw * self.scalef
         #self.image.get_pixbuf().scale(self.image2.get_pixbuf(), 0, 0, ww, hh,
         #                    0, 0, self.scalef, self.scalef, Gtk.gdk.INTERP_TILES)
-
         #self.image.set_from_image(self.image2)
 
     # --------------------------------------------------------------------
@@ -383,7 +381,7 @@ class ImgMain(Gtk.DrawingArea):
 
         #imgrec.verbose = 0
         ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
-        print( "Histo Image")
+        #print( "Histogram Image")
         nnn = imgrec.histogram()
         print("histogram", nnn)
         self.invalidate()
@@ -526,7 +524,7 @@ class ImgMain(Gtk.DrawingArea):
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
                 self.xparent.simg.invalidate()
-                #usleep(5)
+                #usleep(1)
 
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
@@ -596,7 +594,7 @@ class ImgMain(Gtk.DrawingArea):
         self.xparent.win2.simg.clear()
 
         dones = {}; nbounds = []; found = 0
-
+        self.sumx = []
         # Iterate all shapes
         while True:
             if yyy >= self.iww:
@@ -608,6 +606,7 @@ class ImgMain(Gtk.DrawingArea):
             fparam.stepx = self.stepx; fparam.stepy = self.stepy
             fparam.thresh = THRESH
             fparam.markcol = MARKCOL
+            fparam.breath = 30
             #fparam.colx = int(random.random() * 0xffffff)
             #fparam.verbose = 1
             if self.xparent.check3.get_active():
@@ -632,12 +631,12 @@ class ImgMain(Gtk.DrawingArea):
             if len(fparam.bounds) < 32:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
-                xxx += 1
-                yyy += 1
+                xxx += 1; yyy += 1
                 continue
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
+            usleep(100)
 
             # Process data from flood
             uls = norm.flush_upleft(fparam)
@@ -646,13 +645,17 @@ class ImgMain(Gtk.DrawingArea):
             nbounds.sort()
             #print("nbounds len", len(nbounds))
 
-            # Save last
-            if nbounds:
-                self.xparent.narr = ("", fparam.minx, fparam.miny, fparam.mark, nbounds)
+            # Save cummulative
+            self.sumx.append(self.xparent.narr)
+
             # Compare with stock
-            self.compare(nbounds, fparam)
+            #sss = self.compare(nbounds, fparam)
             if not addx:
                 self.xparent.simg2.clear()
+
+            # Save last
+            self.xparent.narr = ("", fparam.minx, fparam.miny, fparam.mark,
+                                        len(fparam.bounds), nbounds)
             # Display results
             for aa in nbounds:
                 #print(aa[0], aa[1])
@@ -678,7 +681,7 @@ class ImgMain(Gtk.DrawingArea):
                 if sss != "":
                     #print( "Adding shape", sss)
                     self.xparent.shapes.append(
-                            (sss, fparam.minx, fparam.miny, fparam.mark, nbounds))
+                        (sss, fparam.minx, fparam.miny, fparam.mark, len(fparm.bounds), nbounds))
 
             #for aa in fparam.body:
             #    #print(aa[0], aa[1])
@@ -695,6 +698,13 @@ class ImgMain(Gtk.DrawingArea):
             if single:
                 break
 
+        for aa in self.sumx:
+            #print("aa", aa)
+            try:
+                print(aa[0:5], aa[5][:3], "...")
+            except:
+                print("exc sumx", aa)
+
         print("%d segments found." % found)
 
     def compare(self, xarr, fbounds):
@@ -705,7 +715,7 @@ class ImgMain(Gtk.DrawingArea):
             res = norm.cmp_arrays(cc[4], xarr)
             #print("comp", res, cc[0])
             cmp.append( (res, cc[0]) )
-            coord.append( (fbounds.minx, fbounds.miny, fbounds.mark) )
+            coord.append( (fbounds.minx, fbounds.miny, fbounds.mark,) )
         if(len(cmp)):
             cmp.sort()
             #for aa in cmp:
@@ -717,6 +727,10 @@ class ImgMain(Gtk.DrawingArea):
                                     coord[0][2], cmp[0][0], )
             self.xparent.tree.append_treestore(strx)
             print("compare:", strx)
+            return cmp[0][1], cmp[0][0]
+
+        return ("")
+
         #self.aframe += self.bframe
         ## Reference position
         #self.aframe.append((xxx, yyy, 0xff8888ff))

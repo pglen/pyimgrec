@@ -38,7 +38,7 @@ class floodParm():
 
         self.mark = [0,0,0,0];  self.exit = 0
         self.cnt = 0;           self.depth = 0;
-        self.thresh = 20;       self.breath = 10
+        self.thresh = 20;       self.breath = 20
         self.markcol = 100;     self.grey = 0
         self.verbose = 0;       self.ops = 0
         self.stepx = 0;         self.stepy = 0

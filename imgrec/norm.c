@@ -80,19 +80,8 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
             }
         }
     printf("peak %d avg %d breaks %d\n", peak, avg, breaks);
+
     // Re write histogram, spread beginnning
-    float fact = (float)(xlen - breaks) / xlen;
-    //printf("fact %f", fact);
-
-    int conv[256] = {0,};
-    for(int aa = 0; aa < xlen; aa++)
-        {
-        conv[aa] = breaks + (int)(fact * aa);
-        printf("%3d-%4d  ", aa, conv[aa]);
-        }
-    printf("\n");
-
-    // Reverse histogram
     for (loop = 0; loop < dim2; loop++)
         {
         int offs = loop * dim1;
@@ -101,13 +90,20 @@ PyObject *_norm(PyObject *self, PyObject *args, PyObject *kwargs)
             unsigned int ccc = curr[offs + loop2];
             int rr, gg, bb, rrr, ggg, bbb;
 
+            //printf("fact %f", fact);
+
             // Break apart
             APART(ccc, rr, gg, bb)
 
+            // Spread the adjustment
+            float factr = (float)(255-rr) / 255;
+            float factg = (float)(255-gg) / 255;
+            float factb = (float)(255-bb) / 255;
+
             // Operate: reverse histo
-            rrr = conv[rr]; //DCLIP(rrr)
-            ggg = conv[gg]; //DCLIP(ggg)
-            bbb = conv[bb]; //DCLIP(bbb)
+            rrr = rr - factr * breaks; DCLIP(rrr)
+            ggg = gg - factg * breaks; DCLIP(ggg)
+            bbb = bb - factb * breaks; DCLIP(bbb)
 
             // Assemble
             int xold;
@@ -163,7 +159,6 @@ PyObject *_histo(PyObject *self, PyObject *args, PyObject *kwargs)
             unsigned int ccc = curr[offs + loop2];
             //int rrr, ggg, bbb;
             int rr, gg, bb;
-            unsigned int xold;
 
             // Break apart
             APART(ccc, rr, gg, bb)
@@ -172,9 +167,9 @@ PyObject *_histo(PyObject *self, PyObject *args, PyObject *kwargs)
             histo[medi % 256] ++;
 
             // Assemble
+            //unsigned int xold;
             //ASSEM(xold, rrr, ggg, bbb)
-            ASSEM(xold, medi, medi, medi)
-
+            //ASSEM(xold, medi, medi, medi)
             //curr[offs + loop2] = xold;
             }
         }

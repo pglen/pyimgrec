@@ -163,6 +163,7 @@ class MainWin():
         vbox2.pack_start(self.tree.stree, 0, 0, 0)
 
         self.win2 = self.add_win()
+        self.win3 = self.add_win()
 
         try:
             if args:
@@ -271,8 +272,10 @@ class MainWin():
         # Move to current app corner
         xxx, yyy = self.window.get_position()
         #print("curr", xxx, yyy)
-        self.win2.move(xxx - 100, yyy)
+        self.win2.move(0, yyy)
+        self.win3.move(0, yyy + 300)
         self.unpickle_shapes()
+
     def set_small_text(self, txt):
         self.lab.set_text(txt)
 
@@ -364,8 +367,12 @@ class MainWin():
 
         self.simg.resize(self.area.iww, self.area.ihh)
         self.simg.clear()
+
         self.win2.simg.resize(self.area.iww, self.area.ihh)
         self.win2.simg.clear()
+
+        self.win3.simg.resize(self.area.iww, self.area.ihh)
+        self.win3.simg.clear()
 
         if self.area.iww < 500:
             self.scroller.set_size_request(self.area.iww, self.area.ihh)
