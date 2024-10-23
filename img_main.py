@@ -626,9 +626,9 @@ class ImgMain(Gtk.DrawingArea):
                 #    else:
                 #        break
                 # Wed 23.Oct.2024 - Blind seek on grid
-                xxx += 20;
+                xxx += 10;
                 if xxx >= self.iww:
-                    xxx = 0; yyy += 20
+                    xxx = 0; yyy += 10
                 if yyy >= self.iww:
                         break
             #breakpoint()
@@ -637,7 +637,7 @@ class ImgMain(Gtk.DrawingArea):
             ret = flood.flood_one(xxx, yyy, fparam, dones)
             if ret == -1:
                 break
-            if len(fparam.bounds) < 32:
+            if len(fparam.bounds) < 8:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
                 xxx += 1; yyy += 1
@@ -654,6 +654,8 @@ class ImgMain(Gtk.DrawingArea):
             #nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
             nbounds = fparam.bounds
             nbounds.sort()
+            bbounds = fparam.body
+            bbounds.sort
             #print("nbounds len", len(nbounds))
 
             # Save cummulative
@@ -665,9 +667,9 @@ class ImgMain(Gtk.DrawingArea):
                 self.xparent.simg2.clear()
 
             # Save last
-            self.xparent.narr = (str(found), fparam.minx, fparam.miny, fparam.ww, fparam.hh,
-                                        fparam.mark,
-                                            len(fparam.bounds), nbounds)
+            self.xparent.narr = (str(found), fparam.minx, fparam.miny,
+                                   fparam.ww, fparam.hh, fparam.mark,
+                                            len(fparam.bounds), nbounds, bbounds)
             # Display results
             for aa in nbounds:
                 #print(aa[0], aa[1])

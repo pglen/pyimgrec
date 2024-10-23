@@ -257,39 +257,47 @@ class MainWin():
 
     # Button_press event on small image
     def simg_button(self, win, eve):
-        #print("simg_butt %.0f %.0f" % (eve.x, eve.y)) #, eve.state)
 
-        rev = self.area.sumx; rev.reverse()
-        #for aa in self.area.sumx:
-        for aa in rev:
+        print("simg_butt %.0f %.0f" % (eve.x, eve.y)) #, eve.state)
+
+        for aa in self.area.sumx:
             if not len(aa):
                 continue
-            if eve.x > aa[1] and eve.x <  aa[1] + aa[3]:
-                if eve.y > aa[2] and eve.y <  aa[2] + aa[4]:
-                    print(aa[0], "x match:", aa[1], aa[1] + aa[3], end = " ")
-                    print("y match:", aa[2], aa[2] + aa[4])
-                    #for yyy in range(aa[2], aa[2] + aa[4]):
-                    #    row = 4 * yyy * self.win3.simg.ww
-                    #    for xxx in range(aa[1], aa[1] + aa[3]):
-                    #        for cc in range(4):
-                    #            #col = self.area.buf[row + 4 * xxx + cc]
-                    #            col = self.simg.buf[row + 4 * xxx + cc]
-                    #            self.win3.simg.buf[row + 4 * xxx + cc] = col
-                    newcol = (random.randint(0, 0x80),
-                                        random.randint(0, 0x80),
-                                                random.randint(0, 0x80), 0xff)
-                    for aaa in aa[7]:
-                        #print("aaa", aaa)
-                        row = 4 * (aaa[1]) * self.win3.simg.ww
-                        col = 4 * (aaa[0])
-                        for cnt, cc in enumerate(newcol):
-                            try:
-                                self.win3.simg.buf[cnt + row + col] = cc
-                            except:
-                                print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
-                    self.win3.simg.invalidate()
-                    usleep(1000)
-                    #break
+            #if eve.x > aa[1] and eve.x <  aa[1] + aa[3]:
+            #    if eve.y > aa[2] and eve.y <  aa[2] + aa[4]:
+            #        print(aa[0], "x match:", aa[1], aa[1] + aa[3], end = " ")
+            #        print("y match:", aa[2], aa[2] + aa[4])
+
+            # see if on top of a fill
+            for aaa in aa[8]:
+                #print("aaa",aaa)
+                xdiff = abs(aaa[0] - int(eve.x))
+                if  xdiff == 0:
+                    #print("x match", xdiff, aa[0], aa[1], aa[2])
+                    ydiff = abs(aaa[1] - int(eve.y))
+                    if ydiff == 0:
+                        print("xy match", aa[0], aa[1], aa[2])
+                        #newcol = (random.randint(0, 0x80),
+                        #                    random.randint(0, 0x80),
+                        #                            random.randint(0, 0x80), 0xff)
+                        # Draw / Erase
+                        if eve.state:
+                            newcol = (102, 128, 128, 0xff)
+                        else:
+                            newcol = aa[5]
+
+                        for aaa in aa[8]:
+                            #print("aaa", aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        #usleep(1000)
+                        break
 
     def add_win(self):
 
@@ -682,15 +690,18 @@ class MainWin():
 
     def fractal_image(self, win, a3):
         self.win3.simg.clear()
-        for aa in self.area.sumx:
+        for cnt, aa in enumerate(self.area.sumx):
             if not len(aa):
                 continue
-            newcol = (random.randint(0, 0x80),
-                                random.randint(0, 0x80),
-                                        random.randint(0, 0x80), 0xff)
-            #newcol = aa[5]
+            #if cnt % 6 == 0:
+            #    self.win3.simg.clear()
+            #newcol = (random.randint(0, 0x80),
+            #                    random.randint(0, 0x80),
+            #                            random.randint(0, 0x80), 0xff)
+            newcol = aa[5]
             #print("aa", aa[:5])
-            for aaa in aa[7]:
+            #for aaa in aa[7]:
+            for aaa in aa[8]:
                 row = 4 * (aaa[1]) * self.win3.simg.ww
                 col = 4 * (aaa[0])
                 for cnt, cc in enumerate(newcol):
@@ -699,7 +710,7 @@ class MainWin():
                     except:
                         print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
             self.win3.simg.invalidate()
-            usleep(100)
+            usleep(200)
 
         return
 

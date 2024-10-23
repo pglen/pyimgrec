@@ -106,7 +106,6 @@ class Imagex(Gtk.DrawingArea):
             #print(sys.exc_info())
 
 
-
 old_dir = ""
 
 class ofd():
