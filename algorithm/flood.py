@@ -119,11 +119,11 @@ def flood_one(xxx, yyy, param, dones):
         return -1
 
     param.stack.push((xxx, yyy, 0))
-    #_mark_cell_done(xxx, yyy, 1, dones)
+    #_mark_cell_done(xxx, yyy, dones)
 
     # Walk the patches, loop until done
-    param.colx = (random.randint(0, 0xff), random.randint(0, 0xff),
-                            random.randint(0, 0xff), 0xff)
+    #param.colx = (random.randint(0, 0xff), random.randint(0, 0xff),
+    #                        random.randint(0, 0xff), 0xff)
     startop = 0
     while True :
         #print("new loop", xxx, yyy, startop)
@@ -144,46 +144,45 @@ def flood_one(xxx, yyy, param, dones):
         while 1:
             if nnn+startop >= len(scan_ops):
                 break
-
             #print("nnn", nnn)
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
             ret = _scan_one(xxx2, yyy2, param, dones)
-            _mark_cell_done(xxx2, yyy2, 1, dones)
 
+            xxxx = max(0, min(xxx2, param.iww-1))
+            yyyy = max(0, min(yyy2, param.ihh-1))
+
+            #if ret != DOT_MARKED:  # or ret !=  DOT_YES
+            #_mark_cell_done(xxx, yyy, dones)
+            _mark_cell_done(xxx2, yyy2, dones)
+
+            #print("%3d-%3d" % (xxx2, yyy2), end = "   ")
+            #_mark_cell_done(xxx, yyy, dones)
+            #breakpoint()
             #if param.callb:
             #    param.callb(xxx, yyy, DOT_MARKED, param);
-
             if  ret == DOT_YES:
                 param.stack.push((xxx, yyy, nnn))
-                xxxx = max(0, min(xxx2, param.iww-1))
-                yyyy = max(0, min(yyy2, param.ihh-1))
                 param.body.append((xxxx, yyyy))
-                xxx = xxx2; yyy = yyy2
+                xxx = xxxx; yyy = yyyy
                 # To observe fill action, if requested
                 if param.callb:
-                    param.callb(xxx, yyy, DOT_YES, param);
+                    param.callb(xxxx, yyyy, DOT_YES, param);
                 break  # jump to next
             elif  ret == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
-                xxxx = max(0, min(xxx2, param.iww-1))
-                yyyy = max(0, min(yyy2, param.ihh-1))
                 param.bounds.append((xxxx, yyyy))
                 # To observe boundary action, if requested
                 if param.callb:
-                    param.callb(xxx2, yyy2, DOT_NO, param);
+                    param.callb(xxxx, yyyy, DOT_NO, param);
             elif ret == DOT_BOUND:
                 #print("bound", xxx2, yyy2, end = " ")
                 # Correct to within boundary
-                xxxx = max(0, min(xxx2, param.iww-1))
-                yyyy = max(0, min(yyy2, param.ihh-1))
                 param.bounds.append((xxxx, yyyy))
                 #if param.callb:
                 #    param.callb(xxxx, yyyy, DOT_BOUND, param);
             elif ret == DOT_MARKED:
-                xxxx = max(0, min(xxx2, param.iww-1))
-                yyyy = max(0, min(yyy2, param.ihh-1))
                 #if param.callb:
                 #    param.callb(xxxx, yyyy, DOT_MARKED, param);
                 pass
@@ -191,24 +190,30 @@ def flood_one(xxx, yyy, param, dones):
                 print("invalid ret from scan_one", ret)
             nnn += 1
 
-        if  nnn+startop == len(scan_ops):
+        if  nnn+startop >= len(scan_ops):
             #print("eval", nnn+startop, "stack", param.stack.stacklen())
             xxx, yyy, startop2 = param.stack.pop()
 
     # All operations done, pre-process
 
     xlen = len(param.bounds)
-    if xlen > 32:
-        print("flood_one: xxx", xxx, "yyy", yyy, "mark:", param.mark, "xlen", xlen)
-        #print("loop count", param.cnt, "bounds len", len(param.bounds) )
 
     bound  = _calc_bounds(param.bounds)
     param.minx = bound[0]; param.miny = bound[1]
     param.maxx = bound[2]; param.maxy = bound[3]
+    param.ww = param.maxx - param.minx
+    param.hh = param.maxy - param.miny
+
+    if xlen > 4:
+        print("flood_one: xxx", xxx, "yyy", yyy, "ww", param.ww, "hh", param.hh,
+                    "mark:", param.mark, "xlen", xlen)
+        #print("loop count", param.cnt, "bounds len", len(param.bounds) )
 
     reenter -=1
     #print("dones", len(param.dones), dones)
     #print( "done cnt =", param.cnt, "ops =", param.ops)
+
+    #print("dones", dones)
 
     return ret
 
@@ -325,16 +330,21 @@ def _scan_one(xxx2, yyy2, param, dones):
     #print("scan_one:", xxx2, yyy2, dot_strs[ret])
     return ret
 
-def _mark_cell_done(xxx, yyy, flag, dones):
+def _mark_cell_done(xxx, yyy, dones):
 
-    '''  Mark a cell done. Create dimention if not present '''
+    '''  Mark a cell done. Create dimension and value if not present '''
 
     try:
-        dones[xxx, yyy] = flag
+        old = dones[xxx]
+    except:
+       dones[xxx] = {}
+    try:
+        old = dones[xxx, yyy]
+        dones[xxx, yyy] += 1
     except:
         try:
-            dones[xxx] = {}
-            dones[xxx, yyy] = flag
+            dones[xxx, yyy] = 0
+            dones[xxx, yyy] += 1
         except:
             print("exc mark cell", sys.exc_info())
 

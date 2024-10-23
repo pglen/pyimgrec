@@ -64,6 +64,7 @@ class ImgMain(Gtk.DrawingArea):
         self.image  = None
         #self.colormap = Gtk.get_default_colormap()
         #self.set_flags(Gtk.CAN_FOCUS | Gtk.SENSITIVE)
+        self.sumx = []
 
         self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
 
@@ -501,7 +502,6 @@ class ImgMain(Gtk.DrawingArea):
         try:
             if kind == flood.DOT_YES:
                 #newcol = (0x00, 0x00, 0x00), 0xff)
-                #newcol = fparam.colx
                 newcol = fparam.mark
             elif kind == flood.DOT_NO:
                 newcol = (0xff, 0xff, 0x00, 0xff)
@@ -517,9 +517,11 @@ class ImgMain(Gtk.DrawingArea):
                     self.xparent.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
 
             if kind == flood.DOT_YES:
-                newcol = (0x00, 0x00, 0xff, 0xff)
+                newcol = (0x0, 0x0, 0x0, 0xff)
                 for cnt, aa in enumerate(newcol):
-                    self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
+                    #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
+                    self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
 
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
@@ -562,11 +564,11 @@ class ImgMain(Gtk.DrawingArea):
                     imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
 
                 self.invalidate()
-                usleep(10)
+                #usleep(10)
             except:
                 print_exception("grid")
 
-        darr = {};
+        self.darr = {};
 
         # Fill in 2D array
         for yy in range(self.ihh):
@@ -575,7 +577,7 @@ class ImgMain(Gtk.DrawingArea):
                 val = []
                 for cc in range(4):
                     val.append(self.buf[offs + xx * 4 + cc])
-                self.add_to_dict(darr, xx, yy, val)
+                self.add_to_dict(self.darr, xx, yy, val)
 
         # TEST: Put it back to img
         #imgrec.blank(color=0xff888888)
@@ -601,7 +603,7 @@ class ImgMain(Gtk.DrawingArea):
                     break
 
             # Set up flood fill parameters
-            fparam = flood.floodParm(darr, self.callb);
+            fparam = flood.floodParm(self.darr, self.callb);
             fparam.iww = self.iww;  fparam.ihh = self.ihh
             fparam.stepx = self.stepx; fparam.stepy = self.stepy
             fparam.thresh = THRESH
@@ -615,14 +617,21 @@ class ImgMain(Gtk.DrawingArea):
 
             if not single:
                 #print("seek start:", xxx, yyy, end = " ")
-                ret, xxx, yyy = flood.seek(xxx, yyy, fparam, dones)
+                #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, dones)
                 #print("seek ret:", ret, xxx, yyy)
-                if not ret:
-                    if xxx > 0:
-                        xxx = 0; yyy += 1
-                        continue
-                    else:
+                #if not ret:
+                #    if xxx > 0:
+                #        xxx = 0; yyy += 1
+                #        continue
+                #    else:
+                #        break
+                # Wed 23.Oct.2024 - Blind seek on grid
+                xxx += 20;
+                if xxx >= self.iww:
+                    xxx = 0; yyy += 20
+                if yyy >= self.iww:
                         break
+            #breakpoint()
 
             #ttt = time.time()
             ret = flood.flood_one(xxx, yyy, fparam, dones)
@@ -636,12 +645,14 @@ class ImgMain(Gtk.DrawingArea):
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
-            usleep(100)
+            if self.xparent.check4.get_active():
+                usleep(100)
 
             # Process data from flood
-            uls = norm.flush_upleft(fparam)
-            nbs = norm.scale_vectors(uls, norm.ARRLEN)
-            nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
+            #uls = norm.flush_upleft(fparam)
+            #nbs = norm.scale_vectors(uls, norm.ARRLEN)
+            #nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
+            nbounds = fparam.bounds
             nbounds.sort()
             #print("nbounds len", len(nbounds))
 
@@ -654,8 +665,9 @@ class ImgMain(Gtk.DrawingArea):
                 self.xparent.simg2.clear()
 
             # Save last
-            self.xparent.narr = ("", fparam.minx, fparam.miny, fparam.mark,
-                                        len(fparam.bounds), nbounds)
+            self.xparent.narr = (str(found), fparam.minx, fparam.miny, fparam.ww, fparam.hh,
+                                        fparam.mark,
+                                            len(fparam.bounds), nbounds)
             # Display results
             for aa in nbounds:
                 #print(aa[0], aa[1])
@@ -701,9 +713,12 @@ class ImgMain(Gtk.DrawingArea):
         for aa in self.sumx:
             #print("aa", aa)
             try:
-                print(aa[0:5], aa[5][:3], "...")
+                print(aa[0:5], aa[5][0:3], aa[6], aa[7][:2], "...")
+            except IndexError:
+                #print("exc sumx", sys.exc_info())
+                pass
             except:
-                print("exc sumx", aa)
+                print("exc sumx", sys.exc_info())
 
         print("%d segments found." % found)
 
