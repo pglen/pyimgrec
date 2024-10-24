@@ -626,9 +626,9 @@ class ImgMain(Gtk.DrawingArea):
                 #    else:
                 #        break
                 # Wed 23.Oct.2024 - Blind seek on grid
-                xxx += 10;
+                xxx += 2;
                 if xxx >= self.iww:
-                    xxx = 0; yyy += 10
+                    xxx = 0; yyy += 2
                 if yyy >= self.iww:
                         break
             #breakpoint()
@@ -637,10 +637,10 @@ class ImgMain(Gtk.DrawingArea):
             ret = flood.flood_one(xxx, yyy, fparam, dones)
             if ret == -1:
                 break
-            if len(fparam.bounds) < 8:
+            if len(fparam.bounds) < 12:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
-                xxx += 1; yyy += 1
+                #xxx += 10; yyy += 10
                 continue
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))

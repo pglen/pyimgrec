@@ -38,7 +38,7 @@ def print_exception(xstr):
 
 class Imagex(Gtk.DrawingArea):
 
-    def __init__(self, xparent, ww = 200, hh = 200):
+    def __init__(self, xparent, ww = 20, hh = 20):
         super().__init__()
         self.ww = ww; self.hh = hh
         self.xparent = xparent

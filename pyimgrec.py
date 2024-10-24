@@ -71,6 +71,7 @@ class MainWin():
 
     def __init__(self, args):
 
+        self.reenter = 0
         self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_title("Python Image Recognition")
         #self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
@@ -212,7 +213,7 @@ class MainWin():
         self.mainbox.pack_start(self.scale, 0, 0, 0)
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(30)
+        self.scale2.set_value(24)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -272,10 +273,10 @@ class MainWin():
             for aaa in aa[8]:
                 #print("aaa",aaa)
                 xdiff = abs(aaa[0] - int(eve.x))
-                if  xdiff == 0:
+                if  xdiff < 1:
                     #print("x match", xdiff, aa[0], aa[1], aa[2])
                     ydiff = abs(aaa[1] - int(eve.y))
-                    if ydiff == 0:
+                    if ydiff < 1:
                         print("xy match", aa[0], aa[1], aa[2])
                         #newcol = (random.randint(0, 0x80),
                         #                    random.randint(0, 0x80),
@@ -426,9 +427,11 @@ class MainWin():
 
         self.win2.simg.resize(self.area.iww, self.area.ihh)
         self.win2.simg.clear()
+        self.win2.resize(self.area.iww, self.area.ihh)
 
         self.win3.simg.resize(self.area.iww, self.area.ihh)
         self.win3.simg.clear()
+        self.win3.resize(self.area.iww, self.area.ihh)
 
         if self.area.iww < 500:
             self.scroller.set_size_request(self.area.iww, self.area.ihh)
@@ -511,8 +514,14 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt3 = Gtk.Button.new_with_mnemonic(" _Refresh Image ")
+        butt3 = Gtk.Button.new_with_mnemonic(" _Refresh ")
         butt3.connect("clicked", self.refr_image, window)
+        hbox.pack_start(butt3, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt3 = Gtk.Button.new_with_mnemonic(" _Clear Subs ")
+        butt3.connect("clicked", self.clear_subs, window)
         hbox.pack_start(butt3, False, 0, 0)
 
         self.spacer(hbox)
@@ -689,40 +698,100 @@ class MainWin():
             msg("Cannot save file:\n%s" % fname)
 
     def fractal_image(self, win, a3):
+
+        ''' attempt to see if random selection would hit ... NO '''
+
+        if self.reenter:
+           self.reenter = 0
+           return
+
+        self.reenter = 1
+
         self.win3.simg.clear()
+
         for cnt, aa in enumerate(self.area.sumx):
-            if not len(aa):
+
+            if self.reenter == 0:
+                break
+
+            if len(aa) == 0:
                 continue
-            #if cnt % 6 == 0:
-            #    self.win3.simg.clear()
-            #newcol = (random.randint(0, 0x80),
-            #                    random.randint(0, 0x80),
-            #                            random.randint(0, 0x80), 0xff)
-            newcol = aa[5]
-            #print("aa", aa[:5])
-            #for aaa in aa[7]:
             for aaa in aa[8]:
+                newcol = aa[5]
                 row = 4 * (aaa[1]) * self.win3.simg.ww
                 col = 4 * (aaa[0])
                 for cnt, cc in enumerate(newcol):
                     try:
                         self.win3.simg.buf[cnt + row + col] = cc
                     except:
-                        print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
+                        print("win3 exc", "aa[:5] =", aa[:5], "aaa =", aaa, sys.exc_info())
             self.win3.simg.invalidate()
-            usleep(200)
+            usleep(10)
 
-        return
+
+    def fractal_image2(self, win, a3):
+
+        ''' attempt to see if random selection would hit ... NO '''
+
+        self.win3.simg.clear()
+
+        if self.reenter:
+           self.reenter = 0
+           return
+        self.reenter = 1
+        while True:
+            if self.reenter == 0:
+                break
+
+            usleep(1000)
+            self.win3.simg.clear()
+            amount = random.randint(1, len(self.area.sumx) - 1)
+            for aaa in range(amount):
+                if self.reenter == 0:
+                    break
+                # select random image
+                cnt = random.randint(0, len(self.area.sumx) - 1)
+                aa = self.area.sumx[cnt]
+
+                if not len(aa):
+                    continue
+                #if cnt % 6 == 0:
+                #    self.win3.simg.clear()
+                #newcol = (random.randint(0, 0x80),
+                #                    random.randint(0, 0x80),
+                #                            random.randint(0, 0x80), 0xff)
+                newcol = aa[5]
+                #print("aa", aa[:5])
+                #for aaa in aa[7]:
+
+                for aaa in aa[8]:
+                    row = 4 * (aaa[1]) * self.win3.simg.ww
+                    col = 4 * (aaa[0])
+                    for cnt, cc in enumerate(newcol):
+                        try:
+                            self.win3.simg.buf[cnt + row + col] = cc
+                        except:
+                            print("win3 exc", "aa[:5] =", aa[:5], "aaa =", aaa, sys.exc_info())
+                self.win3.simg.invalidate()
+                usleep(1)
 
     def anal_image(self, win, a3):
         self.clear_small_img()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
         self.area.anal_image(0, 0)
         self.area.invalidate()
 
     def refr_image(self, arg, ww):
         self.area.refresh()
         self.area.invalidate()
+        self.area.sumx = []
         self.simg.clear()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.tree.update_treestore("")
+
+    def clear_subs(self, arg, ww):
         self.win2.simg.clear()
         self.win3.simg.clear()
         self.tree.update_treestore("")
