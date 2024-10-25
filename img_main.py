@@ -499,16 +499,24 @@ class ImgMain(Gtk.DrawingArea):
         #print( "callb", xxx, yyy, fparam)
         #return
         row =  4 * yyy * self.iww
+        newcol = None
         try:
             if kind == flood.DOT_YES:
                 #newcol = (0x00, 0x00, 0x00), 0xff)
                 newcol = fparam.mark
+                #newcol = None
             elif kind == flood.DOT_NO:
                 newcol = (0xff, 0xff, 0x00, 0xff)
+                #newcol = None
             elif kind == flood.DOT_MARKED:
-                newcol = (0x00, 0xff, 0x00, 0xff)
+                #newcol = (0x00, 0xff, 0x00, 0xff)
+                newcol = None
             elif kind == flood.DOT_BOUND:
-                newcol = None #(0x00, 0x00, 0xff, 0xff)
+                newcol = (0x00, 0x00, 0xff, 0xff)
+            elif kind == flood.DOT_INVALID:
+                pass
+            elif kind == flood.DOT_POP:
+                newcol = (0x00, 0xff, 0xff, 0xff)
             else:
                 print("unkown kind in callb")
                 newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
@@ -519,14 +527,25 @@ class ImgMain(Gtk.DrawingArea):
             if kind == flood.DOT_YES:
                 newcol = (0x0, 0x0, 0x0, 0xff)
                 for cnt, aa in enumerate(newcol):
+                    pass
                     #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
                     self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
                     #self.xparent.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
 
+            if kind == flood.DOT_NO:
+                    xcol = (0x0, 0x0, 0xff, 0xff)
+                    for cnt, aa in enumerate(xcol):
+                        self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = xcol[cnt]
+
+            if kind == flood.DOT_INVALID:
+                # flush graphics
+                self.xparent.win2.simg.invalidate()
+                self.xparent.simg.invalidate()
+
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
                 self.xparent.simg.invalidate()
-                #usleep(1)
+                usleep(10)
 
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
@@ -599,7 +618,23 @@ class ImgMain(Gtk.DrawingArea):
         self.sumx = []
         # Iterate all shapes
         while True:
-            if yyy >= self.iww:
+            if not single:
+                while True:
+                    xxx += 10;
+                    if xxx >= self.iww:
+                        xxx = 0; yyy += 10
+                    if yyy >= self.ihh:
+                            break;
+                    if  self.darr[yyy][xxx][0] < 0x200:
+                        try:
+                            if not dones[xxx, yyy]:
+                                break
+                        except:
+                            #print(sys.exc_info())
+                            break
+                #print("found at", xxx, yyy)
+
+            if yyy >= self.ihh:
                     break
 
             # Set up flood fill parameters
@@ -609,13 +644,11 @@ class ImgMain(Gtk.DrawingArea):
             fparam.thresh = THRESH
             fparam.markcol = MARKCOL
             fparam.breath = 30
-            #fparam.colx = int(random.random() * 0xffffff)
             #fparam.verbose = 1
             if self.xparent.check3.get_active():
                 #print("Grey compare")
                 fparam.grey = True
 
-            if not single:
                 #print("seek start:", xxx, yyy, end = " ")
                 #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, dones)
                 #print("seek ret:", ret, xxx, yyy)
@@ -626,22 +659,25 @@ class ImgMain(Gtk.DrawingArea):
                 #    else:
                 #        break
                 # Wed 23.Oct.2024 - Blind seek on grid
-                xxx += 2;
-                if xxx >= self.iww:
-                    xxx = 0; yyy += 2
-                if yyy >= self.iww:
-                        break
+
             #breakpoint()
 
             #ttt = time.time()
-            ret = flood.flood_one(xxx, yyy, fparam, dones)
+            try:
+                ret = flood.Flood(xxx, yyy, fparam, dones)
+            except:
+                print(sys.exc_info())
+                break
+
             if ret == -1:
                 break
+
             if len(fparam.bounds) < 12:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
                 #xxx += 10; yyy += 10
                 continue
+
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
@@ -649,15 +685,23 @@ class ImgMain(Gtk.DrawingArea):
                 usleep(100)
 
             # Process data from flood
-            #uls = norm.flush_upleft(fparam)
+            #uls = norm.flush_upleft(fparam.bounds, fparm.minx, fpar.miny)
             #nbs = norm.scale_vectors(uls, norm.ARRLEN)
             #nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
-            nbounds = fparam.bounds
-            nbounds.sort()
-            bbounds = fparam.body
-            bbounds.sort
+
+            # Short circuit for now
+            #nbounds = fparam.bounds
+            #nbounds.sort()
+
+            # Just for test
+            #bbounds = fparam.body
+            #bbounds.sort
             #print("nbounds len", len(nbounds))
 
+            # Save last
+            coords = (fparam.minx, fparam.miny, fparam.maxx, fparam.maxy,)
+            self.xparent.narr = [str(found), coords, fparam.mark,
+                                                fparam.body, fparam.bounds]
             # Save cummulative
             self.sumx.append(self.xparent.narr)
 
@@ -666,14 +710,10 @@ class ImgMain(Gtk.DrawingArea):
             if not addx:
                 self.xparent.simg2.clear()
 
-            # Save last
-            self.xparent.narr = (str(found), fparam.minx, fparam.miny,
-                                   fparam.ww, fparam.hh, fparam.mark,
-                                            len(fparam.bounds), nbounds, bbounds)
             # Display results
             for aa in nbounds:
                 #print(aa[0], aa[1])
-                offs = 4 * (aa[0] + aa[1] * self.xparent.simg2.ww)
+                offs = 4 * (aa[1] + aa[1] * self.xparent.simg2.ww)
                 #offs += 4 * fparam.minx
                 #offs += 4 * self.xparent.simg2.ww * fparam.miny
                 try:
@@ -691,11 +731,11 @@ class ImgMain(Gtk.DrawingArea):
                 if len(nbounds) == 0:
                     msg("No shape yet")
 
-                sss = get_str("Enter name for shape:")
-                if sss != "":
-                    #print( "Adding shape", sss)
-                    self.xparent.shapes.append(
-                        (sss, fparam.minx, fparam.miny, fparam.mark, len(fparm.bounds), nbounds))
+                #sss = get_str("Enter name for shape:")
+                #if sss != "":
+                #    #print( "Adding shape", sss)
+                #    self.xparent.shapes.append(
+                #        (sss, fparam.minx, fparam.miny, fparam.mark, len(fparm.bounds), nbounds))
 
             #for aa in fparam.body:
             #    #print(aa[0], aa[1])

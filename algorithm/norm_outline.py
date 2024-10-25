@@ -3,8 +3,8 @@
 import math
 import pyimgutils as iut
 
-ARRLEN = 128
-
+# This is the sample size that is stored in shape array
+ARRLEN = 200
 
 def norm_array(fparm):
 
@@ -70,10 +70,16 @@ def norm_array(fparm):
     resarr3 = scale_magnitude(resarr2, ARRLEN)
     return resarr3
 
-def flush_upleft(fparm):
+def norm_vectors(vects, minx, miny, size = ARRLEN):
+    ulf = flush_upleft(vects, minx, miny)
+    nbs = scale_vectors(ulf, size)
+    nbm = scale_magnitude(nbs, size)
+    return nbm
+
+def flush_upleft(vects, minx, miny):
     xarr = []
-    for aa in fparm.bounds:
-        xarr.append(([aa[0] - fparm.minx, aa[1] - fparm.miny]))
+    for aa in vects:
+        xarr.append(([aa[0] - minx, aa[1] - miny]))
     return xarr
 
 # ========================================================================

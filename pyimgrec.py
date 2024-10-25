@@ -3,8 +3,6 @@
 import os, sys, getopt, signal, array, pickle
 import time, traceback, warnings, random
 
-#warnings.simplefilter("ignore")
-
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -71,6 +69,7 @@ class MainWin():
 
     def __init__(self, args):
 
+        self.curr = []
         self.reenter = 0
         self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_title("Python Image Recognition")
@@ -207,13 +206,13 @@ class MainWin():
         self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
-        self.scale.set_value(255)
+        self.scale.set_value(200)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
         self.mainbox.pack_start(self.scale, 0, 0, 0)
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(24)
+        self.scale2.set_value(36)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -255,50 +254,6 @@ class MainWin():
 
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
-
-    # Button_press event on small image
-    def simg_button(self, win, eve):
-
-        print("simg_butt %.0f %.0f" % (eve.x, eve.y)) #, eve.state)
-
-        for aa in self.area.sumx:
-            if not len(aa):
-                continue
-            #if eve.x > aa[1] and eve.x <  aa[1] + aa[3]:
-            #    if eve.y > aa[2] and eve.y <  aa[2] + aa[4]:
-            #        print(aa[0], "x match:", aa[1], aa[1] + aa[3], end = " ")
-            #        print("y match:", aa[2], aa[2] + aa[4])
-
-            # see if on top of a fill
-            for aaa in aa[8]:
-                #print("aaa",aaa)
-                xdiff = abs(aaa[0] - int(eve.x))
-                if  xdiff < 1:
-                    #print("x match", xdiff, aa[0], aa[1], aa[2])
-                    ydiff = abs(aaa[1] - int(eve.y))
-                    if ydiff < 1:
-                        print("xy match", aa[0], aa[1], aa[2])
-                        #newcol = (random.randint(0, 0x80),
-                        #                    random.randint(0, 0x80),
-                        #                            random.randint(0, 0x80), 0xff)
-                        # Draw / Erase
-                        if eve.state:
-                            newcol = (102, 128, 128, 0xff)
-                        else:
-                            newcol = aa[5]
-
-                        for aaa in aa[8]:
-                            #print("aaa", aaa)
-                            row = 4 * (aaa[1]) * self.win3.simg.ww
-                            col = 4 * (aaa[0])
-                            for cnt, cc in enumerate(newcol):
-                                try:
-                                    self.win3.simg.buf[cnt + row + col] = cc
-                                except:
-                                    print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
-                        self.win3.simg.invalidate()
-                        #usleep(1000)
-                        break
 
     def add_win(self):
 
@@ -442,13 +397,13 @@ class MainWin():
 
         self.spacer(hbox, True )
 
-        butt6 = Gtk.Button.new_with_mnemonic(" Save Last S_hape ")
+        butt6 = Gtk.Button.new_with_mnemonic(" _Save Curr Shape ")
         butt6.connect("clicked", self.save_shape, window)
         hbox.pack_start(butt6, False, 0, 0)
 
         self.spacer(hbox)
 
-        butt7 = Gtk.Button.new_with_mnemonic(" Show All Shapes ")
+        butt7 = Gtk.Button.new_with_mnemonic(" Show All S_hapes ")
         butt7.connect("clicked", self.show_all_shapes, window)
         hbox.pack_start(butt7, False, 0, 0)
 
@@ -468,14 +423,14 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        butt9a = Gtk.Button.new_with_mnemonic(" Clear All Shapes ")
+        butt9a = Gtk.Button.new_with_mnemonic(" _Clear All Shapes ")
         butt9a.connect("clicked", self.clear_shapes, window)
         butt9a.set_tooltip_text("Will clear current shapes")
         hbox.pack_start(butt9a, False, 0, 0)
 
         self.spacer(hbox, False )
 
-        butt9a = Gtk.Button.new_with_mnemonic(" Delete Shape ")
+        butt9a = Gtk.Button.new_with_mnemonic(" _Delete Shape ")
         butt9a.connect("clicked", self.del_shape, window)
         butt9a.set_tooltip_text("Will delete shape, no undo")
         hbox.pack_start(butt9a, False, 0, 0)
@@ -496,7 +451,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt1 = Gtk.Button.new_with_mnemonic(" _Save Image ")
+        butt1 = Gtk.Button.new_with_mnemonic(" Sav_e Image ")
         butt1.connect("clicked", self.save_image, window)
         hbox.pack_start(butt1, False, 0, 0)
 
@@ -532,7 +487,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt5 = Gtk.Button.new_with_mnemonic(" _Clear Annote ")
+        butt5 = Gtk.Button.new_with_mnemonic(" Clear A_nnote ")
         butt5.connect("clicked", self.clear_annote, window)
         hbox.pack_start(butt5, False, 0, 0)
         self.spacer(hbox)
@@ -544,13 +499,13 @@ class MainWin():
 
         self.spacer(hbox, True )
 
-        butt6 = Gtk.Button.new_with_mnemonic(" _Normalize ")
+        butt6 = Gtk.Button.new_with_mnemonic(" N_ormalize ")
         butt6.connect("clicked", self.norm, window)
         hbox.pack_start(butt6, False, 0, 0)
 
         self.spacer(hbox)
 
-        butt6 = Gtk.Button.new_with_mnemonic(" _Histogram ")
+        butt6 = Gtk.Button.new_with_mnemonic(" His_togram ")
         butt6.connect("clicked", self.histo, window)
         hbox.pack_start(butt6, False, 0, 0)
 
@@ -568,7 +523,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt8 = Gtk.Button.new_with_mnemonic(" _Darken ")
+        butt8 = Gtk.Button.new_with_mnemonic(" Dar_ken ")
         butt8.connect("clicked", self.dar, window)
         hbox.pack_start(butt8, False,0 ,0)
 
@@ -592,7 +547,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt92 = Gtk.Button.new_with_mnemonic(" Blan_k ")
+        butt92 = Gtk.Button.new_with_mnemonic(" Blank ")
         butt92.connect("clicked", self.blank, window)
         hbox.pack_start(butt92, False,0 ,0)
 
@@ -697,27 +652,82 @@ class MainWin():
             print( sys.exc_info())
             msg("Cannot save file:\n%s" % fname)
 
+    # Button_press event on small image
+    def simg_button(self, win, eve):
+
+        print("simg_butt", int(eve.x), int(eve.y)) #, eve.state)
+
+        #for cnt, cc in enumerate(self.area.sumx[1]):
+        #    print("sumx[1]", cnt, cc[:12])
+
+        for aa in self.area.sumx:
+            if not len(aa):
+                continue
+
+            # see if on top of a fill
+            for aaa in aa[3]:
+                #print("aaa",aaa)
+                xdiff = abs(aaa[0] - int(eve.x))
+                if  xdiff < 1:
+                    #print("x match", xdiff, aa[0], aa[1], aa[2])
+                    ydiff = abs(aaa[1] - int(eve.y))
+                    if ydiff < 1:
+                        print("xy match", aa[0], aa[1], aa[2])
+                        self.curr = aa
+
+                        #newcol = (random.randint(0, 0x80),
+                        #                    random.randint(0, 0x80),
+                        #                            random.randint(0, 0x80), 0xff)
+                        # Draw / Erase
+                        if eve.state:
+                            newcol = (102, 128, 128, 0xff)
+                        else:
+                            newcol = aa[2]
+                            newcol = (0x00, 0x00, 0x00, 0xff)
+
+                        for aaa in aa[3]:
+                            #print("aaa", aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    pass
+                                    #self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        newcol = (0x00, 0x00, 0xff, 0xff)
+                        for aaa in aa[4]:
+                            #print("aaa", aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        #usleep(1000)
+                        break
+
     def fractal_image(self, win, a3):
 
-        ''' attempt to see if random selection would hit ... NO '''
+        ''' see selection animated '''
 
         if self.reenter:
            self.reenter = 0
            return
-
         self.reenter = 1
-
         self.win3.simg.clear()
-
         for cnt, aa in enumerate(self.area.sumx):
-
             if self.reenter == 0:
                 break
-
             if len(aa) == 0:
                 continue
-            for aaa in aa[8]:
-                newcol = aa[5]
+            #self.win3.simg.clear()
+            for aaa in aa[4]:
+                #newcol = aa[2]
+                newcol = (0x00, 0x00, 0x00, 0xff)
                 row = 4 * (aaa[1]) * self.win3.simg.ww
                 col = 4 * (aaa[0])
                 for cnt, cc in enumerate(newcol):
@@ -726,7 +736,8 @@ class MainWin():
                     except:
                         print("win3 exc", "aa[:5] =", aa[:5], "aaa =", aaa, sys.exc_info())
             self.win3.simg.invalidate()
-            usleep(10)
+            usleep(100)
+        self.reenter = 0
 
 
     def fractal_image2(self, win, a3):
@@ -833,15 +844,17 @@ class MainWin():
 
     def save_shape(self, win, a3):
         #print( "Save shape data", len(self.narr))
-        if len(self.narr) == 0:
+        if len(self.curr) == 0:
             msg("No shape yet")
             return
-
-        sss = get_str("Enter name for (the last) shape:")
+        sss = get_str("Enter name for (the selected) shape:")
         if sss != "":
             #print( "Adding shape", sss)
-            self.shapes.append((sss, self.narr[1],
-                    self.narr[2], self.narr[3], self.narr[4]) )
+            #print("save", self.curr[:8])
+            xarr = ol.norm_vectors(self.curr[7], self.curr[1], self.curr[2])
+            res = (sss, *self.curr[1:5], xarr)
+            self.shapes.append(res)
+            print("Added", res)
 
     def del_shape(self, win, a3):
         #print( "Delete shape")
@@ -864,10 +877,11 @@ class MainWin():
             return
         for ss in self.shapes:
             self.simg2.clear()
-            print( ss[0:4], "len:", len(ss[4]), ss[4][:3])
-            self.lab.set_text(ss[0])
+            #print( ss[0:5], "len:", len(ss[7]), ss[7][:3])
+            #print("ss", ss[:10])
+            #self.lab.set_text(ss[0])
             #ctx = cairo.Context(self.simg2.surface)
-            for aa in ss[4]:
+            for aa in ss[5]:
                 #print(aa[0], aa[1])
                 offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
                 try:
@@ -919,7 +933,7 @@ if __name__ == '__main__':
     global mainwin
 
     autohide = False
-    print()
+    #print()
     print( "Imgrec Version", imgrec.version(), imgrec.builddate())
     #print( "Imgrec   ", imgrec.__dict__)
 

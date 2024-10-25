@@ -275,4 +275,12 @@ def printarr(arr):
         print( "%.2d %d  " % (aa[0], aa[1]),)
     print()
 
+# Create enums
+def do_enums(dot_strs, localx):
+    for cnt, aa in enumerate(dot_strs):
+        localx.setdefault(aa, cnt)
+        #xstr = "print(locals().get('%s'))" % (aa)
+        #print(xstr)
+        #eval(xstr)
+
 # EOF
