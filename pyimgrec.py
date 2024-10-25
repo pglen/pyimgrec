@@ -206,13 +206,13 @@ class MainWin():
         self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
-        self.scale.set_value(200)
+        self.scale.set_value(255)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
         self.mainbox.pack_start(self.scale, 0, 0, 0)
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(36)
+        self.scale2.set_value(20)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -660,6 +660,9 @@ class MainWin():
         #for cnt, cc in enumerate(self.area.sumx[1]):
         #    print("sumx[1]", cnt, cc[:12])
 
+        if not eve.state & Gdk.ModifierType.SHIFT_MASK:
+            self.win3.simg.clear()
+
         for aa in self.area.sumx:
             if not len(aa):
                 continue
@@ -679,10 +682,10 @@ class MainWin():
                         #                    random.randint(0, 0x80),
                         #                            random.randint(0, 0x80), 0xff)
                         # Draw / Erase
-                        if eve.state:
+                        if eve.state & Gdk.ModifierType.CONTROL_MASK:
                             newcol = (102, 128, 128, 0xff)
                         else:
-                            newcol = aa[2]
+                            #newcol = aa[2]
                             newcol = (0x00, 0x00, 0x00, 0xff)
 
                         for aaa in aa[3]:
@@ -692,7 +695,7 @@ class MainWin():
                             for cnt, cc in enumerate(newcol):
                                 try:
                                     pass
-                                    #self.win3.simg.buf[cnt + row + col] = cc
+                                    self.win3.simg.buf[cnt + row + col] = cc
                                 except:
                                     print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
                         self.win3.simg.invalidate()
@@ -703,12 +706,13 @@ class MainWin():
                             col = 4 * (aaa[0])
                             for cnt, cc in enumerate(newcol):
                                 try:
-                                    self.win3.simg.buf[cnt + row + col] = cc
+                                    pass
+                                    #self.win3.simg.buf[cnt + row + col] = cc
                                 except:
                                     print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
                         self.win3.simg.invalidate()
-                        #usleep(1000)
-                        break
+                        usleep(1000)
+                        #break
 
     def fractal_image(self, win, a3):
 

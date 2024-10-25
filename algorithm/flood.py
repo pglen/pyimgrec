@@ -31,7 +31,6 @@ iut.do_enums(dot_strs, locals())
 # Scanning order for xxx, yyy at: R B L A
 scan_ops = ((1,0), (0,1), (-1,0), (0,-1))
 scan_idx = len(scan_ops) - 1
-reenter = 0
 
 def SQR(val):
     return val * val
@@ -56,11 +55,13 @@ class floodParm():
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
         self.iww = 0;           self.ihh = 0
-        self.tmesub = [];
+        self.reenter = 0
+
+        self.tmesub = [];       self.dones = {}
         self.bounds = [];       self.body  = []
         self.stack = stack.Stack()
 
-def Seek(xxx, yyy, param, dones):
+def Seek(xxx, yyy, param, gl_dones):
 
     ''' find next floodable region / non background pixel.
     History:
@@ -69,9 +70,9 @@ def Seek(xxx, yyy, param, dones):
 
     xx = xxx; yy = yyy
 
-    for yy in range(yyy, param.ihh):
-        for xx in range(0, param.iww):
-            if is_cell_done(xx, yy, dones):
+    for yy in range(yyy, param.ihh, 10):
+        for xx in range(xxx, param.iww, 10):
+            if is_cell_done(xx, yy, gl_dones):
                 continue
             val = param.darr[yy][xx]
 
@@ -80,14 +81,18 @@ def Seek(xxx, yyy, param, dones):
 
             cc = (val[0] + val[1] + val[2]) // 3
             #print(cc, end = " ")
+
             if cc <= param.markcol:
                 return (1, xx, yy)
-    return  (0, xx, yy)
+    return  (0, xxx, yy)
 
 def __callb(xxxx, yyyy, kind, param):
+    ''' Extracted to sub timings '''
     if param.callb:
         ttt2 = time.time()
         param.callb(xxxx, yyyy, kind, param);
+
+        # We accumulate the timing taken by the display
         param.tmesub.append(time.time() - ttt2)
 
 # ------------------------------------------------------------------------
@@ -117,16 +122,15 @@ def __callb(xxxx, yyyy, kind, param):
 # Relies on code from stack.py
 #
 
-def Flood(xxx, yyy, param, dones):
+def Flood(xxx, yyy, param, gl_dones):
 
     ret = 0
-    global reenter
     # Safety net
-    if reenter:
+    if param.reenter:
         print( "Flood re-entry", xxx, yyy)
-        reenter =+ 1
+        param.reenter =+ 1
         return -1
-    reenter += 1
+    param.reenter += 1
 
     ttt = time.time()
     # Mark initial position's color
@@ -156,8 +160,10 @@ def Flood(xxx, yyy, param, dones):
         param.mark = param.darr[yyy][xxx]  # override
     except KeyError:
         print( "Start pos past end %d / %d" % (xxx, yyy))
-        reenter -= 1
+        param.reenter -= 1
         return -1
+
+    _mark_cell_done(xxx, yyy, gl_dones)
 
     param.tmesub = []
     param.stack.push((xxx, yyy, 0))
@@ -171,8 +177,8 @@ def Flood(xxx, yyy, param, dones):
     startop = 0
     while True :
         #print("new loop", xxx, yyy, "start", startop)
-        if reenter > 1:
-            reenter = 1
+        if param.reenter > 1:
+            param.reenter = 1
             ret = -1
             break
 
@@ -183,7 +189,6 @@ def Flood(xxx, yyy, param, dones):
         # Used during development
         #if param.cnt > 500:
         #    break
-
         nnn = 0
         # Iterate operators: Right - Down - Left - Up
         while 1:
@@ -213,19 +218,19 @@ def Flood(xxx, yyy, param, dones):
                 __callb(xxxx, yyyy, DOT_BOUND, param);
                 continue
 
-            if is_cell_done(xxx2, yyy2, dones):
+            if is_cell_done(xxx2, yyy2, param.dones):
                 nnn += 1
                 continue
 
             # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
-            retx = _scan_one(xxx2, yyy2, param, dones)
+            retx = _scan_one(xxx2, yyy2, param)
             #print("scan", xxx2, yyy2, "ret", ret, "start", startop, "nnn", nnn)
 
-            # Note: we mark all cells, including boundary
-            _mark_cell_done(xxx2, yyy2, dones)
+            # Note: we mark all cells globally
+            _mark_cell_done(xxx2, yyy2, gl_dones)
 
             if  retx == DOT_YES:
-                #_mark_cell_done(xxx2, yyy2, dones)
+                _mark_cell_done(xxx2, yyy2, param.dones)
                 #print("Jump", xxx2, yyy2, "start", startop, "nnn", nnn)
                 param.stack.push((xxx2, yyy2, startop+nnn))
                 param.body.append((xxxx, yyyy))
@@ -246,7 +251,7 @@ def Flood(xxx, yyy, param, dones):
             elif retx == DOT_MARKED:
                 # No action
                 pass
-                param.bounds.append((xxxx, yyyy))
+                #param.bounds.append((xxxx, yyyy))
                 #if param.callb:
                 #    param.callb(xxxx, yyyy, DOT_MARKED, param);
             else:
@@ -257,9 +262,9 @@ def Flood(xxx, yyy, param, dones):
         if nnn+startop > scan_idx:
             # It is less costly to scan it again
             #xxx, yyy, startop = param.stack.pop()
-            #_mark_cell_done(xxx, yyy, dones)
+            #_mark_cell_done(xxx, yyy, param.dones)
             xxx, yyy, _ = param.stack.pop()
-            param.bounds.append((xxx, yyy))
+            #param.bounds.append((xxx, yyy))
             #print("popped", xxx, yyy, "start", startop, "nnn", nnn, )
             #__callb(xxxx, yyyy, DOT_POP, param);
 
@@ -294,11 +299,11 @@ def Flood(xxx, yyy, param, dones):
     #print( "done cnt =", param.cnt, "ops =", param.ops)
     #print("dones", dones)
 
-    reenter -=1
+    param.reenter -=1
 
     return ret
 
-def _scan_one(xxx2, yyy2, param, dones):
+def _scan_one(xxx2, yyy2, param):
 
     ''' Scan one pixel, specified by the caller coordinates
         Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND

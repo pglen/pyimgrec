@@ -44,6 +44,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
 
+        self.reanal = 0
         self.xparent = xparent
         Gtk.DrawingArea.__init__(self);
 
@@ -545,8 +546,8 @@ class ImgMain(Gtk.DrawingArea):
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
                 self.xparent.simg.invalidate()
-                usleep(10)
-
+                if self.xparent.check4.get_active():
+                    usleep(1)
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
             pass
@@ -609,34 +610,22 @@ class ImgMain(Gtk.DrawingArea):
         #    self.invalidate(); usleep(.1)
         #return
 
+        self.reanal += 1
+        if self.reanal > 1:
+            print("Stopping Anal .. please wait")
+            return
+
         #imgrec.blank()  #self.invalidate()   #usleep(1)
 
         self.xparent.simg.clear()
         self.xparent.win2.simg.clear()
 
-        dones = {}; nbounds = []; found = 0
+        gl_dones = {}; nbounds = []; found = 0
         self.sumx = []
         # Iterate all shapes
         while True:
-            if not single:
-                while True:
-                    xxx += 10;
-                    if xxx >= self.iww:
-                        xxx = 0; yyy += 10
-                    if yyy >= self.ihh:
-                            break;
-                    if  self.darr[yyy][xxx][0] < 0x200:
-                        try:
-                            if not dones[xxx, yyy]:
-                                break
-                        except:
-                            #print(sys.exc_info())
-                            break
-                #print("found at", xxx, yyy)
-
-            if yyy >= self.ihh:
-                    break
-
+            if self.reanal > 1:
+                break
             # Set up flood fill parameters
             fparam = flood.floodParm(self.darr, self.callb);
             fparam.iww = self.iww;  fparam.ihh = self.ihh
@@ -645,12 +634,31 @@ class ImgMain(Gtk.DrawingArea):
             fparam.markcol = MARKCOL
             fparam.breath = 30
             #fparam.verbose = 1
+
+            if not single:
+                increment = self.iww // 50
+                #print("inc", increment)
+                xxx += increment
+                ret, xx, yy = flood.Seek(xxx, yyy, fparam, gl_dones)
+                #print("found at", ret, xx, yy)
+                if ret:
+                    xxx = xx; yyy = yy
+                else:
+                    xxx += increment; yyy += increment
+                    if xxx >= fparam.iww:
+                        xxx = 0; yyy += increment
+                if yyy >= self.ihh:
+                        break
+
+            if yyy >= self.ihh:
+                break
+
             if self.xparent.check3.get_active():
                 #print("Grey compare")
                 fparam.grey = True
 
                 #print("seek start:", xxx, yyy, end = " ")
-                #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, dones)
+                #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, gl_dones)
                 #print("seek ret:", ret, xxx, yyy)
                 #if not ret:
                 #    if xxx > 0:
@@ -664,7 +672,7 @@ class ImgMain(Gtk.DrawingArea):
 
             #ttt = time.time()
             try:
-                ret = flood.Flood(xxx, yyy, fparam, dones)
+                ret = flood.Flood(xxx, yyy, fparam, gl_dones)
             except:
                 print(sys.exc_info())
                 break
@@ -672,12 +680,11 @@ class ImgMain(Gtk.DrawingArea):
             if ret == -1:
                 break
 
-            if len(fparam.bounds) < 12:
+            if len(fparam.bounds) < 4:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
                 #xxx += 10; yyy += 10
                 continue
-
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
@@ -762,6 +769,7 @@ class ImgMain(Gtk.DrawingArea):
             except:
                 print("exc sumx", sys.exc_info())
 
+        self.reanal = 0
         print("%d segments found." % found)
 
     def compare(self, xarr, fbounds):
