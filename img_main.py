@@ -44,6 +44,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
 
+        self.gl_dones = {};
         self.reanal = 0
         self.xparent = xparent
         Gtk.DrawingArea.__init__(self);
@@ -77,6 +78,7 @@ class ImgMain(Gtk.DrawingArea):
         #                    Gtk.gdk.KEY_RELEASE_MASK |
         #                    Gtk.gdk.FOCUS_CHANGE_MASK )
 
+        self.laststate = 0
         self.connect("key-press-event", self.key_press_event)
         self.connect("button-press-event", self.area_button)
         #self.connect("expose-event", self.expose)
@@ -222,6 +224,8 @@ class ImgMain(Gtk.DrawingArea):
     # --------------------------------------------------------------------
     def key_press_event(self, win, event):
 
+        self.laststate = event.state
+
         #print( "img key_press_event", win, event)
         if event.state & Gtk.gdk.MOD1_MASK:
             if event.keyval == Gdk.KEY_x or event.keyval == Gtk.KEY_X:
@@ -237,6 +241,8 @@ class ImgMain(Gtk.DrawingArea):
         self.invalidate()
 
     def  area_button(self, win, event):
+
+        self.laststate = event.state
 
         rc = self.get_allocation()
         #print( "img button", event.x, event.y, rc.width, rc.height)
@@ -509,15 +515,24 @@ class ImgMain(Gtk.DrawingArea):
             elif kind == flood.DOT_NO:
                 newcol = (0xff, 0xff, 0x00, 0xff)
                 #newcol = None
-            elif kind == flood.DOT_MARKED:
-                #newcol = (0x00, 0xff, 0x00, 0xff)
-                newcol = None
             elif kind == flood.DOT_BOUND:
                 newcol = (0x00, 0x00, 0xff, 0xff)
-            elif kind == flood.DOT_INVALID:
-                pass
             elif kind == flood.DOT_POP:
-                newcol = (0x00, 0xff, 0xff, 0xff)
+                #newcol = (0x00, 0xff, 0xff, 0xff)
+                newcol = None
+            elif kind == flood.DOT_MARK:
+                newcol = (0xff, 0xff, 0xff, 0xff)
+                for line in range(-4, +4):
+                    for cnt, aa in enumerate(newcol):
+                        offs = 4 * line + cnt + 4 * xxx + row
+                        self.xparent.simg.buf[offs] = newcol[cnt]
+                for vline in range(-4, +4):
+                    for cnt, aa in enumerate(newcol):
+                        offs = + cnt + 4 * xxx + row + 4 * vline * self.iww
+                        self.xparent.simg.buf[offs] = newcol[cnt]
+                newcol = None
+            elif kind == flood.DOT_INVALIDATE:
+                pass
             else:
                 print("unkown kind in callb")
                 newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
@@ -525,26 +540,35 @@ class ImgMain(Gtk.DrawingArea):
                 for cnt, aa in enumerate(newcol):
                     self.xparent.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
 
+            # ------------------------------------------------------------
             if kind == flood.DOT_YES:
                 newcol = (0x0, 0x0, 0x0, 0xff)
                 for cnt, aa in enumerate(newcol):
                     pass
                     #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
-                    self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
                     #self.xparent.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
 
             if kind == flood.DOT_NO:
+                newcol = (0x0, 0x0, 0x0, 0xff)
+                for cnt, aa in enumerate(newcol):
+                    self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
+                    #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
+
+            if kind == flood.DOT_BOUND:
                     xcol = (0x0, 0x0, 0xff, 0xff)
                     for cnt, aa in enumerate(xcol):
                         self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = xcol[cnt]
 
-            if kind == flood.DOT_INVALID:
+            if kind == flood.DOT_INVALIDATE:
                 # flush graphics
                 self.xparent.win2.simg.invalidate()
                 self.xparent.simg.invalidate()
 
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
+                self.xparent.win3.simg.invalidate()
                 self.xparent.simg.invalidate()
                 if self.xparent.check4.get_active():
                     usleep(1)
@@ -613,40 +637,45 @@ class ImgMain(Gtk.DrawingArea):
         self.reanal += 1
         if self.reanal > 1:
             print("Stopping Anal .. please wait")
+            flood.gl_reenter += 1
+            self.reanal = 0
             return
 
-        #imgrec.blank()  #self.invalidate()   #usleep(1)
+        # See if repeated request for scanning came
+        if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
+            self.xparent.simg.clear()
+            self.xparent.win2.simg.clear()
+            self.gl_dones = {}
 
-        self.xparent.simg.clear()
-        self.xparent.win2.simg.clear()
-
-        gl_dones = {}; nbounds = []; found = 0
+        nbounds = []; found = 0
         self.sumx = []
         # Iterate all shapes
         while True:
             if self.reanal > 1:
                 break
             # Set up flood fill parameters
-            fparam = flood.floodParm(self.darr, self.callb);
-            fparam.iww = self.iww;  fparam.ihh = self.ihh
+            fparam = flood.floodParm(self.iww, self.ihh, self.darr)
+            fparam.callb = self.callb
             fparam.stepx = self.stepx; fparam.stepy = self.stepy
             fparam.thresh = THRESH
             fparam.markcol = MARKCOL
             fparam.breath = 30
-            #fparam.verbose = 1
+            fparam.verbose = 0
 
             if not single:
                 increment = self.iww // 50
                 #print("inc", increment)
                 xxx += increment
-                ret, xx, yy = flood.Seek(xxx, yyy, fparam, gl_dones)
-                #print("found at", ret, xx, yy)
-                if ret:
-                    xxx = xx; yyy = yy
-                else:
-                    xxx += increment; yyy += increment
-                    if xxx >= fparam.iww:
-                        xxx = 0; yyy += increment
+                ret, xx, yy = flood.Seek(xxx, yyy, fparam, self.gl_dones)
+                print("seek found at", ret, xx, yy)
+                if not ret:
+                    break
+                #xxx = xx; yyy = yy
+                #else:
+                #    xxx += increment; yyy += increment
+                #    if xxx >= fparam.iww:
+                #        xxx = 0; yyy += increment
+
                 if yyy >= self.ihh:
                         break
 
@@ -658,7 +687,7 @@ class ImgMain(Gtk.DrawingArea):
                 fparam.grey = True
 
                 #print("seek start:", xxx, yyy, end = " ")
-                #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, gl_dones)
+                #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, self.gl_dones)
                 #print("seek ret:", ret, xxx, yyy)
                 #if not ret:
                 #    if xxx > 0:
@@ -672,7 +701,7 @@ class ImgMain(Gtk.DrawingArea):
 
             #ttt = time.time()
             try:
-                ret = flood.Flood(xxx, yyy, fparam, gl_dones)
+                ret = flood.Flood(xxx, yyy, fparam, self.gl_dones)
             except:
                 print(sys.exc_info())
                 break

@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flood API documentation</title>
+<meta name="description" content="The flood routines use a local and global &#39;done&#39; list.
+It is kept procedural (no class) in anticipation of converting it
+to a &#39;C&#39;
+module." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flood</code></h1>
+</header>
+<section id="section-intro">
+<p>The flood routines use a local and global 'done' list.
+It is kept procedural (no class) in anticipation of converting it
+to a 'C'
+module.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+
+import  os, sys, getopt, signal, array, random, math, time
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Pango
+
+import  pyimgutils as iut
+import  stack
+
+import imgrec.imgrec as imgrec
+
+__doc__ = \
+&#39;&#39;&#39;
+    The flood routines use a local and global &#39;done&#39; list.
+    It is kept procedural (no class) in anticipation of converting it
+    to a &#39;C&#39;
+    module.
+&#39;&#39;&#39;
+
+# Results of compare
+dot_strs = (&#34;DOT_NO&#34;, &#34;DOT_YES&#34;, &#34;DOT_BOUND&#34;, &#34;DOT_POP&#34;, &#34;DOT_INVALID&#34;)
+# Create enums
+iut.do_enums(dot_strs, locals())
+
+# Verify enums
+#for aaa in dot_strs:
+#    print(&#34;%s=%d&#34; % (aaa, locals().get(aaa)), end = &#34; &#34;)
+#print()
+#print(DOT_NO, DOT_YES, DOT_BOUND, DOT_POP, DOT_INVALID)
+
+# Scanning order for xxx, yyy at: R B L A
+scan_ops = ((1,0), (0,1), (-1,0), (0,-1))
+scan_idx = len(scan_ops) - 1
+
+# Shorthand for tasting power adding
+
+def _sqr(val):
+    return val * val
+
+class floodParm():
+
+    &#39;&#39;&#39;
+        Placeholder for lots of params for the floodfill function
+        Passing a data class as an argument will make it a
+        private / reentrent data.
+    &#39;&#39;&#39;
+
+    def __init__(self, darr, callb = None):
+
+        self.darr = darr;       self.callb = callb
+
+        self.mark = [0,0,0,0];  self.exit = 0
+        self.cnt = 0;           self.ops = 0
+        self.depth = 0;         self.verbose = 0;
+        self.thresh = 20;       self.breath = 20
+        self.markcol = 100;     self.grey = 0
+        self.stepx = 0;         self.stepy = 0
+        self.minx = 0;          self.miny = 0
+        self.maxx = 0;          self.maxy = 0
+        self.iww = 0;           self.ihh = 0
+        self.reenter = 0
+
+        self.tmesub = [];       self.dones = {}
+        self.bounds = [];       self.body  = []
+        self.stack = stack.Stack()
+
+#History:
+#            Sat 19.Oct.2024  start xxx from zero
+#
+
+def Seek(xxx, yyy, param, gl_dones):
+
+    &#39;&#39;&#39;
+    Find next flood-able region / non background pixel.
+
+    Parameters:&lt;br&gt;
+
+            xxx         start coordinate
+            yyy         start coordinate
+            param       the floodParm class (as in the Flood routine)
+            gl_dones    the global flood dones class
+    &#39;&#39;&#39;
+
+    xx = xxx; yy = yyy
+
+    for yy in range(yyy, param.ihh, 10):
+        for xx in range(xxx, param.iww, 10):
+            if is_cell_done(xx, yy, gl_dones):
+                continue
+            val = param.darr[yy][xx]
+
+            #if val[1] &lt; 200:
+            #    print(&#34;val&#34;, xx, yy, val, end = &#34; &#34;)
+
+            cc = (val[0] + val[1] + val[2]) // 3
+            #print(cc, end = &#34; &#34;)
+
+            if cc &lt;= param.markcol:
+                return (1, xx, yy)
+    return  (0, xxx, yy)
+
+def __callb(xxxx, yyyy, kind, param):
+
+    &#39;&#39;&#39; Extracted to subtract timings &#39;&#39;&#39;
+
+    if param.callb:
+        ttt2 = time.time()
+        param.callb(xxxx, yyyy, kind, param);
+
+        # We accumulate the timing taken by the display
+        param.tmesub.append(time.time() - ttt2)
+
+# ------------------------------------------------------------------------
+# FYI: python only does 1000 deep recursion.
+#     If two functions are recursed, that goes to 500 ...
+#     Example: func1() calls func2() recurses to func1() -- 500 of these
+#     ... never mind ... converted to python 3 table based
+#
+#     History:
+#
+#           Sept.2024           Resurrected from pyimgrec
+#           Oct.2024            Python 3 conversion
+#           Sat 12.Oct.2024     flood converted fron star to cross
+#           Wed 30.Oct.2024     docs, separate inner and outer &#39;dones&#39;
+#
+# Relies on code from stack.py
+#
+
+def Flood(xxx, yyy, param, gl_dones):
+
+    &#39;&#39;&#39;
+    Flood fill function. Fills the area in cross formation, clockwise.
+    Re-written from recursive to stack based.
+
+    Synonyms for directions:
+                R-right B-below L-left A-above
+
+    Scanning order: &lt;br&gt;
+
+                       R B L A
+                 (right, below, left, above)
+
+    Parameters: &lt;br&gt;
+
+        xxx, yyy        start coordinates
+        fparam          pre-filled floodParm parameter class
+                        ... most of the parameters are passed via this class.
+        dones           dictionary to store global done flags
+
+    Return Value: &lt;br&gt;
+
+        value of -1 if no more flooding
+
+    &#39;&#39;&#39;
+
+    ret = 0
+
+    # Safety net
+    if param.reenter:
+        print( &#34;Flood re-entry&#34;, xxx, yyy)
+        param.reenter =+ 1
+        return -1
+    param.reenter += 1
+
+    ttt = time.time()
+    # Mark initial position&#39;s color
+    try:
+        # Attempt averaging the staring point: (+x,+y)
+        # |  o      |  o +1+0 |
+        # |  o +0+1 |  o +1+1 |
+        &#39;&#39;&#39; try:
+            pt1 = param.darr[yyy][xxx]
+            pt2 = param.darr[yyy][xxx+1]
+            pt3 = param.darr[yyy+1][xxx+1]
+            pt4 = param.darr[yyy+1][xxx]
+            arr = (pt1, pt2, pt3,  pt4)
+            sumr = 0; sumg = 0; sumb = 0;
+            for aaa in arr:
+                #print(&#34;aaa&#34;, aaa)
+                sumr += aaa[0]
+                sumg += aaa[1]
+                sumb += aaa[2]
+            param.mark  = (sumr//3, sumg//3, sumb//3, 255)
+            #param.mark  = param.darr[yyy][xxx]
+            print(&#34;mark&#34;, param.mark,  &#34;darr&#34;, param.darr[yyy][xxx])
+        except:
+            print(&#34;mark dist&#34;, xxx, yyy, sys.exc_info())
+            param.mark = param.darr[yyy][xxx]
+        &#39;&#39;&#39;
+        # Just mark one
+        param.mark = param.darr[yyy][xxx]  # override
+    except KeyError:
+        print( &#34;Start pos past end %d / %d&#34; % (xxx, yyy))
+        param.reenter -= 1
+        return -1
+
+    param.tmesub = []
+    param.stack.push((xxx, yyy, 0))
+    # Scanning order:
+    #         4
+    #         x
+    #    3  x x x 1
+    #         x
+    #         2
+
+    # Walk the patches, loop until done
+    startop = 0
+    while True :
+        #print(&#34;new loop&#34;, xxx, yyy, &#34;start&#34;, startop)
+
+        # If someone called it with reentry, bail out.
+        # This is to allow the developer to terminate scan early, on demand.
+        if param.reenter &gt; 1:
+            param.reenter = 1
+            ret = -1
+            break
+
+        if param.stack.stacklen() == 0:
+            break
+
+        param.cnt += 1
+        # Used during development
+        #if param.cnt &gt; 500:
+        #    break
+
+        nnn = 0
+
+        # Iterate operators: Right - Down - Left - Up
+        while 1:
+            # Used during development
+            param.cnt += 1
+            #if param.cnt &gt; 500:
+            #    raise RuntimeError(&#34;Excceeded loop count&#34;)
+
+            if nnn+startop &gt; scan_idx:
+                #print(&#34;break op loop&#34;, xxx, yyy,  &#34;start&#34;, startop, &#34;nnn&#34;, nnn)
+                startop = 0
+                break
+
+            #print(&#34;xxx&#34;, xxx, &#34;yyy&#34;, yyy, &#34;nnn&#34;, nnn)
+            xxx2 = xxx + scan_ops[nnn+startop][0];
+            yyy2 = yyy + scan_ops[nnn+startop][1]
+
+            # Contain boundaries
+            xxxx = max(0, min(xxx2, param.iww-1))
+            yyyy = max(0, min(yyy2, param.ihh-1))
+
+            # Here we contain the boundaries by compare
+            #           (as opposed to raising an exception for ---&gt; &#39;C&#39;)
+            if xxx2 &lt; 0 or yyy2 &lt; 1 or \
+                    xxx2 &gt;= param.iww or yyy2 &gt;= param.ihh:
+                param.bounds.append((xxxx, yyyy))
+                #print(&#34;bound lz&#34;, xxx2, yyy2)
+                nnn += 1
+                __callb(xxxx, yyyy, DOT_BOUND, param);
+                continue
+
+            if is_cell_done(xxx2, yyy2, param.dones):
+                nnn += 1
+                continue
+
+            # possible outcomes: DOT_NO, DOT_YES, DOT_BOUND
+            retx = _scan_one(xxx2, yyy2, param, gl_dones)
+            #print(&#34;scan_one&#34;, xxx2, yyy2, &#34;ret&#34;, ret, &#34;start&#34;, startop, &#34;nnn&#34;, nnn)
+
+            if  retx == DOT_YES:
+                _mark_cell_done(xxx2, yyy2, param.dones)
+                #print(&#34;Jump&#34;, xxx2, yyy2, &#34;start&#34;, startop, &#34;nnn&#34;, nnn)
+                param.stack.push((xxx2, yyy2, startop+nnn))
+                param.body.append((xxxx, yyyy))
+                xxx = xxx2; yyy = yyy2
+                #xxx = xxxx; yyy = yyyy
+                __callb(xxxx, yyyy, DOT_YES, param);
+                break  # jump to next
+            elif  retx == DOT_NO:
+                #print(&#34;no&#34;, xxx2, yyy2, end = &#34; &#34;)
+                param.bounds.append((xxxx, yyyy))
+                __callb(xxxx, yyyy, DOT_NO, param);
+            elif retx == DOT_BOUND:
+                #print(&#34;bound&#34;, xxx2, yyy2, end = &#34; &#34;)
+                # Correct to within boundary
+                param.bounds.append((xxxx, yyyy))
+                __callb(xxxx, yyyy, DOT_BOUND, param);
+                pass
+            else:
+                pass
+                print(&#34;invalid ret from scan_one&#34;, retx)
+            nnn += 1
+
+        if nnn+startop &gt; scan_idx:
+            # It is less costly to scan it again
+            #xxx, yyy, startop = param.stack.pop()
+            #_mark_cell_done(xxx, yyy, param.dones)
+            xxx, yyy, _ = param.stack.pop()
+            #param.bounds.append((xxx, yyy))
+            #print(&#34;popped&#34;, xxx, yyy, &#34;start&#34;, startop, &#34;nnn&#34;, nnn, )
+            #__callb(xxxx, yyyy, DOT_POP, param);
+
+    # All operations done, pre-process
+    xlen = len(param.bounds)
+    bound  = _calc_bounds(param.bounds)
+    param.minx = bound[0]; param.miny = bound[1]
+    param.maxx = bound[2]; param.maxy = bound[3]
+    param.ww = param.maxx - param.minx
+    param.hh = param.maxy - param.miny
+
+    if param.callb:  # To flush all
+        __callb(0, 0, DOT_INVALID, param);
+
+    if xlen &gt; 4:
+        treal = (time.time() - ttt)
+        tsum = 0
+        for taa in param.tmesub:
+            tsum += taa
+
+        #print(&#34;tsum %.2f ms&#34; % (tsum * 1000) )
+        #print(&#34;treal %.2f ms&#34; % (treal * 1000) )
+
+        # subtract time spent in printing
+        tstr = &#34;%.2f ms&#34; % ((treal-tsum) * 1000)
+
+        print(&#34;Flood(): xxx&#34;, xxx, &#34;yyy&#34;, yyy, &#34;ww&#34;, param.ww, &#34;hh&#34;, param.hh,
+                    &#34;xlen&#34;, xlen, &#34;ops&#34;, param.ops, &#34;tstr&#34;, tstr)
+        #print(&#34;loop count&#34;, param.cnt, &#34;bounds len&#34;, len(param.bounds) )
+
+    #print(&#34;dones&#34;, len(param.dones), dones)
+    #print( &#34;done cnt =&#34;, param.cnt, &#34;ops =&#34;, param.ops)
+    #print(&#34;dones&#34;, dones)
+
+    # Output marked cells to global pool:
+    for aa in param.dones:
+        _mark_cell_done(xxx, yyy, gl_dones)
+
+    # Unlock flood rentry
+    param.reenter -=1
+
+    return ret
+
+def _scan_one(xxx2, yyy2, param, gl_dones):
+
+    &#39;&#39;&#39; Scan one pixel, specified by the caller coordinates
+        Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
+    &#39;&#39;&#39;
+
+    ret = DOT_NO
+    while 1:        # Substitute goto
+        param.ops += 1
+
+        if is_cell_done(xxx2, yyy2, gl_dones):
+            ret = DOT_BOUND
+            break
+        try:
+            if param.grey:
+                diff = _coldiffbw(param.mark, param.darr[yyy2][xxx2])
+            else:
+                diff = _coldiff(param.mark, param.darr[yyy2][xxx2])
+            #print( &#34;diff: 0x%x&#34; % diff, xxx2, yyy2)
+        except KeyError:
+            print( &#34;out of range: &#34;, xxx2, yyy2)
+            ret = DOT_BOUND
+            break
+        except:
+            iut.print_exception(&#34;coldiff&#34;)
+
+        if diff &lt; param.thresh:
+            ret = DOT_YES
+            break
+        else:
+            ret = DOT_NO
+            break
+        # Just in case
+        break
+
+    #print(&#34;scan_one:&#34;, xxx2, yyy2, dot_strs[ret])
+    return ret
+
+def _mark_cell_done(xxx, yyy, dones):
+
+    &#39;&#39;&#39;  Mark a cell done. Create dimension and value if not present &#39;&#39;&#39;
+
+    try:
+        old = dones[xxx]
+    except:
+       dones[xxx] = {}
+    try:
+        old = dones[xxx, yyy]
+        dones[xxx, yyy] += 1
+    except:
+        try:
+            dones[xxx, yyy] = 0
+            dones[xxx, yyy] += 1
+        except:
+            print(&#34;exc mark cell&#34;, sys.exc_info())
+
+# ------------------------------------------------------------------------
+# Return flag if visited before
+
+def _is_cell_done(xxx, yyy, dones):
+    try:
+        aa = dones[xxx, yyy]
+    except KeyError:
+        aa = 0
+    except:
+        print(&#34;is done&#34;, sys.exc_info())
+    return aa
+
+def coldiff(colm, colx):
+
+    &#39;&#39;&#39; Substruct color avarage from ref avarage. RGB version &#39;&#39;&#39;
+
+    #cc = math.sqrt(abs(_sqr(colm[0]) - SQR(colx[0]) ))
+    #dd = math.sqrt(abs(_sqr(colm[1]) - SQR(colx[1]) ))
+    #ee = math.sqrt(abs(_sqr(colm[2]) - SQR(colx[2]) ))
+
+    cc = abs(colm[0] - colx[0])
+    dd = abs(colm[1] - colx[1])
+    ee = abs(colm[2] - colx[2])
+
+    # Average
+    #ret = cc + dd + ee) // 3
+
+    # Maxdiff   Mon 21.Oct.2024 looks like this one is better
+    ret = max(max(cc, dd), ee)
+    #print(&#34;coldiff&#34;, colm, colx, ret)
+    return ret
+
+def _coldiffbw(colm, colx):
+
+    &#39;&#39;&#39; Substruct col avarage from ref avarage; grayscale version &#39;&#39;&#39;
+
+    cc = (colm[0] + colm[1] + colm[2]) // 3
+    dd = (colx[0] + colx[1] + colx[2]) // 3
+    ret = abs(cc - dd)
+    #print(&#34;coldiffbw&#34;, colm, colx, ret)
+    return ret
+
+def _calc_bounds(bounds):
+
+    &#39;&#39;&#39; Calculate boundaries of the data &#39;&#39;&#39;
+
+    minx = 10000; maxx = 0; miny = 10000; maxy = 0
+
+    for aa in bounds:
+        #print( aa,)
+        if minx &gt; aa[0]: minx = aa[0]
+        if miny &gt; aa[1]: miny = aa[1]
+        if maxx &lt; aa[0]: maxx = aa[0]
+        if maxy &lt; aa[1]: maxy = aa[1]
+
+    #print(&#34;calc_bounds() minx =&#34;, minx, &#34;miny =&#34;, miny,
+    #                            &#34;maxx =&#34;,  maxx,  &#34;maxy =&#34;, maxy)
+    return (minx, miny, maxx, maxy)
+
+# EOF</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="flood.Flood"><code class="name flex">
+<span>def <span class="ident">Flood</span></span>(<span>xxx, yyy, param, gl_dones)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Flood fill function. Fills the area in cross formation, clockwise.
+Re-written from recursive to stack based.</p>
+<p>Synonyms for directions:
+R-right B-below L-left A-above</p>
+<p>Scanning order: <br></p>
+<pre><code>               R B L A
+         (right, below, left, above)
+</code></pre>
+<p>Parameters: <br></p>
+<pre><code>xxx, yyy        start coordinates
+fparam          pre-filled floodParm parameter class
+                ... most of the parameters are passed via this class.
+dones           dictionary to store global done flags
+</code></pre>
+<p>Return Value: <br></p>
+<pre><code>value of -1 if no more flooding
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Flood(xxx, yyy, param, gl_dones):
+
+    &#39;&#39;&#39;
+    Flood fill function. Fills the area in cross formation, clockwise.
+    Re-written from recursive to stack based.
+
+    Synonyms for directions:
+                R-right B-below L-left A-above
+
+    Scanning order: &lt;br&gt;
+
+                       R B L A
+                 (right, below, left, above)
+
+    Parameters: &lt;br&gt;
+
+        xxx, yyy        start coordinates
+        fparam          pre-filled floodParm parameter class
+                        ... most of the parameters are passed via this class.
+        dones           dictionary to store global done flags
+
+    Return Value: &lt;br&gt;
+
+        value of -1 if no more flooding
+
+    &#39;&#39;&#39;
+
+    ret = 0
+
+    # Safety net
+    if param.reenter:
+        print( &#34;Flood re-entry&#34;, xxx, yyy)
+        param.reenter =+ 1
+        return -1
+    param.reenter += 1
+
+    ttt = time.time()
+    # Mark initial position&#39;s color
+    try:
+        # Attempt averaging the staring point: (+x,+y)
+        # |  o      |  o +1+0 |
+        # |  o +0+1 |  o +1+1 |
+        &#39;&#39;&#39; try:
+            pt1 = param.darr[yyy][xxx]
+            pt2 = param.darr[yyy][xxx+1]
+            pt3 = param.darr[yyy+1][xxx+1]
+            pt4 = param.darr[yyy+1][xxx]
+            arr = (pt1, pt2, pt3,  pt4)
+            sumr = 0; sumg = 0; sumb = 0;
+            for aaa in arr:
+                #print(&#34;aaa&#34;, aaa)
+                sumr += aaa[0]
+                sumg += aaa[1]
+                sumb += aaa[2]
+            param.mark  = (sumr//3, sumg//3, sumb//3, 255)
+            #param.mark  = param.darr[yyy][xxx]
+            print(&#34;mark&#34;, param.mark,  &#34;darr&#34;, param.darr[yyy][xxx])
+        except:
+            print(&#34;mark dist&#34;, xxx, yyy, sys.exc_info())
+            param.mark = param.darr[yyy][xxx]
+        &#39;&#39;&#39;
+        # Just mark one
+        param.mark = param.darr[yyy][xxx]  # override
+    except KeyError:
+        print( &#34;Start pos past end %d / %d&#34; % (xxx, yyy))
+        param.reenter -= 1
+        return -1
+
+    param.tmesub = []
+    param.stack.push((xxx, yyy, 0))
+    # Scanning order:
+    #         4
+    #         x
+    #    3  x x x 1
+    #         x
+    #         2
+
+    # Walk the patches, loop until done
+    startop = 0
+    while True :
+        #print(&#34;new loop&#34;, xxx, yyy, &#34;start&#34;, startop)
+
+        # If someone called it with reentry, bail out.
+        # This is to allow the developer to terminate scan early, on demand.
+        if param.reenter &gt; 1:
+            param.reenter = 1
+            ret = -1
+            break
+
+        if param.stack.stacklen() == 0:
+            break
+
+        param.cnt += 1
+        # Used during development
+        #if param.cnt &gt; 500:
+        #    break
+
+        nnn = 0
+
+        # Iterate operators: Right - Down - Left - Up
+        while 1:
+            # Used during development
+            param.cnt += 1
+            #if param.cnt &gt; 500:
+            #    raise RuntimeError(&#34;Excceeded loop count&#34;)
+
+            if nnn+startop &gt; scan_idx:
+                #print(&#34;break op loop&#34;, xxx, yyy,  &#34;start&#34;, startop, &#34;nnn&#34;, nnn)
+                startop = 0
+                break
+
+            #print(&#34;xxx&#34;, xxx, &#34;yyy&#34;, yyy, &#34;nnn&#34;, nnn)
+            xxx2 = xxx + scan_ops[nnn+startop][0];
+            yyy2 = yyy + scan_ops[nnn+startop][1]
+
+            # Contain boundaries
+            xxxx = max(0, min(xxx2, param.iww-1))
+            yyyy = max(0, min(yyy2, param.ihh-1))
+
+            # Here we contain the boundaries by compare
+            #           (as opposed to raising an exception for ---&gt; &#39;C&#39;)
+            if xxx2 &lt; 0 or yyy2 &lt; 1 or \
+                    xxx2 &gt;= param.iww or yyy2 &gt;= param.ihh:
+                param.bounds.append((xxxx, yyyy))
+                #print(&#34;bound lz&#34;, xxx2, yyy2)
+                nnn += 1
+                __callb(xxxx, yyyy, DOT_BOUND, param);
+                continue
+
+            if is_cell_done(xxx2, yyy2, param.dones):
+                nnn += 1
+                continue
+
+            # possible outcomes: DOT_NO, DOT_YES, DOT_BOUND
+            retx = _scan_one(xxx2, yyy2, param, gl_dones)
+            #print(&#34;scan_one&#34;, xxx2, yyy2, &#34;ret&#34;, ret, &#34;start&#34;, startop, &#34;nnn&#34;, nnn)
+
+            if  retx == DOT_YES:
+                _mark_cell_done(xxx2, yyy2, param.dones)
+                #print(&#34;Jump&#34;, xxx2, yyy2, &#34;start&#34;, startop, &#34;nnn&#34;, nnn)
+                param.stack.push((xxx2, yyy2, startop+nnn))
+                param.body.append((xxxx, yyyy))
+                xxx = xxx2; yyy = yyy2
+                #xxx = xxxx; yyy = yyyy
+                __callb(xxxx, yyyy, DOT_YES, param);
+                break  # jump to next
+            elif  retx == DOT_NO:
+                #print(&#34;no&#34;, xxx2, yyy2, end = &#34; &#34;)
+                param.bounds.append((xxxx, yyyy))
+                __callb(xxxx, yyyy, DOT_NO, param);
+            elif retx == DOT_BOUND:
+                #print(&#34;bound&#34;, xxx2, yyy2, end = &#34; &#34;)
+                # Correct to within boundary
+                param.bounds.append((xxxx, yyyy))
+                __callb(xxxx, yyyy, DOT_BOUND, param);
+                pass
+            else:
+                pass
+                print(&#34;invalid ret from scan_one&#34;, retx)
+            nnn += 1
+
+        if nnn+startop &gt; scan_idx:
+            # It is less costly to scan it again
+            #xxx, yyy, startop = param.stack.pop()
+            #_mark_cell_done(xxx, yyy, param.dones)
+            xxx, yyy, _ = param.stack.pop()
+            #param.bounds.append((xxx, yyy))
+            #print(&#34;popped&#34;, xxx, yyy, &#34;start&#34;, startop, &#34;nnn&#34;, nnn, )
+            #__callb(xxxx, yyyy, DOT_POP, param);
+
+    # All operations done, pre-process
+    xlen = len(param.bounds)
+    bound  = _calc_bounds(param.bounds)
+    param.minx = bound[0]; param.miny = bound[1]
+    param.maxx = bound[2]; param.maxy = bound[3]
+    param.ww = param.maxx - param.minx
+    param.hh = param.maxy - param.miny
+
+    if param.callb:  # To flush all
+        __callb(0, 0, DOT_INVALID, param);
+
+    if xlen &gt; 4:
+        treal = (time.time() - ttt)
+        tsum = 0
+        for taa in param.tmesub:
+            tsum += taa
+
+        #print(&#34;tsum %.2f ms&#34; % (tsum * 1000) )
+        #print(&#34;treal %.2f ms&#34; % (treal * 1000) )
+
+        # subtract time spent in printing
+        tstr = &#34;%.2f ms&#34; % ((treal-tsum) * 1000)
+
+        print(&#34;Flood(): xxx&#34;, xxx, &#34;yyy&#34;, yyy, &#34;ww&#34;, param.ww, &#34;hh&#34;, param.hh,
+                    &#34;xlen&#34;, xlen, &#34;ops&#34;, param.ops, &#34;tstr&#34;, tstr)
+        #print(&#34;loop count&#34;, param.cnt, &#34;bounds len&#34;, len(param.bounds) )
+
+    #print(&#34;dones&#34;, len(param.dones), dones)
+    #print( &#34;done cnt =&#34;, param.cnt, &#34;ops =&#34;, param.ops)
+    #print(&#34;dones&#34;, dones)
+
+    # Output marked cells to global pool:
+    for aa in param.dones:
+        _mark_cell_done(xxx, yyy, gl_dones)
+
+    # Unlock flood rentry
+    param.reenter -=1
+
+    return ret</code></pre>
+</details>
+</dd>
+<dt id="flood.Seek"><code class="name flex">
+<span>def <span class="ident">Seek</span></span>(<span>xxx, yyy, param, gl_dones)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Find next flood-able region / non background pixel.</p>
+<p>Parameters:<br></p>
+<pre><code>    xxx         start coordinate
+    yyy         start coordinate
+    param       the floodParm class (as in the Flood routine)
+    gl_dones    the global flood dones class
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Seek(xxx, yyy, param, gl_dones):
+
+    &#39;&#39;&#39;
+    Find next flood-able region / non background pixel.
+
+    Parameters:&lt;br&gt;
+
+            xxx         start coordinate
+            yyy         start coordinate
+            param       the floodParm class (as in the Flood routine)
+            gl_dones    the global flood dones class
+    &#39;&#39;&#39;
+
+    xx = xxx; yy = yyy
+
+    for yy in range(yyy, param.ihh, 10):
+        for xx in range(xxx, param.iww, 10):
+            if is_cell_done(xx, yy, gl_dones):
+                continue
+            val = param.darr[yy][xx]
+
+            #if val[1] &lt; 200:
+            #    print(&#34;val&#34;, xx, yy, val, end = &#34; &#34;)
+
+            cc = (val[0] + val[1] + val[2]) // 3
+            #print(cc, end = &#34; &#34;)
+
+            if cc &lt;= param.markcol:
+                return (1, xx, yy)
+    return  (0, xxx, yy)</code></pre>
+</details>
+</dd>
+<dt id="flood.coldiff"><code class="name flex">
+<span>def <span class="ident">coldiff</span></span>(<span>colm, colx)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Substruct color avarage from ref avarage. RGB version</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def coldiff(colm, colx):
+
+    &#39;&#39;&#39; Substruct color avarage from ref avarage. RGB version &#39;&#39;&#39;
+
+    #cc = math.sqrt(abs(_sqr(colm[0]) - SQR(colx[0]) ))
+    #dd = math.sqrt(abs(_sqr(colm[1]) - SQR(colx[1]) ))
+    #ee = math.sqrt(abs(_sqr(colm[2]) - SQR(colx[2]) ))
+
+    cc = abs(colm[0] - colx[0])
+    dd = abs(colm[1] - colx[1])
+    ee = abs(colm[2] - colx[2])
+
+    # Average
+    #ret = cc + dd + ee) // 3
+
+    # Maxdiff   Mon 21.Oct.2024 looks like this one is better
+    ret = max(max(cc, dd), ee)
+    #print(&#34;coldiff&#34;, colm, colx, ret)
+    return ret</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flood.floodParm"><code class="flex name class">
+<span>class <span class="ident">floodParm</span></span>
+<span>(</span><span>darr, callb=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Placeholder for lots of params for the floodfill function
+Passing a data class as an argument will make it a
+private / reentrent data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class floodParm():
+
+    &#39;&#39;&#39;
+        Placeholder for lots of params for the floodfill function
+        Passing a data class as an argument will make it a
+        private / reentrent data.
+    &#39;&#39;&#39;
+
+    def __init__(self, darr, callb = None):
+
+        self.darr = darr;       self.callb = callb
+
+        self.mark = [0,0,0,0];  self.exit = 0
+        self.cnt = 0;           self.ops = 0
+        self.depth = 0;         self.verbose = 0;
+        self.thresh = 20;       self.breath = 20
+        self.markcol = 100;     self.grey = 0
+        self.stepx = 0;         self.stepy = 0
+        self.minx = 0;          self.miny = 0
+        self.maxx = 0;          self.maxy = 0
+        self.iww = 0;           self.ihh = 0
+        self.reenter = 0
+
+        self.tmesub = [];       self.dones = {}
+        self.bounds = [];       self.body  = []
+        self.stack = stack.Stack()</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="flood.Flood" href="#flood.Flood">Flood</a></code></li>
+<li><code><a title="flood.Seek" href="#flood.Seek">Seek</a></code></li>
+<li><code><a title="flood.coldiff" href="#flood.coldiff">coldiff</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flood.floodParm" href="#flood.floodParm">floodParm</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

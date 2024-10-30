@@ -15,9 +15,16 @@ import  stack
 
 import imgrec.imgrec as imgrec
 
-# Results of compare
-
-dot_strs = ("DOT_NO", "DOT_YES", "DOT_MARKED", "DOT_BOUND", "DOT_POP", "DOT_INVALID")
+__doc__ = \
+'''
+    The flood routines use a local and global 'done' list.
+    It is kept procedural (no class) in anticipation of converting it
+    to a 'C'  module.
+    The local list is copied to global at the end of every scan.
+'''
+# Results of compare, and enums
+dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_POP", "DOT_MARK",
+                    "DOT_INVALIDATE")
 # Create enums
 iut.do_enums(dot_strs, locals())
 
@@ -25,27 +32,32 @@ iut.do_enums(dot_strs, locals())
 #for aaa in dot_strs:
 #    print("%s=%d" % (aaa, locals().get(aaa)), end = " ")
 #print()
+#print("verify:", DOT_NO, DOT_YES, DOT_BOUND, DOT_POP, DOT_MARK, DOT_INVALIDATE)
 
-#print(DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND, DOT_POP, DOT_INVALID)
+gl_reenter = 0
 
 # Scanning order for xxx, yyy at: R B L A
 scan_ops = ((1,0), (0,1), (-1,0), (0,-1))
 scan_idx = len(scan_ops) - 1
 
-def SQR(val):
+# Shorthand for testing power manipulations (expensive, not essencial)
+
+def _sqr(val):
     return val * val
 
 class floodParm():
 
     '''
         Placeholder for lots of params for the floodfill function
-        Passing a data class will make it private / reentrant data
+        Passing a data class as an argument will make it a
+        private / reentrent data.
     '''
 
-    def __init__(self, darr, callb = None):
+    def __init__(self, iww, ihh, darr):
 
-        self.darr = darr;       self.callb = callb
-
+        self.darr = darr;
+        self.iww = iww;         self.ihh = ihh
+        self.callb = None;      self.verbose = 0
         self.mark = [0,0,0,0];  self.exit = 0
         self.cnt = 0;           self.ops = 0
         self.depth = 0;         self.verbose = 0;
@@ -54,26 +66,37 @@ class floodParm():
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
-        self.iww = 0;           self.ihh = 0
-        self.reenter = 0
-
         self.tmesub = [];       self.dones = {}
         self.bounds = [];       self.body  = []
         self.stack = stack.Stack()
 
+# Seek(xxx, yyy, param, gl_dones)
+# History:
+#           Sat 19.Oct.2024  start xxx from zero
+#           Wed 30.Oct.2024  cross marked - wtf
+#
+
 def Seek(xxx, yyy, param, gl_dones):
 
-    ''' find next floodable region / non background pixel.
-    History:
-            Sat 19.Oct.2024  start xxx from zero
+    '''
+    Find next flood-able region / non background pixel.
+
+    Parameters:<br>
+
+            xxx         start coordinate
+            yyy         start coordinate
+            param       the floodParm class (as for the Flood routine)
+            gl_dones    the global flood dones dictionary
     '''
 
     xx = xxx; yy = yyy
 
     for yy in range(yyy, param.ihh, 10):
         for xx in range(xxx, param.iww, 10):
-            if is_cell_done(xx, yy, gl_dones):
+            if _is_cell_done(xx, yy, gl_dones):
+                print("Skipping" ,xx, yy)
                 continue
+
             val = param.darr[yy][xx]
 
             #if val[1] < 200:
@@ -87,50 +110,71 @@ def Seek(xxx, yyy, param, gl_dones):
     return  (0, xxx, yy)
 
 def __callb(xxxx, yyyy, kind, param):
-    ''' Extracted to sub timings '''
-    if param.callb:
-        ttt2 = time.time()
-        param.callb(xxxx, yyyy, kind, param);
 
-        # We accumulate the timing taken by the display
-        param.tmesub.append(time.time() - ttt2)
+    ''' Extracted routine to subtract time spent in callback '''
+
+    if not param.callb:
+        return
+
+    ttt2 = time.time()
+    param.callb(xxxx, yyyy, kind, param);
+
+    # We accumulate the timing taken by the display
+    param.tmesub.append(time.time() - ttt2)
 
 # ------------------------------------------------------------------------
-# Flood fill. Fill in cross formation, clockwise. Re-written from recursive
-# to stack based. FYI: python (2.6) only does 1000 deep recursion.
-# If two functions are recursed, that goes to 500 ...
-# Example: func1() calls func2() recurses to func1() -- 500 of these
+# FYI: python only does 1000 deep recursion.
+#     If two functions are recursed, that goes to 500 ...
+#     Example: func1() calls func2() recurses to func1() -- 500 of these
+#     ... never mind ... converted to python 3 table based
 #
-# ... never mind ... converted to python 3 table based
+#     History:
 #
-# Synonyms for directions:
-#            L-left R-right A-above B-below
-#
-# Scanning order:
-#                   R B L A
-# Parms:
-#   xxx, yyy    start coordinates
-#    fparm      pre filled parameter class
-#               ... most of the parameters are passed via this class.
-#    dones      dictioanry to store done flags
-#
-# History:
 #           Sept.2024           Resurrected from pyimgrec
 #           Oct.2024            Python 3 conversion
 #           Sat 12.Oct.2024     flood converted fron star to cross
+#           Wed 30.Oct.2024     docs, separate inner and outer 'dones'
 #
 # Relies on code from stack.py
 #
 
 def Flood(xxx, yyy, param, gl_dones):
 
+    '''
+    Flood fill function. Fills the area in cross formation, clockwise.
+    Re-written from recursive to stack based.
+
+    Synonyms for directions:
+                R-right B-below L-left A-above
+
+    Scanning order: <br>
+
+                       R B L A
+                 (right, below, left, above)
+
+    Parameters: <br>
+
+        xxx, yyy        start coordinates
+        fparam          pre-filled floodParm parameter class
+                        ... most of the parameters are passed via this class.
+        dones           dictionary to store global done flags
+
+    Return Value: <br>
+
+        value of -1 if no more flooding
+
+    '''
+
+    global gl_reenter
+
     ret = 0
+
     # Safety net
-    if param.reenter:
+    if gl_reenter:
         print( "Flood re-entry", xxx, yyy)
-        param.reenter =+ 1
+        gl_reenter =+ 1
         return -1
-    param.reenter += 1
+    gl_reenter += 1
 
     ttt = time.time()
     # Mark initial position's color
@@ -152,18 +196,17 @@ def Flood(xxx, yyy, param, gl_dones):
                 sumb += aaa[2]
             param.mark  = (sumr//3, sumg//3, sumb//3, 255)
             #param.mark  = param.darr[yyy][xxx]
-            print("mark", param.mark,  "darr", param.darr[yyy][xxx])
+            #print("mark", param.mark,  "darr", param.darr[yyy][xxx])
         except:
-            print("mark dist", xxx, yyy, sys.exc_info())
+            #print("mark dist", xxx, yyy, sys.exc_info())
             param.mark = param.darr[yyy][xxx]
         '''
+        # Just mark one
         param.mark = param.darr[yyy][xxx]  # override
     except KeyError:
         print( "Start pos past end %d / %d" % (xxx, yyy))
-        param.reenter -= 1
+        gl_reenter = 0
         return -1
-
-    _mark_cell_done(xxx, yyy, gl_dones)
 
     param.tmesub = []
     param.stack.push((xxx, yyy, 0))
@@ -173,12 +216,19 @@ def Flood(xxx, yyy, param, gl_dones):
     #    3  x x x 1
     #         x
     #         2
+
+    #print("iww", param.iww, "ihh", param.ihh)
+
     # Walk the patches, loop until done
     startop = 0
     while True :
         #print("new loop", xxx, yyy, "start", startop)
-        if param.reenter > 1:
-            param.reenter = 1
+
+        #iut.usleep(1)
+        # If someone called it with reentry, bail out.
+        # This is to allow the developer to terminate scan early, on demand.
+        if gl_reenter > 1:
+            gl_reenter =  0
             ret = -1
             break
 
@@ -189,7 +239,9 @@ def Flood(xxx, yyy, param, gl_dones):
         # Used during development
         #if param.cnt > 500:
         #    break
+
         nnn = 0
+
         # Iterate operators: Right - Down - Left - Up
         while 1:
             # Used during development
@@ -210,6 +262,8 @@ def Flood(xxx, yyy, param, gl_dones):
             xxxx = max(0, min(xxx2, param.iww-1))
             yyyy = max(0, min(yyy2, param.ihh-1))
 
+            # Here we contain the boundaries by compare
+            #           (as opposed to raising an exception for ---> 'C')
             if xxx2 < 0 or yyy2 < 1 or \
                     xxx2 >= param.iww or yyy2 >= param.ihh:
                 param.bounds.append((xxxx, yyyy))
@@ -218,21 +272,19 @@ def Flood(xxx, yyy, param, gl_dones):
                 __callb(xxxx, yyyy, DOT_BOUND, param);
                 continue
 
-            if is_cell_done(xxx2, yyy2, param.dones):
+            if _is_cell_done(xxx2, yyy2, param.dones):
+                #print("cell done", xxx2, yyy2)
                 nnn += 1
                 continue
 
-            # possible outcomes: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
-            retx = _scan_one(xxx2, yyy2, param)
-            #print("scan", xxx2, yyy2, "ret", ret, "start", startop, "nnn", nnn)
-
-            # Note: we mark all cells globally
-            _mark_cell_done(xxx2, yyy2, gl_dones)
+            # possible outcomes: DOT_NO, DOT_YES, DOT_BOUND
+            retx = _scan_one(xxx2, yyy2, param, gl_dones)
+            #print(xxx2, yyy2, ret, end = " - ")
 
             if  retx == DOT_YES:
                 _mark_cell_done(xxx2, yyy2, param.dones)
                 #print("Jump", xxx2, yyy2, "start", startop, "nnn", nnn)
-                param.stack.push((xxx2, yyy2, startop+nnn))
+                param.stack.push((xxx, yyy, startop+nnn))
                 param.body.append((xxxx, yyyy))
                 xxx = xxx2; yyy = yyy2
                 #xxx = xxxx; yyy = yyyy
@@ -245,39 +297,33 @@ def Flood(xxx, yyy, param, gl_dones):
             elif retx == DOT_BOUND:
                 #print("bound", xxx2, yyy2, end = " ")
                 # Correct to within boundary
-                #param.bounds.append((xxxx, yyyy))
-                #__callb(xxxx, yyyy, DOT_BOUND, param);
+                param.bounds.append((xxxx, yyyy))
+                __callb(xxxx, yyyy, DOT_BOUND, param);
                 pass
-            elif retx == DOT_MARKED:
-                # No action
-                pass
-                #param.bounds.append((xxxx, yyyy))
-                #if param.callb:
-                #    param.callb(xxxx, yyyy, DOT_MARKED, param);
             else:
                 pass
-                #print("invalid ret from scan_one", retx)
+                print("invalid ret from scan_one", retx)
             nnn += 1
 
         if nnn+startop > scan_idx:
             # It is less costly to scan it again
             #xxx, yyy, startop = param.stack.pop()
             #_mark_cell_done(xxx, yyy, param.dones)
+            #xxx, yyy, startop = param.stack.pop()
             xxx, yyy, _ = param.stack.pop()
             #param.bounds.append((xxx, yyy))
             #print("popped", xxx, yyy, "start", startop, "nnn", nnn, )
             #__callb(xxxx, yyyy, DOT_POP, param);
 
-    # All operations done, pre-process
+    # All operations done, post-process
     xlen = len(param.bounds)
-    bound  = _calc_bounds(param.bounds)
+    bound  = calc_flood_bounds(param.bounds)
     param.minx = bound[0]; param.miny = bound[1]
     param.maxx = bound[2]; param.maxy = bound[3]
     param.ww = param.maxx - param.minx
     param.hh = param.maxy - param.miny
 
-    if param.callb:  # To flush all
-        __callb(0, 0, DOT_INVALID, param);
+    __callb(0, 0, DOT_INVALIDATE, param);
 
     if xlen > 4:
         treal = (time.time() - ttt)
@@ -299,11 +345,18 @@ def Flood(xxx, yyy, param, gl_dones):
     #print( "done cnt =", param.cnt, "ops =", param.ops)
     #print("dones", dones)
 
-    param.reenter -=1
+    __callb(xxx, yyy, DOT_MARK, param)
 
+    # Output marked cells to global pool:
+    for aa in param.dones:
+        #print("CpMark:", aa)
+        _mark_cell_done(xxx, yyy, gl_dones)
+
+    # Unlock flood rentry
+    gl_reenter = 0
     return ret
 
-def _scan_one(xxx2, yyy2, param):
+def _scan_one(xxx2, yyy2, param, gl_dones):
 
     ''' Scan one pixel, specified by the caller coordinates
         Return one of: DOT_NO, DOT_YES, DOT_MARKED, DOT_BOUND
@@ -312,11 +365,15 @@ def _scan_one(xxx2, yyy2, param):
     ret = DOT_NO
     while 1:        # Substitute goto
         param.ops += 1
+
+        if _is_cell_done(xxx2, yyy2, gl_dones):
+            ret = DOT_BOUND
+            break
         try:
             if param.grey:
-                diff = _coldiffbw(param.mark, param.darr[yyy2][xxx2])
+                diff = coldiffbw(param.mark, param.darr[yyy2][xxx2])
             else:
-                diff = _coldiff(param.mark, param.darr[yyy2][xxx2])
+                diff = coldiff(param.mark, param.darr[yyy2][xxx2])
             #print( "diff: 0x%x" % diff, xxx2, yyy2)
         except KeyError:
             print( "out of range: ", xxx2, yyy2)
@@ -358,7 +415,7 @@ def _mark_cell_done(xxx, yyy, dones):
 # ------------------------------------------------------------------------
 # Return flag if visited before
 
-def is_cell_done(xxx, yyy, dones):
+def _is_cell_done(xxx, yyy, dones):
     try:
         aa = dones[xxx, yyy]
     except KeyError:
@@ -367,41 +424,43 @@ def is_cell_done(xxx, yyy, dones):
         print("is done", sys.exc_info())
     return aa
 
-def _coldiff(colm, colx):
+def coldiff(refcol, colx):
 
-    ''' Substruct col avarage from ref avarage. RGB version '''
+    ''' Subtract color average from ref average. RGB version '''
 
-    #cc = math.sqrt(abs(sqr(colm[0]) - SQR(colx[0]) ))
-    #dd = math.sqrt(abs(sqr(colm[1]) - SQR(colx[1]) ))
-    #ee = math.sqrt(abs(sqr(colm[2]) - SQR(colx[2]) ))
+    #cc = math.sqrt(abs(_sqr(refcol[0]) - SQR(colx[0]) ))
+    #dd = math.sqrt(abs(_sqr(refcol[1]) - SQR(colx[1]) ))
+    #ee = math.sqrt(abs(_sqr(refcol[2]) - SQR(colx[2]) ))
 
-    cc = abs(colm[0] - colx[0])
-    dd = abs(colm[1] - colx[1])
-    ee = abs(colm[2] - colx[2])
+    cc = abs(refcol[0] - colx[0])
+    dd = abs(refcol[1] - colx[1])
+    ee = abs(refcol[2] - colx[2])
 
-    # Average
+    # Average:
     #ret = cc + dd + ee) // 3
 
-    # Maxdiff   Mon 21.Oct.2024 looks like this one
+    # Looks like this one is better, picking dominant color diff
+    # Maxdiff:   Mon 21.Oct.2024
     ret = max(max(cc, dd), ee)
-    #print("coldiff", colm, colx, ret)
+    #print("coldiff", refcol, colx, ret)
     return ret
 
-def _coldiffbw(colm, colx):
+def coldiffbw(refcol, colx):
 
-    ''' Substruct col avarage from ref avarage; grayscale version '''
+    ''' Subtract col average from ref average; gray scale version '''
 
-    cc = (colm[0] + colm[1] + colm[2]) // 3
+    cc = (refcol[0] + refcol[1] + refcol[2]) // 3
     dd = (colx[0] + colx[1] + colx[2]) // 3
     ret = abs(cc - dd)
-    #print("coldiffbw", colm, colx, ret)
+    #print("coldiffbw", refcol, colx, ret)
     return ret
 
-def _calc_bounds(bounds):
+def calc_flood_bounds(bounds):
 
     ''' Calculate boundaries of the data '''
 
-    minx = 10000; maxx = 0; miny = 10000; maxy = 0
+    minx = miny = 0xffffffff;
+    maxx = maxy = 0
 
     for aa in bounds:
         #print( aa,)

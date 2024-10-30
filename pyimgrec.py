@@ -205,12 +205,14 @@ class MainWin():
         vimgbox.pack_start(self.lab, 0, 0, 0)
         self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
-        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
+        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
+                                                        0, 255, 1)
         self.scale.set_value(255)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
         self.mainbox.pack_start(self.scale, 0, 0, 0)
-        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
+        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
+                                                        0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
         self.scale2.set_value(20)
         self.scale2.set_inverted(True)
@@ -624,7 +626,8 @@ class MainWin():
     def area_motion(self, area, event):
         #print(  "area_motion", event.x, event.y)
         pass
-        #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
+        #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,
+        #                           Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
         #gc.set_foreground(colormap.alloc_color("#aaaaaa"))
         #winn.draw_line(gc, 0, 7, rc.width, rc.height+7 )
         #gc.set_foreground(colormap.alloc_color("#ffffff"))
@@ -660,7 +663,7 @@ class MainWin():
         #for cnt, cc in enumerate(self.area.sumx[1]):
         #    print("sumx[1]", cnt, cc[:12])
 
-        if not eve.state & Gdk.ModifierType.SHIFT_MASK:
+        if not (eve.state & Gdk.ModifierType.SHIFT_MASK):
             self.win3.simg.clear()
 
         for aa in self.area.sumx:
@@ -697,7 +700,8 @@ class MainWin():
                                     pass
                                     self.win3.simg.buf[cnt + row + col] = cc
                                 except:
-                                    print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
+                                    print("win3 exc", "aa", aa[:5], "aaa",
+                                                aaa, sys.exc_info())
                         self.win3.simg.invalidate()
                         newcol = (0x00, 0x00, 0xff, 0xff)
                         for aaa in aa[4]:
@@ -709,9 +713,10 @@ class MainWin():
                                     pass
                                     #self.win3.simg.buf[cnt + row + col] = cc
                                 except:
-                                    print("win3 exc", "aa", aa[:5], "aaa", aaa, sys.exc_info())
+                                    print("win3 exc", "aa", aa[:5], "aaa",
+                                                aaa, sys.exc_info())
                         self.win3.simg.invalidate()
-                        usleep(1000)
+                        usleep(100)
                         #break
 
     def fractal_image(self, win, a3):
@@ -738,7 +743,8 @@ class MainWin():
                     try:
                         self.win3.simg.buf[cnt + row + col] = cc
                     except:
-                        print("win3 exc", "aa[:5] =", aa[:5], "aaa =", aaa, sys.exc_info())
+                        print("win3 exc", "aa[:5] =", aa[:5], "aaa =",
+                                        aaa, sys.exc_info())
             self.win3.simg.invalidate()
             usleep(100)
         self.reenter = 0
@@ -786,7 +792,8 @@ class MainWin():
                         try:
                             self.win3.simg.buf[cnt + row + col] = cc
                         except:
-                            print("win3 exc", "aa[:5] =", aa[:5], "aaa =", aaa, sys.exc_info())
+                            print("win3 exc", "aa[:5] =", aa[:5], "aaa =",
+                                            aaa, sys.exc_info())
                 self.win3.simg.invalidate()
                 usleep(1)
 

@@ -265,6 +265,7 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
+XPATH = python3 -W ignore::DeprecationWarning `which pdoc` --force --html
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -681,6 +682,16 @@ git:
 	git add .
 	git commit -m "Auto"
 	git push
+
+help:
+	@echo "Targets: pydocs clean git"
+
+#.PHONY: docs
+#@echo "pydocs"
+
+pydocs:
+	@echo ${XPATH}
+	@${XPATH} -o docs algorithm/flood.py
 
 # EOF
 
