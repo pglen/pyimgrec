@@ -22,9 +22,9 @@ __doc__ = \
     to a 'C'  module.
     The local list is copied to global at the end of every scan.
 '''
-# Results of compare, and enums
-dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_POP", "DOT_MARK",
-                    "DOT_INVALIDATE")
+# Results of compare, and more enums
+dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_MARK",
+                    "DOT_POP", "DOT_INVALIDATE")
 # Create enums
 iut.do_enums(dot_strs, locals())
 
@@ -32,7 +32,8 @@ iut.do_enums(dot_strs, locals())
 #for aaa in dot_strs:
 #    print("%s=%d" % (aaa, locals().get(aaa)), end = " ")
 #print()
-#print("verify:", DOT_NO, DOT_YES, DOT_BOUND, DOT_POP, DOT_MARK, DOT_INVALIDATE)
+#print("verify:", DOT_NO, DOT_YES, DOT_BOUND)
+#print("enums:", DOT_MARK, DOT_POP, DOT_INVALIDATE)
 
 gl_reenter = 0
 
@@ -55,7 +56,7 @@ class floodParm():
 
     def __init__(self, iww, ihh, darr):
 
-        self.darr = darr;
+        self.darr = darr;       self.seekstep = 1
         self.iww = iww;         self.ihh = ihh
         self.callb = None;      self.verbose = 0
         self.mark = [0,0,0,0];  self.exit = 0
@@ -79,7 +80,7 @@ class floodParm():
 def Seek(xxx, yyy, param, gl_dones):
 
     '''
-    Find next flood-able region / non background pixel.
+    Find next flood - able region / non background pixel.
 
     Parameters:<br>
 
@@ -87,27 +88,37 @@ def Seek(xxx, yyy, param, gl_dones):
             yyy         start coordinate
             param       the floodParm class (as for the Flood routine)
             gl_dones    the global flood dones dictionary
+
+    Return:  <br>
+
+        new xxx, yyy
+        or -1, -1 if no more matches
+
     '''
-
-    xx = xxx; yy = yyy
-
-    for yy in range(yyy, param.ihh, 10):
-        for xx in range(xxx, param.iww, 10):
-            if _is_cell_done(xx, yy, gl_dones):
-                print("Skipping" ,xx, yy)
+    #print("Seek:", xxx, yyy)
+    rxx = -1; ryy = -1
+    breakout = False
+    while True:
+        xxx += param.seekstep
+        if xxx >= param.iww:
+            xxx = 0; yyy += param.seekstep
+        if yyy >= param.ihh:
+            break
+        if _is_cell_done(xxx, yyy, gl_dones):
+                #print("Skipping to " , xx, yy)
                 continue
+        val = param.darr[yyy][xxx]
+        ##if val[1] < 200:
+        ##    print("val", xx, yy, val, end = " ")
+        cc = (val[0] + val[1] + val[2]) // 3
+        ##print(cc, end = " ")
+        if cc < param.markcol:
+            #print("got:", xxx, yyy)
+            rxx = xxx; ryy = yyy
+            break
 
-            val = param.darr[yy][xx]
-
-            #if val[1] < 200:
-            #    print("val", xx, yy, val, end = " ")
-
-            cc = (val[0] + val[1] + val[2]) // 3
-            #print(cc, end = " ")
-
-            if cc <= param.markcol:
-                return (1, xx, yy)
-    return  (0, xxx, yy)
+    # -1 -1 if No more found
+    return  rxx, ryy
 
 def __callb(xxxx, yyyy, kind, param):
 
@@ -166,6 +177,8 @@ def Flood(xxx, yyy, param, gl_dones):
     '''
 
     global gl_reenter
+
+    #print(hex(id(gl_dones)))
 
     ret = 0
 
@@ -254,7 +267,7 @@ def Flood(xxx, yyy, param, gl_dones):
                 startop = 0
                 break
 
-            #print("xxx", xxx, "yyy", yyy, "nnn", nnn)
+            #print("op: xxx", xxx, "yyy", yyy, "nnn", nnn)
             xxx2 = xxx + scan_ops[nnn+startop][0];
             yyy2 = yyy + scan_ops[nnn+startop][1]
 
@@ -276,6 +289,11 @@ def Flood(xxx, yyy, param, gl_dones):
                 #print("cell done", xxx2, yyy2)
                 nnn += 1
                 continue
+
+            #if _is_cell_done(xxx2, yyy2, gl_dones):
+            #    print("cell done", xxx2, yyy2)
+            #    nnn += 1
+            #    continue
 
             # possible outcomes: DOT_NO, DOT_YES, DOT_BOUND
             retx = _scan_one(xxx2, yyy2, param, gl_dones)
@@ -348,9 +366,15 @@ def Flood(xxx, yyy, param, gl_dones):
     __callb(xxx, yyy, DOT_MARK, param)
 
     # Output marked cells to global pool:
-    for aa in param.dones:
-        #print("CpMark:", aa)
-        _mark_cell_done(xxx, yyy, gl_dones)
+    for aaa in param.dones:
+        #print(cnt, aaa, end = " - ")
+        try:
+            _mark_cell_done(aaa[0], aaa[1], gl_dones)
+        except:
+            pass
+            print("cpmark", cnt, aaa, sys.exc_info())
+
+    #print("gl_dones records", len(gl_dones), len(param.dones))
 
     # Unlock flood rentry
     gl_reenter = 0
@@ -363,10 +387,11 @@ def _scan_one(xxx2, yyy2, param, gl_dones):
     '''
 
     ret = DOT_NO
-    while 1:        # Substitute goto
-        param.ops += 1
+    param.ops += 1
 
+    while 1:        # Substitute goto
         if _is_cell_done(xxx2, yyy2, gl_dones):
+            #print("cell done", xxx2, yyy2)
             ret = DOT_BOUND
             break
         try:
@@ -398,19 +423,25 @@ def _mark_cell_done(xxx, yyy, dones):
 
     '''  Mark a cell done. Create dimension and value if not present '''
 
-    try:
-        old = dones[xxx]
-    except:
-       dones[xxx] = {}
-    try:
-        old = dones[xxx, yyy]
-        dones[xxx, yyy] += 1
-    except:
-        try:
-            dones[xxx, yyy] = 0
-            dones[xxx, yyy] += 1
-        except:
-            print("exc mark cell", sys.exc_info())
+    #print(id(dones))
+
+    dones[xxx, yyy] = 1
+
+    #try:
+    #    old = dones[xxx, yyy]
+    #except:
+    #    #print("create", xxx, yyy, sys.exc_info())
+    #    dones[xxx, yyy] = 1
+    #try:
+    #    #print("inc", xxx, yyy)
+    #    dones[xxx, yyy] += 1
+    #except:
+    #    print("exc mark cell", sys.exc_info())
+
+    #for cnt, aaaa in enumerate(dones):
+    #    print("dones", cnt, aaaa, dones[aaaa])
+    #    if cnt > 20:
+    #        break
 
 # ------------------------------------------------------------------------
 # Return flag if visited before

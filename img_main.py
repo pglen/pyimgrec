@@ -327,7 +327,7 @@ class ImgMain(Gtk.DrawingArea):
             # "mul",  self.iww*self.ihh*bpx, len(buf))
             imgrec.verbose = 0
             imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
-            imgrec.verbose = 0
+            #imgrec.verbose = 0
 
             self.stepx = float(self.iww)/self.divider;
             self.stepy = float(self.ihh)/self.divider;
@@ -378,7 +378,7 @@ class ImgMain(Gtk.DrawingArea):
     def norm_image(self):
 
         #imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         print( "Norm Image")
         nnn = imgrec.normalize()
@@ -388,7 +388,7 @@ class ImgMain(Gtk.DrawingArea):
     def histo_image(self):
 
         #imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         #print( "Histogram Image")
         nnn = imgrec.histogram()
         print("histogram", nnn)
@@ -397,14 +397,14 @@ class ImgMain(Gtk.DrawingArea):
     def grey_image(self):
 
         #imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         print( "Grey Image")
         imgrec.greyen()
         self.invalidate()
 
     def smooth_image(self):
 
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         #print("Smooth")
         old = imgrec.verbose
@@ -427,7 +427,7 @@ class ImgMain(Gtk.DrawingArea):
         arr = pixb.get_pixels()
 
         imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.bridar(10)
 
@@ -436,13 +436,13 @@ class ImgMain(Gtk.DrawingArea):
     def dar_image(self):
 
         imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.bridar(-10)
         self.invalidate()
 
     def line_image(self):
 
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.verbose = 0
 
         imgrec.line(10, 20, 10,  100,  0xffff0000)
@@ -466,7 +466,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def frame_image(self):
 
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         imgrec.verbose = 0
         imgrec.frame(10, 10, 100, 100, 0xff0000ff)
         imgrec.verbose = 0
@@ -474,7 +474,7 @@ class ImgMain(Gtk.DrawingArea):
 
     def blank_image(self):
 
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         #imgrec.verbose = 1
         imgrec.blank() #color=0xffffffff)
@@ -489,7 +489,7 @@ class ImgMain(Gtk.DrawingArea):
 
         #print( "walk_image() dim =", iw, ih, "pos =", xx, yy )
         imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
         ret2 = imgrec.walk(int(xx), int(yy))
         print("ret2", ret2)
         self.invalidate()
@@ -497,7 +497,7 @@ class ImgMain(Gtk.DrawingArea):
     def edge_image(self):
 
         #imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         imgrec.edge()
         self.invalidate()
@@ -521,15 +521,18 @@ class ImgMain(Gtk.DrawingArea):
                 #newcol = (0x00, 0xff, 0xff, 0xff)
                 newcol = None
             elif kind == flood.DOT_MARK:
-                newcol = (0xff, 0xff, 0xff, 0xff)
-                for line in range(-4, +4):
-                    for cnt, aa in enumerate(newcol):
-                        offs = 4 * line + cnt + 4 * xxx + row
-                        self.xparent.simg.buf[offs] = newcol[cnt]
-                for vline in range(-4, +4):
-                    for cnt, aa in enumerate(newcol):
-                        offs = + cnt + 4 * xxx + row + 4 * vline * self.iww
-                        self.xparent.simg.buf[offs] = newcol[cnt]
+                try:
+                    newcol = (0xff, 0xff, 0xff, 0xff)
+                    for line in range(-4, +4):
+                        for cnt, aa in enumerate(newcol):
+                            offs = 4 * line + cnt + 4 * xxx + row
+                            self.xparent.simg.buf[offs] = newcol[cnt]
+                    for vline in range(-4, +4):
+                        for cnt, aa in enumerate(newcol):
+                            offs = + cnt + 4 * xxx + row + 4 * vline * self.iww
+                            self.xparent.simg.buf[offs] = newcol[cnt]
+                except:
+                    pass
                 newcol = None
             elif kind == flood.DOT_INVALIDATE:
                 pass
@@ -574,8 +577,24 @@ class ImgMain(Gtk.DrawingArea):
                     usleep(1)
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
-            pass
+            print_exception("callb")
 
+    def show_buff(self, dbuff):
+
+        self.xparent.win3.simg.clear()
+        cnt = 0
+        for aa in dbuff:
+            try:
+                xxx = aa[0]; yyy = aa[1]
+                row = yyy * 4 * self.iww
+                newcol = (0x0, 0x0, 0x0, 0xff)
+                for cnt, aa in enumerate(newcol):
+                    self.xparent.win3.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
+            except:
+                cnt += 1
+                pass
+        self.xparent.win3.simg.invalidate()
+        #print("dbuff len", len(dbuff), "slack", cnt)
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
@@ -583,7 +602,7 @@ class ImgMain(Gtk.DrawingArea):
     def anal_image(self, xxx, yyy, single = False, addx = False):
 
         imgrec.verbose = 0
-        ret = imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         MARKCOL = int(self.xparent.scale.get_value())
         THRESH  = int(self.xparent.scale2.get_value())
@@ -641,7 +660,7 @@ class ImgMain(Gtk.DrawingArea):
             self.reanal = 0
             return
 
-        # See if repeated request for scanning came
+        # See if repeated request for scanning the same image
         if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
             self.xparent.simg.clear()
             self.xparent.win2.simg.clear()
@@ -657,27 +676,21 @@ class ImgMain(Gtk.DrawingArea):
             fparam = flood.floodParm(self.iww, self.ihh, self.darr)
             fparam.callb = self.callb
             fparam.stepx = self.stepx; fparam.stepy = self.stepy
-            fparam.thresh = THRESH
-            fparam.markcol = MARKCOL
-            fparam.breath = 30
-            fparam.verbose = 0
+            fparam.thresh = THRESH;    fparam.markcol = MARKCOL
+            fparam.breath = 30;        fparam.verbose = 0
+            fparam.seekstep = 1
 
             if not single:
-                increment = self.iww // 50
-                #print("inc", increment)
-                xxx += increment
-                ret, xx, yy = flood.Seek(xxx, yyy, fparam, self.gl_dones)
-                print("seek found at", ret, xx, yy)
-                if not ret:
-                    break
-                #xxx = xx; yyy = yy
-                #else:
-                #    xxx += increment; yyy += increment
-                #    if xxx >= fparam.iww:
-                #        xxx = 0; yyy += increment
-
+                # pre step
+                xxx += fparam.seekstep
+                if xxx >= fparam.iww:
+                    xxx = 0; yyy += fparam.seekstep
                 if yyy >= self.ihh:
                         break
+                xxx, yyy = flood.Seek(xxx, yyy, fparam, self.gl_dones)
+                if xxx < 0 or yyy < 0:
+                    break
+                #print("flood.Seek found at", xxx, yyy)
 
             if yyy >= self.ihh:
                 break
@@ -700,13 +713,15 @@ class ImgMain(Gtk.DrawingArea):
             #breakpoint()
 
             #ttt = time.time()
+            #print(hex(id(self.gl_dones)))
             try:
-                ret = flood.Flood(xxx, yyy, fparam, self.gl_dones)
+                retf = flood.Flood(xxx, yyy, fparam, self.gl_dones)
             except:
-                print(sys.exc_info())
+                print_exception("Flood")
+                #print("flood:", sys.exc_info())
                 break
 
-            if ret == -1:
+            if retf == -1:
                 break
 
             if len(fparam.bounds) < 4:
@@ -714,6 +729,8 @@ class ImgMain(Gtk.DrawingArea):
                 #            len(fparam.bounds), fparam.bounds[:4])
                 #xxx += 10; yyy += 10
                 continue
+
+            self.show_buff(self.gl_dones)
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1

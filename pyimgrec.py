@@ -207,14 +207,14 @@ class MainWin():
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
-        self.scale.set_value(255)
+        self.scale.set_value(220)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
         self.mainbox.pack_start(self.scale, 0, 0, 0)
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(20)
+        self.scale2.set_value(26)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -260,6 +260,10 @@ class MainWin():
     def add_win(self):
 
         winx =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        #winx =  Gtk.Window(type=Gtk.WindowType.POPUP)
+        winx.set_skip_taskbar_hint(True)
+        winx.set_skip_pager_hint(True)
+
         winx.set_title("Image Show")
         winx.simg = Imagex(self)
         winx.ww = winx.simg.ww;
@@ -340,7 +344,7 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        self.check4 = Gtk.CheckButton.new_with_mnemonic(" Animate ")
+        self.check4 = Gtk.CheckButton.new_with_mnemonic(" A_nimate ")
         self.check3.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.check4, False, 0, 0)
 
@@ -483,13 +487,13 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt4 = Gtk.Button.new_with_mnemonic(" _Magnifier ")
-        butt4.connect("clicked", self.mag_image, window)
+        butt4 = Gtk.Button.new_with_mnemonic(" Point _Image ")
+        butt4.connect("clicked", self.point_image, window)
         hbox.pack_start(butt4, False, 0, 0)
 
         self.spacer(hbox)
 
-        butt5 = Gtk.Button.new_with_mnemonic(" Clear A_nnote ")
+        butt5 = Gtk.Button.new_with_mnemonic(" Clear Annote ")
         butt5.connect("clicked", self.clear_annote, window)
         hbox.pack_start(butt5, False, 0, 0)
         self.spacer(hbox)
@@ -619,8 +623,41 @@ class MainWin():
         hbox.pack_start(lab14, flag, 0, 0)
 
     # Refresh image from original
-    def mag_image(self, area, a3):
-        self.area.toggle_mag()
+    def point_image(self, area, a3):
+        #self.area.toggle_mag()
+        print("point image")
+        simg = Imagex(self)
+        simg.copyfrom(self.area.iww, self.area.ihh, self.area.buf);
+        ttt = time.time()
+        simg.copyto(self.win3.simg)
+        print("time %.2f ms" % ((time.time()- ttt) * 1000) )
+
+        ximg = self.win3.simg # Alias
+        imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
+        imgrec.smooth(6); imgrec.smoothv(6)
+
+        self.win3.simg.invalidate()
+
+        # Scan point
+        for yy in range(ximg.hh):
+            row =  ximg.bpx * yy * ximg.ww
+            prev = 0xff
+            for xx in range(ximg.ww):
+                val = 0
+                for aa in range(ximg.bpx-1):
+                    val += (ximg.buf[aa + row + ximg.bpx * xx])
+                val //=  ximg.bpx - 1
+                #if val < 200:
+                #    print("%d/%d: %d " % (xx, yy, val), end = "   ")
+                if prev < val:
+                    print("Edge: %d/%d: %d - %d " % (xx, yy, val, prev) )
+
+                    for aa in range(ximg.bpx-1):
+                        ximg.buf[aa + row + ximg.bpx * xx] = 0x00
+
+                prev = val
+
+        self.win3.simg.invalidate()
 
     # Paint the image
     def area_motion(self, area, event):
@@ -814,6 +851,7 @@ class MainWin():
         self.tree.update_treestore("")
 
     def clear_subs(self, arg, ww):
+        self.simg.clear()
         self.win2.simg.clear()
         self.win3.simg.clear()
         self.tree.update_treestore("")

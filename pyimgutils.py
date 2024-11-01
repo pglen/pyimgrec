@@ -47,7 +47,7 @@ class Imagex(Gtk.DrawingArea):
         self.buf = self.surface.get_data()
         self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
 
-        self.connect("draw", self.draw)
+        self.connect("draw", self._draw)
         self.connect("motion-notify-event", self.area_motion)
         self.clear()
         #print("Imagex create", self.ww, self.hh)
@@ -60,6 +60,7 @@ class Imagex(Gtk.DrawingArea):
         #print("Imagex resize", self.ww, self.hh)
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
+        self.bpx = 4    # From FORMAT specifier - ARGB32
         self.buf = self.surface.get_data()
 
     def clear(self):
@@ -70,7 +71,24 @@ class Imagex(Gtk.DrawingArea):
         self.invalidate()
         #print("Imagex clear", self.ww, self.hh)
 
-    def draw(self, me, gc):
+    def copyfrom(self, ww, hh, xbuf):
+        ''' Duplicate image '''
+        #self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
+        self.ww = ww
+        self.hh = hh
+        self.resize(self.ww, self.hh)
+        #for aa in range(len(xbuf)):
+        #    self.buf[aa] = xbuf[aa]
+        self.buf[:] = xbuf[:]
+
+    def copyto(self, target):
+        ''' Display Image '''
+        target.resize(self.ww, self.hh)
+        #for aa in range(len(self.buf)):
+        #    target.buf[aa] = self.buf[aa]
+        target.buf[:] = self.buf[:]
+
+    def _draw(self, me, gc):
         #print("Imagex draw")
         gc.set_source_surface(self.surface)
         gc.paint()
