@@ -487,8 +487,8 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt4 = Gtk.Button.new_with_mnemonic(" Point _Image ")
-        butt4.connect("clicked", self.point_image, window)
+        butt4 = Gtk.Button.new_with_mnemonic(" Mark _Image ")
+        butt4.connect("clicked", self.mark_image, window)
         hbox.pack_start(butt4, False, 0, 0)
 
         self.spacer(hbox)
@@ -623,52 +623,99 @@ class MainWin():
         hbox.pack_start(lab14, flag, 0, 0)
 
     # Refresh image from original
-    def point_image(self, area, a3):
+    def mark_image(self, area, a3):
         #self.area.toggle_mag()
-        print("point image")
+        #print("point image")
         simg = Imagex(self)
         simg.copyfrom(self.area.iww, self.area.ihh, self.area.buf);
-        ttt = time.time()
         simg.copyto(self.win3.simg)
-        print("time %.2f ms" % ((time.time()- ttt) * 1000) )
-
         ximg = self.win3.simg # Alias
         imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
-        imgrec.smooth(6); imgrec.smoothv(6)
-
+        factor = 32
+        imgrec.smooth(factor); imgrec.smoothv(factor)
         self.win3.simg.invalidate()
 
-        # Scan point
+        # Scan for xx marking points
         for yy in range(ximg.hh):
             row =  ximg.bpx * yy * ximg.ww
-            prev = 0xff
+            # Get first pixel in a row
+            prev = ximg.getcol(0, yy)
+            # Scan THIS line
+            wasup = 0; wasdown = 0; lastup = 0; lastdown = 0
             for xx in range(ximg.ww):
-                val = 0
-                for aa in range(ximg.bpx-1):
-                    val += (ximg.buf[aa + row + ximg.bpx * xx])
-                val //=  ximg.bpx - 1
-                #if val < 200:
-                #    print("%d/%d: %d " % (xx, yy, val), end = "   ")
+                val = ximg.getcol(xx, yy)
                 if prev < val:
-                    print("Edge: %d/%d: %d - %d " % (xx, yy, val, prev) )
-
-                    for aa in range(ximg.bpx-1):
-                        ximg.buf[aa + row + ximg.bpx * xx] = 0x00
-
+                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasup:
+                        xpos = lastdown + (xx - lastdown) // 2
+                        ximg.setcol(xpos, yy, (0x00, 0xff, 0xff, 0xff))
+                        wasup = True
+                        wasdown = False
+                        lastup = xx
+                elif prev > val:
+                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasdown:
+                        xpos = lastup + (xx - lastup) // 2
+                        ximg.setcol(xpos, yy, (0xff, 0xff, 0x00, 0xff))
+                        wasdown = True
+                        wasup = False
+                        lastdown = xx
+                else:
+                    pass
                 prev = val
-
+            # Output remnant
+            #if wasup:
+            #    xpos = lastdown + (xx - lastdown) // 2
+            #    ximg.setcol(xpos, yy, (0x8f, 0x8f, 0x8f, 0xff))
+            #    #print("lastdown", lastdown, yy)
+            #if wasdown:
+            #    xpos = lastup + (xx - lastup) // 2
+            #    ximg.setcol(xpos, yy, (0x8f, 0x8f, 0x8f, 0xff))
+            #    #print("lastup", lastup, yy)
+        # Scan for yy marking points
+        for xx in range(ximg.ww):
+            prev = 0
+            # Get first pixel in a column
+            prev = ximg.getcol(xx, 0)
+            # Scan THIS cloumn
+            wasup = wasdown = lastup = lastdown = 0
+            for yy in range(ximg.hh):
+                val = ximg.getcol(xx, yy)
+                if prev < val:
+                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasup:
+                        ypos = (lastdown + (yy - lastdown) // 2)
+                        ximg.setcol(xx, ypos, (0x00, 0xff, 0xff, 0xff))
+                        wasup = True; wasdown = False; lastup = yy
+                elif prev > val:
+                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasdown:
+                        ypos = (lastup + (yy - lastup) // 2)
+                        ximg.setcol(xx, ypos, (0xff, 0xff, 0x00, 0xff))
+                        wasdown = True; wasup = False; lastdown = yy
+                else:
+                    # Same, do nothing
+                    pass
+                prev = val
+            # Output remnant
+            #if wasup:
+            #    ypos = (lastdown + (yy - lastdown) // 2)
+            #    ximg.setcol(xx, ypos, (0xff, 0xff, 0xff, 0xff))
+            #if wasdown:
+            #    ypos = (lastup + (yy - lastup) // 2)
+            #    ximg.setcol(xx, ypos, (0xff, 0xff, 0xff, 0xff))
         self.win3.simg.invalidate()
 
     # Paint the image
     def area_motion(self, area, event):
         #print(  "area_motion", event.x, event.y)
-        pass
         #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,
         #                           Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
         #gc.set_foreground(colormap.alloc_color("#aaaaaa"))
         #winn.draw_line(gc, 0, 7, rc.width, rc.height+7 )
         #gc.set_foreground(colormap.alloc_color("#ffffff"))
         #winn.draw_line(gc, 0, 0, rc.width, rc.height)
+        pass
 
     def load_image(self, arg, ww):
         self.fname = ofd("Open Image File").result
@@ -695,7 +742,7 @@ class MainWin():
     # Button_press event on small image
     def simg_button(self, win, eve):
 
-        print("simg_butt", int(eve.x), int(eve.y)) #, eve.state)
+        #print("simg_butt", int(eve.x), int(eve.y)) #, eve.state)
 
         #for cnt, cc in enumerate(self.area.sumx[1]):
         #    print("sumx[1]", cnt, cc[:12])

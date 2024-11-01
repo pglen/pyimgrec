@@ -36,6 +36,14 @@ def print_exception(xstr):
 # pyimgutils
 # --------------------------------------------------------------------
 
+def timeit(fn):
+    def wrapped(*args, **keyw):
+        ttt = time.time()
+        ret = fn(*args, **keyw)
+        print("func: '%s' %.3f ms" % (fn.__name__, (time.time() - ttt)*1000))
+        return ret
+    return wrapped
+
 class Imagex(Gtk.DrawingArea):
 
     def __init__(self, xparent, ww = 20, hh = 20):
@@ -71,6 +79,7 @@ class Imagex(Gtk.DrawingArea):
         self.invalidate()
         #print("Imagex clear", self.ww, self.hh)
 
+    #@timeit
     def copyfrom(self, ww, hh, xbuf):
         ''' Duplicate image '''
         #self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
@@ -81,12 +90,32 @@ class Imagex(Gtk.DrawingArea):
         #    self.buf[aa] = xbuf[aa]
         self.buf[:] = xbuf[:]
 
+    #@timeit
     def copyto(self, target):
         ''' Display Image '''
         target.resize(self.ww, self.hh)
         #for aa in range(len(self.buf)):
         #    target.buf[aa] = self.buf[aa]
         target.buf[:] = self.buf[:]
+
+    def getcol(self, xx, yy):
+        ''' Return color tuple from coordinate.
+            Tuple is RGBA in machine byte order '''
+
+        val = 0
+        offs = self.bpx * yy * self.ww + self.bpx * xx
+        for aa in range(self.bpx-1):
+            val += self.buf[aa + offs]
+        val //=  self.bpx - 1
+        return val
+
+    def setcol(self, xx, yy, colorx):
+        ''' Set color tuple at coordinate.
+            Color is RGBA in machine byte order '''
+
+        offs = self.bpx * yy * self.ww + self.bpx * xx
+        for aa in range(self.bpx):
+            self.buf[aa + offs] = colorx[aa]
 
     def _draw(self, me, gc):
         #print("Imagex draw")
