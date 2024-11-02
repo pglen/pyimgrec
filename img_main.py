@@ -40,6 +40,8 @@ MAG_SIZE    = 300
 THRESH      = 20                 # Color diff for boundary
 MARKCOL     = 180                # Color counts as mark
 
+MARKDIFF    = 10
+
 class ImgMain(Gtk.DrawingArea):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
@@ -502,6 +504,111 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
+    # Refresh image from original
+    def mark_image(self):
+        uparr = []; dwnarr = []
+        simg = Imagex(self)
+        simg.copyfrom(self.iww, self.ihh, self.buf);
+        simg.copyto(self.xparent.win3.simg)
+        ximg = self.xparent.win3.simg # Alias
+        imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
+        factor = 4
+        imgrec.smooth(factor); imgrec.smoothv(factor)
+        self.xparent.win3.simg.invalidate()
+
+        # Scan for xx marking points
+        for yy in range(ximg.hh):
+            row =  ximg.bpx * yy * ximg.ww
+            # Get first pixel in a row
+            prev = ximg.getcol(0, yy)
+            # Scan THIS line
+            wasup = 0; wasdown = 0; lastup = 0; lastdown = 0
+            for xx in range(ximg.ww):
+                val = ximg.getcol(xx, yy)
+                diff =  abs( prev - val)
+                if diff < MARKDIFF:
+                    prev = val
+                    continue
+                if val > 200:
+                    continue
+
+                if prev < val:
+                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasup:
+                        xpos = lastdown + (xx - lastdown) // 2
+                        uparr.append((xpos, yy))
+                        wasup = True; wasdown = False; lastup = xx
+                elif prev > val:
+                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasdown:
+                        xpos = lastup + (xx - lastup) // 2
+                        dwnarr.append((xpos, yy))
+                        wasdown = True; wasup = False; lastdown = xx
+                else:
+                    pass
+                prev = val
+            # Output remnant
+            #if wasup:
+            #    xpos = lastdown + (xx - lastdown) // 2
+            #    uparr.append((xpos, yy))
+            #    #print("lastdown", lastdown, yy)
+            #if wasdown:
+            #    xpos = lastup + (xx - lastup) // 2
+            #    dwnarr.append((xpos, yy))
+            #    #print("lastup", lastup, yy)
+        # Scan for yy marking points
+        '''
+        for xx in range(ximg.ww):
+            prev = 0
+            # Get first pixel in a column
+            prev = ximg.getcol(xx, 0)
+            # Scan THIS cloumn
+            wasup = wasdown = lastup = lastdown = 0
+            for yy in range(ximg.hh):
+                val = ximg.getcol(xx, yy)
+                if abs(prev - val) < MARKDIFF:
+                    prev = val
+                    continue
+                if val > 200:
+                    continue
+                if prev < val:
+                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasup:
+                        ypos = (lastdown + (yy - lastdown) // 2)
+                        uparr.append((xx, ypos))
+                        wasup = True; wasdown = False; lastup = yy
+                elif prev > val:
+                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasdown:
+                        ypos = (lastup + (yy - lastup) // 2)
+                        dwnarr.append((xx, ypos))
+                        wasdown = True; wasup = False; lastdown = yy
+                else:
+                    # Same values, do nothing
+                    pass
+                prev = val
+            '''
+            # Output remnant
+            #if wasup:
+            #    ypos = (lastdown + (yy - lastdown) // 2)
+            #    uparr.append((xx, ypos))
+            #if wasdown:
+            #    ypos = (lastup + (yy - lastup) // 2)
+            #    dwnarr.append((xx, ypos))
+        self.xparent.win3.simg.invalidate()
+
+        # Paint to test window
+
+        for aa in uparr:
+            ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
+
+        #for aa in dwnarr:
+        #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
+
+        print(uparr)
+
+        return uparr, dwnarr
+
     def callb(self, xxx, yyy, kind, fparam):
         #print( "callb", xxx, yyy, fparam)
         #return
@@ -668,8 +775,14 @@ class ImgMain(Gtk.DrawingArea):
 
         nbounds = []; found = 0
         self.sumx = []
+
+        uarr, darr = self.mark_image()
+
         # Iterate all shapes
-        while True:
+        #while True:
+
+        for xxx, yyy in uarr:
+
             if self.reanal > 1:
                 break
             # Set up flood fill parameters
@@ -681,16 +794,18 @@ class ImgMain(Gtk.DrawingArea):
             fparam.seekstep = 1
 
             if not single:
-                # pre step
-                xxx += fparam.seekstep
-                if xxx >= fparam.iww:
-                    xxx = 0; yyy += fparam.seekstep
-                if yyy >= self.ihh:
-                        break
+                # pre step, skip past dones
+                #xxx += fparam.seekstep
+                #if xxx >= fparam.iww:
+                #    xxx = 0; yyy += fparam.seekstep
+                #if yyy >= self.ihh:
+                #        break
+                #
                 xxx, yyy = flood.Seek(xxx, yyy, fparam, self.gl_dones)
                 if xxx < 0 or yyy < 0:
                     break
                 #print("flood.Seek found at", xxx, yyy)
+                pass
 
             if yyy >= self.ihh:
                 break
@@ -783,24 +898,6 @@ class ImgMain(Gtk.DrawingArea):
             if self.xparent.check2.get_active():
                 if len(nbounds) == 0:
                     msg("No shape yet")
-
-                #sss = get_str("Enter name for shape:")
-                #if sss != "":
-                #    #print( "Adding shape", sss)
-                #    self.xparent.shapes.append(
-                #        (sss, fparam.minx, fparam.miny, fparam.mark, len(fparm.bounds), nbounds))
-
-            #for aa in fparam.body:
-            #    #print(aa[0], aa[1])
-            #    offs = 4 * (aa[0] + aa[1] * self.xparent.area.iww)
-            #    try:
-            #        self.xparent.simg.data[offs]   = 0xff
-            #        self.xparent.simg.data[offs+1] = 0x00
-            #        self.xparent.simg.data[offs+2] = 0x00
-            #        self.xparent.simg.data[offs+3] = 0xff
-            #    except:
-            #        pass
-            #self.xparent.simg.invalidate()
 
             if single:
                 break
