@@ -40,7 +40,8 @@ MAG_SIZE    = 300
 THRESH      = 20                 # Color diff for boundary
 MARKCOL     = 180                # Color counts as mark
 
-MARKDIFF    = 10
+MARKDIFF    = 30
+BPX         = 4                  # Bits per pixel
 
 class ImgMain(Gtk.DrawingArea):
 
@@ -93,7 +94,7 @@ class ImgMain(Gtk.DrawingArea):
         self.xparent.laby.set_text("")
         self.xparent.labz.set_text("")
 
-    def add_to_dict(self, xdic, xxx, yyy, val):
+    def _add_to_dict(self, xdic, xxx, yyy, val):
         try:
             xdic[yyy][xxx] = val
         except KeyError:
@@ -113,9 +114,9 @@ class ImgMain(Gtk.DrawingArea):
         xxx = int(event.x); yyy = int(event.y)
 
         try:
-            col  =  self.buf[4 * (xxx + yyy * self.iww)   ]
-            col2 =  self.buf[4 * (xxx + yyy * self.iww)+1 ]
-            col3 =  self.buf[4 * (xxx + yyy * self.iww)+2 ]
+            col  =  self.buf[BPX * (xxx + yyy * self.iww)   ]
+            col2 =  self.buf[BPX * (xxx + yyy * self.iww)+1 ]
+            col3 =  self.buf[BPX * (xxx + yyy * self.iww)+2 ]
             self.xparent.labz.set_text("%x%x%x" % (col, col2, col3))
         except:
             pass
@@ -504,21 +505,14 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
-    # Refresh image from original
-    def mark_image(self):
-        uparr = []; dwnarr = []
-        simg = Imagex(self)
-        simg.copyfrom(self.iww, self.ihh, self.buf);
-        simg.copyto(self.xparent.win3.simg)
-        ximg = self.xparent.win3.simg # Alias
-        imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
-        factor = 4
-        imgrec.smooth(factor); imgrec.smoothv(factor)
-        self.xparent.win3.simg.invalidate()
+    def scanxx(self, ximg):
 
         # Scan for xx marking points
+
+        xuparr = []; xdwnarr = []
+
         for yy in range(ximg.hh):
-            row =  ximg.bpx * yy * ximg.ww
+            row = ximg.bpx * yy * ximg.ww
             # Get first pixel in a row
             prev = ximg.getcol(0, yy)
             # Scan THIS line
@@ -536,28 +530,33 @@ class ImgMain(Gtk.DrawingArea):
                     #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
                     if not wasup:
                         xpos = lastdown + (xx - lastdown) // 2
-                        uparr.append((xpos, yy))
+                        xuparr.append((xpos, yy))
                         wasup = True; wasdown = False; lastup = xx
                 elif prev > val:
                     #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
                     if not wasdown:
                         xpos = lastup + (xx - lastup) // 2
-                        dwnarr.append((xpos, yy))
+                        xdwnarr.append((xpos, yy))
                         wasdown = True; wasup = False; lastdown = xx
                 else:
                     pass
                 prev = val
             # Output remnant
-            #if wasup:
-            #    xpos = lastdown + (xx - lastdown) // 2
-            #    uparr.append((xpos, yy))
-            #    #print("lastdown", lastdown, yy)
-            #if wasdown:
-            #    xpos = lastup + (xx - lastup) // 2
-            #    dwnarr.append((xpos, yy))
-            #    #print("lastup", lastup, yy)
-        # Scan for yy marking points
-        '''
+            if wasup:
+                xpos = lastdown + (xx - lastdown) // 2
+                xuparr.append((xpos, yy))
+                #print("lastdown", lastdown, yy)
+            if wasdown:
+                xpos = lastup + (xx - lastup) // 2
+                xdwnarr.append((xpos, yy))
+                #print("lastup", lastup, yy)
+        return xuparr, xdwnarr
+
+    def scanyy(self, ximg):
+
+        ''' Scan for yy marking points '''
+
+        yuparr = []; ydwnarr = []
         for xx in range(ximg.ww):
             prev = 0
             # Get first pixel in a column
@@ -575,44 +574,112 @@ class ImgMain(Gtk.DrawingArea):
                     #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
                     if not wasup:
                         ypos = (lastdown + (yy - lastdown) // 2)
-                        uparr.append((xx, ypos))
+                        yuparr.append((xx, ypos))
                         wasup = True; wasdown = False; lastup = yy
                 elif prev > val:
                     #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
                     if not wasdown:
                         ypos = (lastup + (yy - lastup) // 2)
-                        dwnarr.append((xx, ypos))
+                        ydwnarr.append((xx, ypos))
                         wasdown = True; wasup = False; lastdown = yy
                 else:
                     # Same values, do nothing
                     pass
                 prev = val
-            '''
             # Output remnant
-            #if wasup:
-            #    ypos = (lastdown + (yy - lastdown) // 2)
-            #    uparr.append((xx, ypos))
-            #if wasdown:
-            #    ypos = (lastup + (yy - lastup) // 2)
-            #    dwnarr.append((xx, ypos))
-        self.xparent.win3.simg.invalidate()
+            if wasup:
+                ypos = (lastdown + (yy - lastdown) // 2)
+                yuparr.append((xx, ypos))
+            if wasdown:
+                ypos = (lastup + (yy - lastup) // 2)
+                ydwnarr.append((xx, ypos))
+        return yuparr, ydwnarr
 
-        # Paint to test window
+    def mark_image(self):
 
-        for aa in uparr:
+        ''' Mark crossing of significant regions '''
+
+        simg = Imagex(self)
+        simg.copyfrom(self.iww, self.ihh, self.buf);
+        simg.copyto(self.xparent.win3.simg)
+        ximg = self.xparent.win3.simg # Alias
+        imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
+        #factor = 5; imgrec.smooth(factor); imgrec.smoothv(factor)
+
+        xuparr, xdwnarr = self.scanxx(ximg)
+        # Test output
+        for aa in xuparr:
             ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
-
-        #for aa in dwnarr:
+        #for aa in xdwnarr:
         #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
 
-        print(uparr)
+        yuparr, ydwnarr = self.scanyy(ximg)
 
-        return uparr, dwnarr
+        # Mark middle point of X line ups
+        iarr = []
+        inup = False; oldx = 0; starty = 0
+        sumxarr = xuparr + xdwnarr
+        sumxarr.sort()
+        for xx2, yy2 in sumxarr:
+            #print((xx2, yy2))
+            if oldx != xx2:
+                if inup:
+                    inup = False
+                    iarr.append((xx2, starty + (yy2 - starty) // 2))
+                else:
+                    starty = yy2
+                    inup = True
+            oldx = xx2
+
+        for aa in iarr:
+            #print("iarr", aa)
+            ximg.drawcross(aa[0], aa[1], (0xff, 0xff, 0xff, 0xff))
+            ximg.drawcross(aa[0]+1, aa[1]+1, (0x00, 0x00, 0x00, 0xff))
+            pass
+
+        print("%d marks" % len(xuparr))
+
+        # Mark middle point of line ups for Y axis
+        '''iyarr = []
+        inup = False; oldy = 0; startx = 0
+        sumyarr = yuparr + ydwnarr
+        sumyarr.sort()
+        for xx2, yy2 in sumyarr:
+            #print((xx2, yy2))
+            if oldy != yy2:
+                if inup:
+                    inup = False
+                    iarr.append(( (startx + (yy2 - startx) // 2), yy2) )
+                else:
+                    startx = xx2
+                    inup = True
+            oldy = yy2
+
+        for aa in iyarr:
+            print("iyarr", aa)
+            ximg.drawcross(aa[0], aa[1], (0xff, 0xff, 0xff, 0xff))
+            ximg.drawcross(aa[0]+1, aa[1]+1, (0x00, 0x00, 0x00, 0xff))
+            pass
+        '''
+
+        ## Paint to test window
+
+        #for aa in yuparr:
+        #    ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
+
+        #for aa in ydwnarr:
+        #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
+
+        self.xparent.win3.simg.invalidate()
+        return xuparr, xdwnarr, #yuparr, ydwnarr
 
     def callb(self, xxx, yyy, kind, fparam):
         #print( "callb", xxx, yyy, fparam)
         #return
-        row =  4 * yyy * self.iww
+
+        bpx = self.xparent.simg.bpx
+
+        row =  bpx * yyy * self.iww
         newcol = None
         try:
             if kind == flood.DOT_YES:
@@ -628,18 +695,8 @@ class ImgMain(Gtk.DrawingArea):
                 #newcol = (0x00, 0xff, 0xff, 0xff)
                 newcol = None
             elif kind == flood.DOT_MARK:
-                try:
-                    newcol = (0xff, 0xff, 0xff, 0xff)
-                    for line in range(-4, +4):
-                        for cnt, aa in enumerate(newcol):
-                            offs = 4 * line + cnt + 4 * xxx + row
-                            self.xparent.simg.buf[offs] = newcol[cnt]
-                    for vline in range(-4, +4):
-                        for cnt, aa in enumerate(newcol):
-                            offs = + cnt + 4 * xxx + row + 4 * vline * self.iww
-                            self.xparent.simg.buf[offs] = newcol[cnt]
-                except:
-                    pass
+                newcol = (0xff, 0xff, 0xff, 0xff)
+                self.xparent.simg.drawcross(xxx, yyy, newcol)
                 newcol = None
             elif kind == flood.DOT_INVALIDATE:
                 pass
@@ -648,28 +705,28 @@ class ImgMain(Gtk.DrawingArea):
                 newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
             if newcol:
                 for cnt, aa in enumerate(newcol):
-                    self.xparent.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
+                    self.xparent.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
 
             # ------------------------------------------------------------
             if kind == flood.DOT_YES:
                 newcol = (0x0, 0x0, 0x0, 0xff)
                 for cnt, aa in enumerate(newcol):
                     pass
-                    #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
-                    #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
-                    #self.xparent.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.win2.simg.buf[cnt + BPX * xxx + row] = newcol[cnt]
+                    #self.xparent.win2.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
 
             if kind == flood.DOT_NO:
                 newcol = (0x0, 0x0, 0x0, 0xff)
                 for cnt, aa in enumerate(newcol):
-                    self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
-                    #self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
-                    #self.xparent.simg.buf[cnt + 4 * xxx + row] = fparam.mark[cnt]
+                    self.xparent.win2.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
+                    #self.xparent.win2.simg.buf[cnt + BPX4 * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
 
             if kind == flood.DOT_BOUND:
                     xcol = (0x0, 0x0, 0xff, 0xff)
                     for cnt, aa in enumerate(xcol):
-                        self.xparent.win2.simg.buf[cnt + 4 * xxx + row] = xcol[cnt]
+                        self.xparent.win2.simg.buf[cnt + bpx * xxx + row] = xcol[cnt]
 
             if kind == flood.DOT_INVALIDATE:
                 # flush graphics
@@ -685,23 +742,6 @@ class ImgMain(Gtk.DrawingArea):
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
             print_exception("callb")
-
-    def show_buff(self, dbuff):
-
-        self.xparent.win3.simg.clear()
-        cnt = 0
-        for aa in dbuff:
-            try:
-                xxx = aa[0]; yyy = aa[1]
-                row = yyy * 4 * self.iww
-                newcol = (0x0, 0x0, 0x0, 0xff)
-                for cnt, aa in enumerate(newcol):
-                    self.xparent.win3.simg.buf[cnt + 4 * xxx + row] = newcol[cnt]
-            except:
-                cnt += 1
-                pass
-        self.xparent.win3.simg.invalidate()
-        #print("dbuff len", len(dbuff), "slack", cnt)
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
@@ -742,12 +782,12 @@ class ImgMain(Gtk.DrawingArea):
 
         # Fill in 2D array
         for yy in range(self.ihh):
-            offs = yy * self.iww * 4
+            offs = yy * self.iww * BPX
             for xx in range(self.iww):
                 val = []
-                for cc in range(4):
-                    val.append(self.buf[offs + xx * 4 + cc])
-                self.add_to_dict(self.darr, xx, yy, val)
+                for cc in range(BPX):
+                    val.append(self.buf[offs + xx * BPX + cc])
+                self._add_to_dict(self.darr, xx, yy, val)
 
         # TEST: Put it back to img
         #imgrec.blank(color=0xff888888)
@@ -776,12 +816,12 @@ class ImgMain(Gtk.DrawingArea):
         nbounds = []; found = 0
         self.sumx = []
 
-        uarr, darr = self.mark_image()
+        #uarr, darr = self.mark_image()
 
         # Iterate all shapes
-        #while True:
+        while True:
 
-        for xxx, yyy in uarr:
+        #for xxx, yyy in uarr:
 
             if self.reanal > 1:
                 break
@@ -791,22 +831,21 @@ class ImgMain(Gtk.DrawingArea):
             fparam.stepx = self.stepx; fparam.stepy = self.stepy
             fparam.thresh = THRESH;    fparam.markcol = MARKCOL
             fparam.breath = 30;        fparam.verbose = 0
-            fparam.seekstep = 1
+            fparam.seekstep = self.iww // 50
 
             if not single:
                 # pre step, skip past dones
-                #xxx += fparam.seekstep
-                #if xxx >= fparam.iww:
-                #    xxx = 0; yyy += fparam.seekstep
-                #if yyy >= self.ihh:
-                #        break
-                #
+                xxx += fparam.seekstep
+                if xxx >= fparam.iww:
+                    xxx = 0; yyy += fparam.seekstep
+                if yyy >= self.ihh:
+                        break
+
                 xxx, yyy = flood.Seek(xxx, yyy, fparam, self.gl_dones)
                 if xxx < 0 or yyy < 0:
                     break
                 #print("flood.Seek found at", xxx, yyy)
                 pass
-
             if yyy >= self.ihh:
                 break
 
@@ -814,21 +853,6 @@ class ImgMain(Gtk.DrawingArea):
                 #print("Grey compare")
                 fparam.grey = True
 
-                #print("seek start:", xxx, yyy, end = " ")
-                #ret, xxx, yyy = flood.seek(xxx, yyy, fparam, self.gl_dones)
-                #print("seek ret:", ret, xxx, yyy)
-                #if not ret:
-                #    if xxx > 0:
-                #        xxx = 0; yyy += 1
-                #        continue
-                #    else:
-                #        break
-                # Wed 23.Oct.2024 - Blind seek on grid
-
-            #breakpoint()
-
-            #ttt = time.time()
-            #print(hex(id(self.gl_dones)))
             try:
                 retf = flood.Flood(xxx, yyy, fparam, self.gl_dones)
             except:
@@ -839,13 +863,11 @@ class ImgMain(Gtk.DrawingArea):
             if retf == -1:
                 break
 
-            if len(fparam.bounds) < 4:
+            if len(fparam.bounds) < 24:
                 #print("Short buffer", xxx, yyy, "len",
                 #            len(fparam.bounds), fparam.bounds[:4])
                 #xxx += 10; yyy += 10
                 continue
-
-            self.show_buff(self.gl_dones)
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
@@ -881,7 +903,7 @@ class ImgMain(Gtk.DrawingArea):
             # Display results
             for aa in nbounds:
                 #print(aa[0], aa[1])
-                offs = 4 * (aa[1] + aa[1] * self.xparent.simg2.ww)
+                offs = BPX * (aa[1] + aa[1] * self.xparent.simg2.ww)
                 #offs += 4 * fparam.minx
                 #offs += 4 * self.xparent.simg2.ww * fparam.miny
                 try:

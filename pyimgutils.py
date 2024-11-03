@@ -52,6 +52,7 @@ class Imagex(Gtk.DrawingArea):
         self.xparent = xparent
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
+        self.bpx = 4    # From FORMAT specifier - ARGB32
         self.buf = self.surface.get_data()
         self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
 
@@ -68,7 +69,6 @@ class Imagex(Gtk.DrawingArea):
         #print("Imagex resize", self.ww, self.hh)
         self.set_size_request(ww, hh)
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
-        self.bpx = 4    # From FORMAT specifier - ARGB32
         self.buf = self.surface.get_data()
 
     def clear(self):
@@ -117,6 +117,20 @@ class Imagex(Gtk.DrawingArea):
         for aa in range(self.bpx):
             self.buf[aa + offs] = colorx[aa]
 
+    def drawcross(self, xxx, yyy, newcol = (0xff, 0xff, 0xff, 0xff), size = 4):
+        row =  self.bpx * yyy * self.ww
+        try:
+            for line in range(-size, +size):
+                for cnt, aa in enumerate(newcol):
+                    offs = self.bpx * line + cnt + self.bpx * xxx + row
+                    self.buf[offs] = newcol[cnt]
+            for vline in range(-size, +size):
+                for cnt, aa in enumerate(newcol):
+                    offs = cnt + self.bpx * xxx + row + self.bpx * vline * self.ww
+                    self.buf[offs] = newcol[cnt]
+        except:
+            pass
+
     def _draw(self, me, gc):
         #print("Imagex draw")
         gc.set_source_surface(self.surface)
@@ -157,14 +171,16 @@ old_dir = ""
 
 class ofd():
 
-    def __init__(self, msg = "Open File", mode=Gtk.FileChooserAction.OPEN):
-
+    def __init__(self, msg = "Open File", startdir = "images",
+                                        mode=Gtk.FileChooserAction.OPEN):
         self.result = None
-        self.old = os.getcwd()
 
         global old_dir
         if not old_dir:
-            old_dir = self.old
+            os.chdir(startdir)
+
+        self.old = os.getcwd()
+        old_dir = self.old
 
         #print("old_dir:", old_dir)
 
