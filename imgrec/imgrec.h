@@ -15,6 +15,7 @@ extern PyObject *module;
 
 PyObject *_flood(PyObject *self, PyObject *args, PyObject *kwargs);
 PyObject *_average(PyObject *self, PyObject *args, PyObject *kwargs);
+PyObject *_seek(PyObject *self, PyObject *args, PyObject *kwargs);
 
 // Lines:
 

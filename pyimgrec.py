@@ -214,7 +214,7 @@ class MainWin():
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(26)
+        self.scale2.set_value(30)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -493,8 +493,8 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt5 = Gtk.Button.new_with_mnemonic(" Clear Annote ")
-        butt5.connect("clicked", self.clear_annote, window)
+        butt5 = Gtk.Button.new_with_mnemonic(" Test B_utt (seek) ")
+        butt5.connect("clicked", self.test_butt, window)
         hbox.pack_start(butt5, False, 0, 0)
         self.spacer(hbox)
 
@@ -837,9 +837,8 @@ class MainWin():
         #self.fill_small_img(self.area.image2)
         pass
 
-    def clear_annote(self, win, a3):
-        self.area.clear_annote()
-        #self.set_small_text("annote cleared")
+    def test_butt(self, win, a3):
+        self.area.test_butt()
 
     def pickle_shapes(self, win = None, a3 = None):
         try:

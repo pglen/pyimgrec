@@ -76,12 +76,6 @@ void    print_list(void);
 void    show_crosses(void);
 
 int calc_avg(void);
+int intfromclass(PyObject *classx, const char *method);
 
-
-
-
-
-
-
-
-
+// EOF

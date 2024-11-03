@@ -166,7 +166,9 @@ PyMethodDef imgrec_functions[] =
     { "edge",      (PyCFunction)_edge,    METH_VARARGS|METH_KEYWORDS,  "Edge out ridge lines" },
     { "smooth",    (PyCFunction)_smooth,  METH_VARARGS|METH_KEYWORDS,  "Smooth image" },
     { "smoothv",   (PyCFunction)_smoothv, METH_VARARGS|METH_KEYWORDS,  "Smooth image vertical" },
-    { "average",   (PyCFunction)_average,  METH_VARARGS|METH_KEYWORDS, "Calculate average" },
+    { "average",   (PyCFunction)_average, METH_VARARGS|METH_KEYWORDS,  "Calculate average" },
+
+    { "seek",      (PyCFunction)_seek,    METH_VARARGS|METH_KEYWORDS,  "Seek next floodable slot" },
 
     {  NULL },
     };

@@ -58,7 +58,7 @@ class floodParm():
 
         self.darr = darr;       self.seekstep = 1
         self.iww = iww;         self.ihh = ihh
-        self.callb = None;      self.verbose = 0
+        self.callb = None;
         self.mark = [0,0,0,0];  self.exit = 0
         self.cnt = 0;           self.ops = 0
         self.depth = 0;         self.verbose = 0;
@@ -67,6 +67,7 @@ class floodParm():
         self.stepx = 0;         self.stepy = 0
         self.minx = 0;          self.miny = 0
         self.maxx = 0;          self.maxy = 0
+
         self.tmesub = [];       self.dones = {}
         self.bounds = [];       self.body  = []
         self.stack = stack.Stack()
@@ -355,8 +356,8 @@ def Flood(xxx, yyy, param, gl_dones):
         # subtract time spent in printing
         tstr = "%.2f ms" % ((treal-tsum) * 1000)
 
-        print("Flood(): xxx", xxx, "yyy", yyy, "ww", param.ww, "hh", param.hh,
-                    "xlen", xlen, "ops", param.ops, "tstr", tstr)
+        #print("Flood(): xxx", xxx, "yyy", yyy, "ww", param.ww, "hh", param.hh,
+        #            "xlen", xlen, "ops", param.ops, "tstr", tstr)
         #print("loop count", param.cnt, "bounds len", len(param.bounds) )
 
     #print("dones", len(param.dones), dones)

@@ -641,6 +641,34 @@ class ImgMain(Gtk.DrawingArea):
         # Display final image
         self.invalidate()
 
-# EOF
+def funcrev(item):
+            return item[1], item[0]
+        arrm = map(funcrev, xuparr)
+        sumxarr = []
+        for aa in arrm:
+            sumxarr.append(aa)
+
+# Compare array
+        def cmp(aa, bb):
+            if aa[1] > bb[1]:
+                return 1
+            else:
+                if aa[1] < bb[1]:
+                    return -1
+                else:
+                    if aa[0] > bb[0]:
+                       return 1
+                    else:
+                        if aa[0] < bb[0]:
+                            return -1
+                        else:
+                            return 0
+
+        # Mark middle point of X line ups
+        iarr = []
+        inup = False; oldx = 0; starty = 0
+        from functools import cmp_to_key
+        sumxarr = sorted(xuparr, key=cmp_to_key(cmp))
+        print(sumxarr)
 
 # EOF

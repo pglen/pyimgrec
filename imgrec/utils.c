@@ -248,4 +248,21 @@ void    show_crosses(void)
     dealloc();
 }
 
+// Get int from class
+
+int intfromclass(PyObject *classx, const char *method)
+
+{
+    PyObject *namex = PyObject_GetAttr(classx,
+                                    Py_BuildValue("s", method));
+    if (!namex)
+        {
+        printf("Warn: no such method %s", method);
+        return -1;
+        }
+    int ret = (int) PyLong_AsLong(namex);
+    //printf(" %d\n", ret);
+    return ret;
+}
+
 // EOF

@@ -243,6 +243,25 @@ class ImgMain(Gtk.DrawingArea):
         self.aframe = [];        self.bframe = []
         self.invalidate()
 
+    def test_butt(self):
+        #print("test_butt")
+        imgrec.verbose = 0
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+
+        xdarr = {}; glarr = {}
+        # Fill in 2D array
+        for yy in range(self.ihh):
+            offs = yy * self.iww * BPX
+            for xx in range(self.iww):
+                val = []
+                for cc in range(BPX):
+                    val.append(self.buf[offs + xx * BPX + cc])
+                self._add_to_dict(xdarr, xx, yy, val)
+        #print("xdarr len", len(xdarr) )
+
+        fparam = flood.floodParm(self.iww, self.ihh, xdarr)
+        imgrec.seek(10, 10, fparam, glarr)
+
     def  area_button(self, win, event):
 
         self.laststate = event.state
@@ -618,9 +637,8 @@ class ImgMain(Gtk.DrawingArea):
         # Mark middle point of X line ups
         iarr = []
         inup = False; oldx = 0; starty = 0
-        sumxarr = xuparr + xdwnarr
-        sumxarr.sort()
-        for xx2, yy2 in sumxarr:
+
+        for xx2, yy2 in xuparr:
             #print((xx2, yy2))
             if oldx != xx2:
                 if inup:
@@ -743,93 +761,58 @@ class ImgMain(Gtk.DrawingArea):
             print("callb", xxx, yyy, kind, sys.exc_info())
             print_exception("callb")
 
-    # --------------------------------------------------------------------
-    # Using an arrray to manipulate the underlying buffer
 
-    def anal_image(self, xxx, yyy, single = False, addx = False):
+    def _anal_image_worker(self, xxx, yyy, single, addx):
 
-        imgrec.verbose = 0
-        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+        ''' Work until reasonable matche=s found '''
 
-        MARKCOL = int(self.xparent.scale.get_value())
-        THRESH  = int(self.xparent.scale2.get_value())
+        thresh = THRESH
+        allcnt = 0
 
-        #imgrec.verbose = 1
-        #avg = imgrec.average()
-        print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
-                        "thresh", THRESH, "markcol", MARKCOL)
-        #imgrec.verbose = 0
+        MAXFOUND    = 200
+        MINFOUND    = 150
+        MINMAXFACT  = 3
 
-        self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
+        ttt = time.time()
 
-        # Draw grid:
-        if self.xparent.check1.get_active():
-            try:
-                #print("Grid")
-                for xx in range(self.divider):
-                    hor = int(xx * self.stepx)
-                    imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
-                for yy in range(self.divider):
-                    ver = int(yy * self.stepy)
-                    imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
+        while True:
+            # Limit it to maximum number of iterations
+            if allcnt > 6:
+                break
+            allcnt += 1
 
-                self.invalidate()
-                #usleep(10)
-            except:
-                print_exception("grid")
-
-        self.darr = {};
-
-        # Fill in 2D array
-        for yy in range(self.ihh):
-            offs = yy * self.iww * BPX
-            for xx in range(self.iww):
-                val = []
-                for cc in range(BPX):
-                    val.append(self.buf[offs + xx * BPX + cc])
-                self._add_to_dict(self.darr, xx, yy, val)
-
-        # TEST: Put it back to img
-        #imgrec.blank(color=0xff888888)
-        #for yy in range(self.ihh):
-        #    for xx in range(self.iww):
-        #        offs = yy * self.iww * 4
-        #        for cc in range(4):
-        #            try: buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
-        #            except: pass
-        #    self.invalidate(); usleep(.1)
-        #return
-
-        self.reanal += 1
-        if self.reanal > 1:
-            print("Stopping Anal .. please wait")
-            flood.gl_reenter += 1
-            self.reanal = 0
-            return
-
-        # See if repeated request for scanning the same image
-        if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
-            self.xparent.simg.clear()
-            self.xparent.win2.simg.clear()
             self.gl_dones = {}
+            found = self._anal_image_worker2(xxx, yyy, single, thresh, addx)
+            print("worker2() found", found, "thresh", thresh)
 
-        nbounds = []; found = 0
+            # Got optimal count in range, stop
+            if found < MAXFOUND and found > MINFOUND:
+                break
+
+            if found > MAXFOUND:
+                thresh += (found - MAXFOUND) // MINMAXFACT
+            else:
+                thresh -= (found - MINFOUND) // MINMAXFACT
+
+        print("anal time: %.2f ms" % ((time.time() - ttt) * 1000))
+
+
+    def _anal_image_worker2(self, xxx, yyy, single, thresh, addx):
+
+        nbounds = [];
         self.sumx = []
-
-        #uarr, darr = self.mark_image()
+        found = 0
 
         # Iterate all shapes
         while True:
-
-        #for xxx, yyy in uarr:
-
             if self.reanal > 1:
                 break
+
             # Set up flood fill parameters
             fparam = flood.floodParm(self.iww, self.ihh, self.darr)
             fparam.callb = self.callb
             fparam.stepx = self.stepx; fparam.stepy = self.stepy
-            fparam.thresh = THRESH;    fparam.markcol = MARKCOL
+            fparam.thresh = thresh;    fparam.markcol = MARKCOL
             fparam.breath = 30;        fparam.verbose = 0
             fparam.seekstep = self.iww // 50
 
@@ -934,8 +917,82 @@ class ImgMain(Gtk.DrawingArea):
             except:
                 print("exc sumx", sys.exc_info())
 
-        self.reanal = 0
         print("%d segments found." % found)
+        return found
+
+    # --------------------------------------------------------------------
+    # Using an arrray to manipulate the underlying buffer
+
+    def anal_image(self, xxx, yyy, single = False, addx = False):
+
+        imgrec.verbose = 0
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+
+        global MARKCOL, THRESH
+        MARKCOL = int(self.xparent.scale.get_value())
+        THRESH  = int(self.xparent.scale2.get_value())
+
+        #imgrec.verbose = 1
+        #avg = imgrec.average()
+        print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
+                        "thresh", THRESH, "markcol", MARKCOL)
+        #imgrec.verbose = 0
+
+        self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
+
+        # Draw grid:
+        if self.xparent.check1.get_active():
+            try:
+                #print("Grid")
+                for xx in range(self.divider):
+                    hor = int(xx * self.stepx)
+                    imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
+                for yy in range(self.divider):
+                    ver = int(yy * self.stepy)
+                    imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
+
+                self.invalidate()
+                #usleep(10)
+            except:
+                print_exception("grid")
+
+        self.darr = {};
+
+        # Fill in 2D array
+        for yy in range(self.ihh):
+            offs = yy * self.iww * BPX
+            for xx in range(self.iww):
+                val = []
+                for cc in range(BPX):
+                    val.append(self.buf[offs + xx * BPX + cc])
+                self._add_to_dict(self.darr, xx, yy, val)
+
+        # TEST: Put it back to img
+        #imgrec.blank(color=0xff888888)
+        #for yy in range(self.ihh):
+        #    for xx in range(self.iww):
+        #        offs = yy * self.iww * 4
+        #        for cc in range(4):
+        #            try: buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
+        #            except: pass
+        #    self.invalidate(); usleep(.1)
+        #return
+
+        self.reanal += 1
+        if self.reanal > 1:
+            print("Stopping Anal .. please wait")
+            flood.gl_reenter += 1
+            self.reanal = 0
+            return
+
+        # See if repeated request for scanning the same image
+        if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
+            self.xparent.simg.clear()
+            self.xparent.win2.simg.clear()
+            self.gl_dones = {}
+
+        self._anal_image_worker(xxx, yyy, single, addx)
+        self.reanal = 0
 
     def compare(self, xarr, fbounds):
 
