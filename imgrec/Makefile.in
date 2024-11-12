@@ -54,6 +54,6 @@ imgrec.so: ${TARGS} Makefile
 utils.o:  utils.h
 
 clean:
-	rm *.o
+	@rm -f *.o
 
 # EOF

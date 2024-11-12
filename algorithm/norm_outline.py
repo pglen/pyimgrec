@@ -3,8 +3,17 @@
 import math
 import pyimgutils as iut
 
-# This is the sample size that is stored in shape array
-ARRLEN = 200
+__doc__ = '''
+
+  Process and shape image boundary data vectors. Misc routines to
+  shape / normalize / sort compare arrays.
+  The initial attempt was to convert them by sorting on rotational vector.
+  However, the simple sort is just fine.
+
+'''
+
+#: This is the sample size that is stored in the shape array
+ARRLEN = 100
 
 def norm_array(fparm):
 
@@ -71,12 +80,26 @@ def norm_array(fparm):
     return resarr3
 
 def norm_vectors(vects, minx, miny, size = ARRLEN):
+
+    ''' Call subsequent norm / scale routines '''
+
     ulf = flush_upleft(vects, minx, miny)
     nbs = scale_vectors(ulf, size)
     nbm = scale_magnitude(nbs, size)
     return nbm
 
-def flush_upleft(vects, minx, miny):
+def flush_upleft(vects, minx = 0, miny = 0):
+
+    ''' Make sure vector origin at 0,0 (minx, miny)
+
+    Parameters
+    ----------
+
+        vects           vectors to operate on
+        minx, miny      flush reference point
+
+    '''
+
     xarr = []
     for aa in vects:
         xarr.append(([aa[0] - minx, aa[1] - miny]))
@@ -85,6 +108,7 @@ def flush_upleft(vects, minx, miny):
 def order_vectors(carr, midx, midy, rev = False):
 
     ''' Order vectors. Calculate vector tangent and sort by it.
+        Obsolete. Kept because it may be useful in the future.
     '''
 
     vec = []; resarr = []
@@ -136,7 +160,13 @@ def scale_magnitude(carr, newval):
 
 def cmp_arrays(arr1, arr2, span = 3):
 
-    ''' Compare two arrays, look sideways for closer match '''
+    ''' Compare two arrays, look sideways for closer match
+
+        Parameters:  <br>
+
+            arr1, arr2      arrays to compare
+            span            how musch to look sideways
+    '''
 
     xlen = min(len(arr1), len(arr2))
     if xlen < span + 2:
@@ -158,6 +188,9 @@ def cmp_arrays(arr1, arr2, span = 3):
     return int(ret)
 
 def cmp_arrays2(arr1, arr2):
+
+    ''' Compare two arrays, old version (never mind) '''
+
     ret = 0; xlen = min(len(arr1), len(arr2))
     for aa in range(1, xlen - 1):
 
@@ -243,7 +276,7 @@ def norm_array2(fparm):
 
 def sqrdiff(aa, bb):
 
-    ''' math sugar for absolute difference '''
+    ''' Math sugar for absolute difference. Not used, as it is too expensive. '''
 
     dist = math.sqrt(abs(math.pow(bb, 2) - \
                 math.pow(aa, 2)))

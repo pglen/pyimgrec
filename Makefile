@@ -14,7 +14,7 @@
 
 
 
-# Make image recognition libraries
+# Makefile for image recognition libraries
 
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -676,7 +676,9 @@ all-am:
 	make -C imgrec
 
 clean:
-	make -C imgrec clean
+	@make -C imgrec clean
+	@rm -rf __pycache__
+	@rm -f *~
 
 git:
 	git add .
@@ -684,14 +686,12 @@ git:
 	git push
 
 help:
-	@echo "Targets: pydocs clean git"
-
-#.PHONY: docs
-#@echo "pydocs"
+	@echo "Targets: pydocs clean git pydocs"
 
 pydocs:
-	@echo ${XPATH}
+	@#echo ${XPATH}
 	@${XPATH} -o docs algorithm/flood.py
+	@${XPATH} -o docs algorithm/norm_outline.py
 
 # EOF
 
