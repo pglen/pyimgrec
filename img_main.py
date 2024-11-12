@@ -355,7 +355,7 @@ class ImgMain(Gtk.DrawingArea):
             self.stepy = float(self.ihh)/self.divider;
         except:
             print("exc load", fname, sys.exc_info())
-            print_exception("load")
+            print_exception("area load")
             #msg("  Cannot load image:\n '%s' " % fname)
             raise
 
@@ -783,7 +783,13 @@ class ImgMain(Gtk.DrawingArea):
 
             self.gl_dones = {}
             found = self._anal_image_worker2(xxx, yyy, single, thresh, addx)
-            print("worker2() found", found, "thresh", thresh)
+            if xconfig.verbose:
+                print("worker2() found", found, "thresh", thresh)
+
+            # Image is too simple, break
+            if found < 20:
+                print("Image too simple")
+                break
 
             # Got optimal count in range, stop
             if found < MAXFOUND and found > MINFOUND:
@@ -934,7 +940,8 @@ class ImgMain(Gtk.DrawingArea):
 
         #imgrec.verbose = 1
         #avg = imgrec.average()
-        print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
+        if xconfig.verbose:
+            print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
                         "thresh", THRESH, "markcol", MARKCOL)
         #imgrec.verbose = 0
 

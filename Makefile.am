@@ -14,7 +14,7 @@ git:
 	git push
 
 help:
-	@echo "Targets: pydocs clean git pydocs"
+	@echo "Targets: pydocs clean git pydocs cycle"
 
 XPATH=python3 -W ignore::DeprecationWarning `which pdoc` --force --html
 
@@ -22,5 +22,11 @@ pydocs:
 	@#echo ${XPATH}
 	@${XPATH} -o docs algorithm/flood.py
 	@${XPATH} -o docs algorithm/norm_outline.py
+	@${XPATH} -o docs pyimgutils.py
+	@${XPATH} -o docs pyimgrec.py
+
+cycle:
+	@make -C imgrec
+	@./pyimgrec.py
 
 # EOF

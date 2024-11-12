@@ -58,7 +58,7 @@ def help():
     print( "Options:")
     print( )
     print( "            -d level  - Debug level 1-10. (Limited implementation)")
-    print( "            -v        - Verbose (to stdout and log)")
+    print( "            -v        - Verbose (to stdout and log) more -v for more info")
     print( "            -c        - Dump Config")
     print( "            -h        - Help")
     print()
@@ -946,11 +946,6 @@ if __name__ == '__main__':
 
     global mainwin
 
-    autohide = False
-    #print()
-    print( "Imgrec Version", imgrec.version(), imgrec.builddate())
-    #print( "Imgrec   ", imgrec.__dict__)
-
     try:
         if not os.path.isdir(config_dir):
             os.mkdir(config_dir)
@@ -963,7 +958,7 @@ if __name__ == '__main__':
 
     opts = []; args = []
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hva")
+        opts, args = getopt.getopt(sys.argv[1:], "hvd:")
     except getopt.GetoptError as err:
         print( "Invalid option(s) on command line:", err)
         sys.exit(1)
@@ -971,25 +966,45 @@ if __name__ == '__main__':
     #print( "opts", opts, "args", args)
 
     for aa in opts:
+        if aa[0] == "-v":
+            xconfig.verbose += 1
+
         if aa[0] == "-d":
             try:
-                pgdebug = int(aa[1])
+                xconfig.pgdebug = int(aa[1])
             except:
-                pgdebug = 0
+                xconfig.pgdebug = 0
+            if xconfig.verbose:
+                print("Debug level:", xconfig.pgdebug)
 
         if aa[0] == "-h": help();  exit(1)
-        if aa[0] == "-v": verbose = True
-        if aa[0] == "-a": autohide = True
 
-    if verbose:
+    if xconfig.verbose > 1:
+            print("Verbose level:", xconfig.verbose)
+
+    if xconfig.verbose:
         print( "PyImgRec running on", "'" + os.name + "'",
-            "GTK", Gtk.gtk_version, "PyGtk", pygtk_version )
+            "GTK", Gtk._version, "PyGtk",
+             "%d.%d.%d" % (Gtk.get_major_version(), \
+                        Gtk.get_minor_version(), \
+                            Gtk.get_micro_version()))
+
+    if xconfig.verbose > 1:
+        if args:
+            print("args", args)
+
+    if xconfig.verbose > 1:
+        print( "Imgrec Version", imgrec.version(), imgrec.builddate())
+        #print( "Imgrec   ", imgrec.__dict__)
+
+    if args:
+        if not os.path.isfile(args[0]):
+            print("Argument '%s' must be an image file." % args[0])
+            sys.exit(1)
 
     mainwin = MainWin(args)
     mainwin.window.show_all()
 
-    if autohide:
-        mainwin.window.iconify()
     Gtk.main()
 
 # EOF

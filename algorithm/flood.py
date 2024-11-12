@@ -10,7 +10,7 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Pango
 
-import  pyimgutils as iut
+from  pyimgutils import *
 import  stack
 
 import imgrec.imgrec as imgrec
@@ -26,7 +26,7 @@ __doc__ = \
 dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_MARK",
                     "DOT_POP", "DOT_INVALIDATE")
 # Create enums
-iut.do_enums(dot_strs, locals())
+create_enums(dot_strs, locals())
 
 # Verify enums
 #for aaa in dot_strs:
@@ -45,6 +45,7 @@ scan_idx = len(scan_ops) - 1
 
 def _sqr(val):
     return val * val
+
 
 class floodParm():
 
@@ -238,7 +239,7 @@ def Flood(xxx, yyy, param, gl_dones):
     while True :
         #print("new loop", xxx, yyy, "start", startop)
 
-        #iut.usleep(1)
+        #usleep(1)
         # If someone called it with reentry, bail out.
         # This is to allow the developer to terminate scan early, on demand.
         if gl_reenter > 1:
@@ -406,7 +407,7 @@ def _scan_one(xxx2, yyy2, param, gl_dones):
             ret = DOT_BOUND
             break
         except:
-            iut.print_exception("coldiff")
+            print_exception("coldiff")
 
         if diff < param.thresh:
             ret = DOT_YES

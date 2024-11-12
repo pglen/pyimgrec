@@ -1,0 +1,3196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pyimgrec API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyimgrec</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+
+import os, sys, getopt, signal, array, pickle
+import time, traceback, warnings, random
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Pango
+from gi.repository import GdkPixbuf
+
+import cairo
+
+from timeit import Timer
+
+from pyimgutils import *
+
+import treehand, img_main
+import algorithm.norm_outline as ol
+
+ol.ARRLEN
+
+try:
+    import imgrec.imgrec as imgrec
+    #print(&#34;ImgRec Lib Version:&#34;, imgrec.version(), &#34;Built:&#34;, imgrec.builddate())
+
+except:
+    print_exception(&#34;import imgrec&#34;)
+    print( &#34;Cannot import imgrec&#34;) #, using py implementation&#34;)
+    raise
+
+# ------------------------------------------------------------------------
+# This is open source image recognition program. Written in python with
+# plugins in &#39;C&#39;
+
+version = 0.80
+verbose = False
+xstr = &#34;&#34;
+
+# Profile line, use it on bottlenecks
+#got_clock = time.clock()
+# profiled code here
+#print(  &#34;Str&#34;, time.clock() - got_clock        )
+
+# Where things are stored (backups, orgs, macros)
+config_dir = os.path.expanduser(&#34;~/.pyimgrec&#34;)
+
+def help():
+
+    print( )
+    print( &#34;PyImgRec version: &#34;, version)
+    print( )
+    print( &#34;Usage: &#34; + os.path.basename(sys.argv[0]) + &#34; [options] [[filename] ... [filenameN]]&#34;)
+    print( )
+    print( &#34;Options:&#34;)
+    print( )
+    print( &#34;            -d level  - Debug level 1-10. (Limited implementation)&#34;)
+    print( &#34;            -v        - Verbose (to stdout and log) more -v for more info&#34;)
+    print( &#34;            -c        - Dump Config&#34;)
+    print( &#34;            -h        - Help&#34;)
+    print()
+
+# ------------------------------------------------------------------------
+
+class MainWin():
+
+    def __init__(self, args):
+
+        self.curr = []
+        self.reenter = 0
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        self.window.set_title(&#34;Python Image Recognition&#34;)
+        #self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        self.smrc = None
+        self.narr = []; self.shapes = []
+        ic = Gtk.Image(); ic.set_from_file(&#34;images/shapes.png&#34;)
+        #stock(Gtk.DialogType.INFO, Gtk.GtkIconSize.BUTTON)
+        self.window.set_icon(ic.get_pixbuf())
+
+        #self.window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
+        #self.window.set_events(  Gdk.POINTER_MOTION_MASK |
+        #                    Gdk.POINTER_MOTION_HINT_MASK |
+        #                    Gdk.BUTTON_PRESS_MASK |
+        #                    Gdk.BUTTON_RELEASE_MASK |
+        #                    Gdk.KEY_PRESS_MASK |
+        #                    Gdk.KEY_RELEASE_MASK |
+        #                    Gdk.FOCUS_CHANGE_MASK )
+
+        self.window.connect(&#34;destroy&#34;, self.OnExit)
+        self.window.connect(&#34;button-press-event&#34;, self.area_button)
+        self.window.connect(&#34;key-press-event&#34;, self.key_press_event)
+        self.window.connect(&#34;configure-event&#34;, self.config_event)
+
+        self.pangolayout = self.window.create_pango_layout(&#34;a&#34;)
+        try:
+            self.window.set_icon_from_file(&#34;icon.png&#34;)
+        except:
+            pass
+
+        warnings.simplefilter(&#34;ignore&#34;)
+
+        www = Gdk.Screen.width(); hhh = Gdk.Screen.height();
+
+        disp2 = Gdk.Display()
+        disp = disp2.get_default()
+        #print( disp)
+        scr = disp.get_default_screen()
+        ptr = disp.get_pointer()
+        mon = scr.get_monitor_at_point(ptr[1], ptr[2])
+        geo = scr.get_monitor_geometry(mon)
+        self.dwww = geo.width; self.dhhh = geo.height
+        xxx = geo.x;     yyy = geo.y
+
+        # Resort to old means of getting screen w / h
+        if self.dwww == 0 or self.dhhh == 0:
+            self.dwww = Gdk.screen_width(); self.dhhh = Gdk.screen_height();
+
+        #print(&#34;Window size&#34;, www, hhh)
+        #if www / hhh &gt; 2:
+        #    self.window.set_default_size(5*www/8, 7*hhh/8)
+        #else:
+        #    self.window.set_default_size(7*www/8, 7*hhh/8)
+
+        self.window.set_default_size(6*self.dwww/8, 6*self.dhhh/8)
+
+        warnings.simplefilter(&#34;default&#34;)
+
+        #print( www, hhh)
+        self.wwww = 3 * self.dwww / 4;  self.hhhh = 3 * self.dhhh / 4
+
+        self.hbox_s = Gtk.HBox()
+        self.hbox_s2 = Gtk.HBox()
+        self.hbox = Gtk.HBox()
+        self.mainbox = Gtk.HBox()
+        self.hbox2 = Gtk.HBox()
+        self.hbox2a = Gtk.HBox()
+        self.hbox3 = Gtk.HBox()
+
+        self.area = img_main.ImgMain(self)
+        self.vport = Gtk.Viewport()
+        self.scroller = Gtk.ScrolledWindow()
+        self.vport.add(self.area)
+        self.scroller.add(self.vport)
+        self.mainbox.pack_start(self.scroller, 1, 1, 4)
+
+        self.vport2 = Gtk.Viewport()
+        self.scroller2 = Gtk.ScrolledWindow()
+
+        #self.simg = Gtk.Image.new_from_file(&#34;images/star.png&#34;)
+        #a2 = self.simg.get_pixbuf()
+        #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
+
+        self.simg  = Imagex(self, ol.ARRLEN, ol.ARRLEN)
+        self.simg2 = Imagex(self, ol.ARRLEN, ol.ARRLEN)
+
+        self.simg.connect(&#34;button-press-event&#34;, self.simg_button)
+
+        vbox2 = Gtk.VBox()
+        self.tree = treehand.TreeHand(self.tree_sel_row)
+        self.tree.stree.set_size_request(-1, 200)
+        vbox2.pack_start(self.tree.stree, 0, 0, 0)
+
+        self.win2 = self.add_win()
+        self.win3 = self.add_win()
+
+        try:
+            if args:
+                self.load(args[0])
+            else:
+                # Load default image(s)
+                #self.load(&#34;images/african.jpg&#34;)
+                #self.load(&#34;images/IMG_0823.jpg&#34;)
+                #self.load(&#34;images/shapes.png&#34;)
+                self.load(&#34;images/shapex.png&#34;)
+                #self.load(&#34;images/Untitled.png&#34;)
+                #self.load(&#34;images/line.png&#34;)
+                #self.load(&#34;images/star.png&#34;)
+                #self.load(&#34;images/rect.png&#34;)
+                #self.load(&#34;images/IMG_0827.jpg&#34;)
+                #self.load(&#34;images/enrolled.pgm&#34;)
+        except:
+            print_exception(&#34;Load Image&#34;)
+            #msg(&#34;Cannot load file &#34; + self.fname)
+            raise
+
+        pix = self.area.image.get_pixbuf()
+        iww = pix.get_width(); ihh = pix.get_height()
+
+        self.vport2.add(self.simg)
+        self.scroller2.add(self.vport2)
+        self.mainbox.pack_start(self.scroller2, 1, 1, 4)
+
+        self.labx = Gtk.Label(label=&#34;&#34;)
+        self.laby = Gtk.Label(label=&#34;&#34;)
+        self.labz = Gtk.Label(label=&#34;&#34;)
+        vimgbox = Gtk.VBox()
+        vimgbox.pack_start(self.labx, 0, 0, 0)
+        vimgbox.pack_start(self.laby, 0, 0, 0)
+        vimgbox.pack_start(self.labz, 0, 0, 0)
+        vimgbox.pack_start(self.simg2, 0, 0, 0)
+        self.lab = Gtk.Label(label=&#34; None &#34;)
+        vimgbox.pack_start(self.lab, 0, 0, 0)
+        self.mainbox.pack_start(vimgbox, 0, 0, 4)
+
+        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
+                                                        0, 255, 1)
+        self.scale.set_value(220)
+        self.scale.set_inverted(True)
+        self.scale.set_tooltip_text(&#34;Mark value&#34;)
+        self.mainbox.pack_start(self.scale, 0, 0, 0)
+        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
+                                                        0, 255, 1)
+        self.mainbox.pack_start(self.scale2, 0, 0, 0)
+        self.scale2.set_value(30)
+        self.scale2.set_inverted(True)
+        self.scale2.set_tooltip_text(&#34;Threshold diff&#34;)
+
+        #if iww &gt; self.wwww or ihh &gt; self.hhhh:
+        #    self.scroller.set_size_request(self.wwww, self.hhhh)
+        #else:
+        #    self.scroller.set_size_request(iww + 30, ihh + 30)
+
+        #self.area3 = DrawingArea()
+        #vbox2.pack_start(self.area3)
+
+        #lab2 = Gtk.Label(&#34;Test Image&#34;)
+        #vbox2.pack_start(lab2, False, 0, 0)
+        #self.img = Gtk.Image();
+        #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
+
+        self.buttons(self.hbox, self.window)
+        self.buttons2(self.hbox2, self.window)
+        self.buttons3(self.hbox2a, self.window)
+        self.checks(self.hbox3, self.window)
+
+        self.spacer(self.hbox_s, False)
+        self.spacer(self.hbox_s2, False)
+
+        self.vbox = Gtk.VBox();
+
+        #self.vbox.pack_start(self.hbox_s, False, 0, 0)
+        self.vbox.pack_start(self.mainbox, True, True, 4)
+        #self.vbox.pack_start(self.hbox_s2, False, 0, 0)
+        self.vbox.pack_start(vbox2, False, 0, 0)
+        self.vbox.pack_start(self.hbox3, False, 0, 0)
+        self.vbox.pack_start(self.hbox, False, 0, 0)
+        self.vbox.pack_start(self.hbox2a, False, 0, 0)
+        self.vbox.pack_start(self.hbox2, False, 0, 0)
+
+        #frame = Gtk.Frame(); frame.add(self.img)
+        #vbox2.pack_start(frame, 1, 1, 0)
+        #
+
+        self.window.add(self.vbox)
+        GLib.timeout_add(100, self.after)
+
+    def add_win(self):
+
+        winx =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        #winx =  Gtk.Window(type=Gtk.WindowType.POPUP)
+        winx.set_skip_taskbar_hint(True)
+        winx.set_skip_pager_hint(True)
+
+        winx.set_title(&#34;Image Show&#34;)
+        winx.simg = Imagex(self)
+        winx.ww = winx.simg.ww;
+        winx.hh = winx.simg.hh
+        winx.set_size_request(winx.ww, winx.hh)
+        winx.add(winx.simg)
+        winx.move(100, 100)
+        #.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        winx.show_all()
+        return winx
+
+    def after(self):
+
+        # Move to current app to corner
+        xxx, yyy = self.window.get_position()
+        rrr = self.window.get_allocation()
+        #print(&#34;curr&#34;, xxx, yyy,rrr.width, rrr.height)
+        self.window.move(self.dwww - rrr.width - 10, 40)
+        # Flush to left
+        xxx, yyy = self.window.get_position()
+        self.win2.move(10, yyy)
+        self.win3.move(10, yyy + 300)
+        self.unpickle_shapes()
+
+    def set_small_text(self, txt):
+        self.lab.set_text(txt)
+
+    def clear_small_img(self, color = 0xffffffff):
+        # Only get this once after resize
+        #if not self.smrc:
+        #    self.smrc = self.simg.get_allocation()
+        #rc = self.simg.get_allocation()
+        #pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8,
+        #                                    rc.width, rc.height)
+        #pixbuf.fill(color)
+        #self.simg.set_from_pixbuf(pixbuf)
+        #rc = self.mainbox.get_allocation()
+        #self.mainbox.window.invalidate_rect(rc, False)
+        pass
+
+    def fill_small_img(self, img):
+
+        pass
+        # Only get this once after resize
+        #if not self.smrc:
+        #    self.smrc = self.img.get_allocation()
+        #print( &#34;fill small&#34;, self.smrc.width, self.smrc.height)
+
+        #rc = self.simg.get_allocation()
+        #print( &#34;fill small&#34;, img, rc.width, rc.height)
+        #nnn = img.get_pixbuf().scale_simple(rc.width, rc.height,
+        #                GdkPixbuf.InterpType.NEAREST)
+        #self.simg.set_from_pixbuf(nnn)
+        #self.mainbox.show_now()
+        #rc = self.mainbox.get_allocation()
+        #self.mainbox.window.invalidate_rect(rc, False)
+
+    # --------------------------------------------------------------------
+    def checks(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        self.check1 = Gtk.CheckButton.new_with_mnemonic(&#34; Draw Grid &#34;)
+        self.check1.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check1, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check2 = Gtk.CheckButton.new_with_mnemonic(&#34; _Prompt for save Shape &#34;)
+        self.check2.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check2, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check3 = Gtk.CheckButton.new_with_mnemonic(&#34; Grayscale compare &#34;)
+        self.check3.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check3, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check4 = Gtk.CheckButton.new_with_mnemonic(&#34; A_nimate &#34;)
+        self.check3.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check4, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        #self.radio1 = Gtk.RadioButton.new_with_mnemonic_from_widget(None, &#34; Flood &#34;)
+        #self.radio1.connect(&#34;clicked&#34;, self.check_hell, window)
+        #hbox.pack_start(self.radio1, False, 0, 0)
+        #
+        #self.spacer(hbox, False )
+        #
+        #self.radio2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, &#34; Rect Flood &#34;)
+        #self.radio2.connect(&#34;clicked&#34;, self.check_hell, window)
+        #hbox.pack_start(self.radio2, False, 0, 0)
+        #
+        #self.spacer(hbox, False )
+        #
+        #self.radio3 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, &#34; Walk &#34;)
+        #self.radio3.connect(&#34;clicked&#34;, self.check_hell, window)
+        #hbox.pack_start(self.radio3, False, 0, 0)
+        #
+        self.spacer(hbox, True )
+
+    def check_hell(self, arg, ww):
+        #print( &#34;check1&#34;, self.check1.get_active())
+        #print( &#34;check2&#34;, self.check2.get_active())
+        #print( &#34;radio1&#34;, self.radio1.get_active())
+        #print( &#34;radio2&#34;, self.radio2.get_active())
+        pass
+
+    # --------------------------------------------------------------------
+    # Load image
+
+    def load(self, fname):
+
+        self.fname = fname
+        self.area.load(fname)
+
+        self.simg.resize(self.area.iww, self.area.ihh)
+        self.simg.clear()
+
+        self.win2.simg.resize(self.area.iww, self.area.ihh)
+        self.win2.simg.clear()
+        self.win2.resize(self.area.iww, self.area.ihh)
+
+        self.win3.simg.resize(self.area.iww, self.area.ihh)
+        self.win3.simg.clear()
+        self.win3.resize(self.area.iww, self.area.ihh)
+
+        if self.area.iww &lt; 500:
+            self.scroller.set_size_request(self.area.iww, self.area.ihh)
+            self.scroller2.set_size_request(self.area.iww, self.area.ihh)
+
+    # --------------------------------------------------------------------
+    def buttons3(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; _Save Curr Shape &#34;)
+        butt6.connect(&#34;clicked&#34;, self.save_shape, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt7 = Gtk.Button.new_with_mnemonic(&#34; Show All S_hapes &#34;)
+        butt7.connect(&#34;clicked&#34;, self.show_all_shapes, window)
+        hbox.pack_start(butt7, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt8 = Gtk.Button.new_with_mnemonic(&#34; Pickle Shapes &#34;)
+        butt8.set_tooltip_text(&#34;Will save it to disk&#34;)
+        butt8.connect(&#34;clicked&#34;, self.pickle_shapes, window)
+        hbox.pack_start(butt8, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt9 = Gtk.Button.new_with_mnemonic(&#34; unPickle Shapes &#34;)
+        butt9.connect(&#34;clicked&#34;, self.unpickle_shapes, window)
+        butt9.set_tooltip_text(&#34;Will append it from disk&#34;)
+        hbox.pack_start(butt9, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        butt9a = Gtk.Button.new_with_mnemonic(&#34; _Clear All Shapes &#34;)
+        butt9a.connect(&#34;clicked&#34;, self.clear_shapes, window)
+        butt9a.set_tooltip_text(&#34;Will clear current shapes&#34;)
+        hbox.pack_start(butt9a, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        butt9a = Gtk.Button.new_with_mnemonic(&#34; _Delete Shape &#34;)
+        butt9a.connect(&#34;clicked&#34;, self.del_shape, window)
+        butt9a.set_tooltip_text(&#34;Will delete shape, no undo&#34;)
+        hbox.pack_start(butt9a, False, 0, 0)
+
+        self.spacer(hbox, True )
+
+    def clear_shapes(self, win, a3):
+        self.shapes = []
+
+    # --------------------------------------------------------------------
+    def buttons(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; _Load Image &#34;)
+        butt1.connect(&#34;clicked&#34;, self.load_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; Sav_e Image &#34;)
+        butt1.connect(&#34;clicked&#34;, self.save_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; _Analize &#34;)
+        butt1.connect(&#34;clicked&#34;, self.anal_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; _Fractal &#34;)
+        butt1.connect(&#34;clicked&#34;, self.fractal_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt3 = Gtk.Button.new_with_mnemonic(&#34; _Refresh &#34;)
+        butt3.connect(&#34;clicked&#34;, self.refr_image, window)
+        hbox.pack_start(butt3, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt3 = Gtk.Button.new_with_mnemonic(&#34; _Clear Subs &#34;)
+        butt3.connect(&#34;clicked&#34;, self.clear_subs, window)
+        hbox.pack_start(butt3, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt4 = Gtk.Button.new_with_mnemonic(&#34; Mark _Image &#34;)
+        butt4.connect(&#34;clicked&#34;, self.mark_image, window)
+        hbox.pack_start(butt4, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt5 = Gtk.Button.new_with_mnemonic(&#34; Test B_utt (seek) &#34;)
+        butt5.connect(&#34;clicked&#34;, self.test_butt, window)
+        hbox.pack_start(butt5, False, 0, 0)
+        self.spacer(hbox)
+
+        self.spacer(hbox, True )
+
+
+    def buttons2(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; N_ormalize &#34;)
+        butt6.connect(&#34;clicked&#34;, self.norm, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; His_togram &#34;)
+        butt6.connect(&#34;clicked&#34;, self.histo, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; _Grey &#34;)
+        butt6.connect(&#34;clicked&#34;, self.grey, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt7 = Gtk.Button.new_with_mnemonic(&#34; _Brighten &#34;)
+        butt7.connect(&#34;clicked&#34;, self.bri, window)
+        hbox.pack_start(butt7, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt8 = Gtk.Button.new_with_mnemonic(&#34; Dar_ken &#34;)
+        butt8.connect(&#34;clicked&#34;, self.dar, window)
+        hbox.pack_start(butt8, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt9 = Gtk.Button.new_with_mnemonic(&#34; _Walk &#34;)
+        butt9.connect(&#34;clicked&#34;, self.walk, window)
+        hbox.pack_start(butt9, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt9 = Gtk.Button.new_with_mnemonic(&#34; _Edge &#34;)
+        butt9.connect(&#34;clicked&#34;, self.edge, window)
+        hbox.pack_start(butt9, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt91 = Gtk.Button.new_with_mnemonic(&#34; Smooth &#34;)
+        butt91.connect(&#34;clicked&#34;, self.smooth, window)
+        hbox.pack_start(butt91, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt92 = Gtk.Button.new_with_mnemonic(&#34; Blank &#34;)
+        butt92.connect(&#34;clicked&#34;, self.blank, window)
+        hbox.pack_start(butt92, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt92a = Gtk.Button.new_with_mnemonic(&#34; Line &#34;)
+        butt92a.connect(&#34;clicked&#34;, self.line, window)
+        hbox.pack_start(butt92a, False, 0 ,0)
+
+        self.spacer(hbox)
+
+        butt92b = Gtk.Button.new_with_mnemonic(&#34; Frame &#34;)
+        butt92b.connect(&#34;clicked&#34;, self.frame, window)
+        hbox.pack_start(butt92b, False, 0 ,0)
+
+        self.spacer(hbox)
+
+        butt99 = Gtk.Button.new_with_mnemonic(&#34; E_xit &#34;)
+        butt99.connect(&#34;clicked&#34;, self.exit, window)
+        hbox.pack_start(butt99, False,0 ,0)
+
+        self.spacer(hbox, True )
+
+    def exit(self, butt, window):
+        self.OnExit(1)
+
+    def blank(self, butt, window):
+        self.area.blank_image()
+
+    def line(self, butt, window):
+        self.area.line_image()
+
+    def frame(self, butt, window):
+        self.area.frame_image()
+
+    def smooth(self, butt, window):
+        self.area.smooth_image()
+
+    def dar(self, butt, window):
+        self.area.dar_image()
+
+    def bri(self, butt, window):
+        self.area.bri_image()
+
+    def norm(self, butt, window):
+        #print( &#34;Norm&#34; #,butt, window)
+        self.area.norm_image()
+
+    def histo(self, butt, window):
+        #print( &#34;Norm&#34; #,butt, window)
+        self.area.histo_image()
+
+    def grey(self, butt, window):
+        #print( &#34;Norm&#34; #,butt, window)
+        self.area.grey_image()
+
+    def walk(self, butt, window):
+        #print( &#34;Walk&#34; #,butt, window)
+        self.area.walk_image(4, 4)
+
+    def edge(self, butt, window):
+        #print( &#34;Walk&#34; #,butt, window)
+        self.area.edge_image()
+
+    def spacer(self, hbox, flag = False ):
+        lab14 = Gtk.Label(label=&#34; &#34;);
+        hbox.pack_start(lab14, flag, 0, 0)
+
+    def mark_image(self, area, a3):
+        self.area.mark_image()
+
+    # Paint the image
+    def area_motion(self, area, event):
+        #print(  &#34;area_motion&#34;, event.x, event.y)
+        #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,
+        #                           Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
+        #gc.set_foreground(colormap.alloc_color(&#34;#aaaaaa&#34;))
+        #winn.draw_line(gc, 0, 7, rc.width, rc.height+7 )
+        #gc.set_foreground(colormap.alloc_color(&#34;#ffffff&#34;))
+        #winn.draw_line(gc, 0, 0, rc.width, rc.height)
+        pass
+
+    def load_image(self, arg, ww):
+        self.fname = ofd(&#34;Open Image File&#34;).result
+        if not self.fname:
+            return
+        try:
+            self.load(self.fname)
+        except:
+            msg(&#34;Cannot load file:\n%s&#34; % self.fname)
+
+    def save_image(self, arg, ww):
+        fname = ofd(&#34;Save Image File&#34;, Gtk.FileChooserAction.SAVE).result
+        if not fname:
+            return
+        try:
+            if fname[-4:] != &#34;.jpg&#34;:
+                fname += &#34;.jpg&#34;
+            pix = self.area.image2.get_pixbuf()
+            pix.save(fname, &#34;jpeg&#34;, {&#34;quality&#34;:&#34;100&#34;});
+        except:
+            print( sys.exc_info())
+            msg(&#34;Cannot save file:\n%s&#34; % fname)
+
+    # Button_press event on small image
+    def simg_button(self, win, eve):
+
+        #print(&#34;simg_butt&#34;, int(eve.x), int(eve.y)) #, eve.state)
+
+        #for cnt, cc in enumerate(self.area.sumx[1]):
+        #    print(&#34;sumx[1]&#34;, cnt, cc[:12])
+
+        if not (eve.state &amp; Gdk.ModifierType.SHIFT_MASK):
+            self.win3.simg.clear()
+
+        for aa in self.area.sumx:
+            if not len(aa):
+                continue
+
+            # see if on top of a fill
+            for aaa in aa[3]:
+                #print(&#34;aaa&#34;,aaa)
+                xdiff = abs(aaa[0] - int(eve.x))
+                if  xdiff &lt; 1:
+                    #print(&#34;x match&#34;, xdiff, aa[0], aa[1], aa[2])
+                    ydiff = abs(aaa[1] - int(eve.y))
+                    if ydiff &lt; 1:
+                        print(&#34;xy match&#34;, aa[0], aa[1], aa[2])
+                        self.curr = aa
+
+                        #newcol = (random.randint(0, 0x80),
+                        #                    random.randint(0, 0x80),
+                        #                            random.randint(0, 0x80), 0xff)
+                        # Draw / Erase
+                        if eve.state &amp; Gdk.ModifierType.CONTROL_MASK:
+                            newcol = (102, 128, 128, 0xff)
+                        else:
+                            #newcol = aa[2]
+                            newcol = (0x00, 0x00, 0x00, 0xff)
+
+                        for aaa in aa[3]:
+                            #print(&#34;aaa&#34;, aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    pass
+                                    self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print(&#34;win3 exc&#34;, &#34;aa&#34;, aa[:5], &#34;aaa&#34;,
+                                                aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        newcol = (0x00, 0x00, 0xff, 0xff)
+                        for aaa in aa[4]:
+                            #print(&#34;aaa&#34;, aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    pass
+                                    #self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print(&#34;win3 exc&#34;, &#34;aa&#34;, aa[:5], &#34;aaa&#34;,
+                                                aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        usleep(100)
+                        #break
+
+    def fractal_image(self, win, a3):
+
+        &#39;&#39;&#39; see selection animated &#39;&#39;&#39;
+
+        if self.reenter:
+           self.reenter = 0
+           return
+        self.reenter = 1
+        self.win3.simg.clear()
+        for cnt, aa in enumerate(self.area.sumx):
+            if self.reenter == 0:
+                break
+            if len(aa) == 0:
+                continue
+            #self.win3.simg.clear()
+            for aaa in aa[4]:
+                #newcol = aa[2]
+                newcol = (0x00, 0x00, 0x00, 0xff)
+                row = 4 * (aaa[1]) * self.win3.simg.ww
+                col = 4 * (aaa[0])
+                for cnt, cc in enumerate(newcol):
+                    try:
+                        self.win3.simg.buf[cnt + row + col] = cc
+                    except:
+                        print(&#34;win3 exc&#34;, &#34;aa[:5] =&#34;, aa[:5], &#34;aaa =&#34;,
+                                        aaa, sys.exc_info())
+            self.win3.simg.invalidate()
+            usleep(100)
+        self.reenter = 0
+
+
+    def fractal_image2(self, win, a3):
+
+        &#39;&#39;&#39; attempt to see if random selection would hit ... NO &#39;&#39;&#39;
+
+        self.win3.simg.clear()
+
+        if self.reenter:
+           self.reenter = 0
+           return
+        self.reenter = 1
+        while True:
+            if self.reenter == 0:
+                break
+
+            usleep(1000)
+            self.win3.simg.clear()
+            amount = random.randint(1, len(self.area.sumx) - 1)
+            for aaa in range(amount):
+                if self.reenter == 0:
+                    break
+                # select random image
+                cnt = random.randint(0, len(self.area.sumx) - 1)
+                aa = self.area.sumx[cnt]
+
+                if not len(aa):
+                    continue
+                #if cnt % 6 == 0:
+                #    self.win3.simg.clear()
+                #newcol = (random.randint(0, 0x80),
+                #                    random.randint(0, 0x80),
+                #                            random.randint(0, 0x80), 0xff)
+                newcol = aa[5]
+                #print(&#34;aa&#34;, aa[:5])
+                #for aaa in aa[7]:
+
+                for aaa in aa[8]:
+                    row = 4 * (aaa[1]) * self.win3.simg.ww
+                    col = 4 * (aaa[0])
+                    for cnt, cc in enumerate(newcol):
+                        try:
+                            self.win3.simg.buf[cnt + row + col] = cc
+                        except:
+                            print(&#34;win3 exc&#34;, &#34;aa[:5] =&#34;, aa[:5], &#34;aaa =&#34;,
+                                            aaa, sys.exc_info())
+                self.win3.simg.invalidate()
+                usleep(1)
+
+    def anal_image(self, win, a3):
+        self.clear_small_img()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.area.anal_image(0, 0)
+        self.area.invalidate()
+
+    def refr_image(self, arg, ww):
+        self.area.refresh()
+        self.area.invalidate()
+        self.area.sumx = []
+        self.simg.clear()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.tree.update_treestore(&#34;&#34;)
+
+    def clear_subs(self, arg, ww):
+        self.simg.clear()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.tree.update_treestore(&#34;&#34;)
+
+    def invalidate(self):
+        self.area.invalidate()
+
+    def config_event(self, win, event):
+        rc = self.window.get_allocation()
+        #print( &#34;rc&#34;, rc)
+        if rc.width != event.width or rc.height != event.height:
+            #print( &#34;config_event resize&#34;, event)
+            self.smrc = None
+
+    def  area_button(self, win, event):
+        #print( &#34;main&#34;, event)
+        #self.fill_small_img(self.area.image2)
+        pass
+
+    def test_butt(self, win, a3):
+        self.area.test_butt()
+
+    def pickle_shapes(self, win = None, a3 = None):
+        try:
+            fp = open(&#34;shapes.txt&#34;, &#34;wb&#34;)
+            pickle.dump(self.shapes, fp)
+            fp.close()
+        except:
+            print(_exception(&#34;pickle&#34;))
+
+    def unpickle_shapes(self, win = None, a3 = None):
+        try:
+            fp = open(&#34;shapes.txt&#34;, &#34;rb&#34;)
+            self.shapes = pickle.load( fp)
+            fp.close()
+        except:
+            print(_exception(&#34;pickle&#34;))
+
+    def save_shape(self, win, a3):
+        #print( &#34;Save shape data&#34;, len(self.narr))
+        if len(self.curr) == 0:
+            msg(&#34;No shape yet&#34;)
+            return
+        sss = get_str(&#34;Enter name for (the selected) shape:&#34;)
+        if sss != &#34;&#34;:
+            #print( &#34;Adding shape&#34;, sss)
+            #print(&#34;save&#34;, self.curr[:8])
+            xarr = ol.norm_vectors(self.curr[7], self.curr[1], self.curr[2])
+            res = (sss, *self.curr[1:5], xarr)
+            self.shapes.append(res)
+            print(&#34;Added&#34;, res)
+
+    def del_shape(self, win, a3):
+        #print( &#34;Delete shape&#34;)
+        sss = get_str(&#34;Enter name for shape to delete:&#34;)
+        if sss == &#34;&#34;:
+            return
+        cnt = 0
+        #print( &#34;Deleteing shape&#34;, sss)
+        for aa in range(len(self.shapes)-1, -1, -1):
+            if self.shapes[aa][0] == sss:
+                print(&#34;Deleting&#34;, sss)
+                del self.shapes[aa]
+                cnt += 1
+        if not cnt:
+            msg(&#34;No such shape&#34;, sss)
+
+    def show_all_shapes(self, win, a3):
+        if not self.shapes:
+            print(&#34;No shapes saved&#34;)
+            return
+        for ss in self.shapes:
+            self.simg2.clear()
+            #print( ss[0:5], &#34;len:&#34;, len(ss[7]), ss[7][:3])
+            #print(&#34;ss&#34;, ss[:10])
+            #self.lab.set_text(ss[0])
+            #ctx = cairo.Context(self.simg2.surface)
+            for aa in ss[5]:
+                #print(aa[0], aa[1])
+                offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
+                try:
+                    self.simg2.buf[offs]   = 0xff
+                    self.simg2.buf[offs+1] = 0xff
+                    self.simg2.buf[offs+2] = 0xff
+                    self.simg2.buf[offs+3] = 0xff
+                except:
+                    #print(&#34;exc nbounds&#34;, aa[0], aa[1], sys.exc_info())
+                    pass
+                self.simg2.invalidate()
+                usleep(5)
+            usleep(100)
+            self.lab.set_text(&#34;&#34;)
+
+    # --------------------------------------------------------------------
+
+    def exit_all(self, area):
+        Gtk.main_quit()
+
+    def OnExit(self, aa):
+        #print(&#34;Saving shapes&#34;)
+        self.pickle_shapes()
+        Gtk.main_quit()
+
+    def tree_sel_row(self, xtree):
+        #print( &#34;tree sel&#34;)
+        global xstr
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected_rows()
+        for aa in xiter:
+            xstr = xmodel.get_value(xmodel.get_iter(aa), 0)
+            break
+
+    def key_press_event(self, win, event):
+        #print( &#34;main key_press_event&#34;, win, event)
+        if event.state &amp; Gdk.ModifierType.MOD1_MASK:
+            if event.keyval == Gdk.KEY_x or event.keyval == Gdk.KEY_X:
+                sys.exit(0)
+
+        if event.keyval == Gdk.KEY_Escape:
+            self.mag = False
+            self.invalidate()
+
+# Start of program:
+
+if __name__ == &#39;__main__&#39;:
+
+    global mainwin
+
+    try:
+        if not os.path.isdir(config_dir):
+            os.mkdir(config_dir)
+    except: pass
+
+    # Let the user know it needs fixin&#39;
+    if not os.path.isdir(config_dir):
+        print( &#34;Cannot access config dir:&#34;, config_dir)
+        sys.exit(1)
+
+    opts = []; args = []
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], &#34;hvd:&#34;)
+    except getopt.GetoptError as err:
+        print( &#34;Invalid option(s) on command line:&#34;, err)
+        sys.exit(1)
+
+    #print( &#34;opts&#34;, opts, &#34;args&#34;, args)
+
+    for aa in opts:
+        if aa[0] == &#34;-v&#34;:
+            xconfig.verbose += 1
+
+        if aa[0] == &#34;-d&#34;:
+            try:
+                xconfig.pgdebug = int(aa[1])
+            except:
+                xconfig.pgdebug = 0
+            if xconfig.verbose:
+                print(&#34;Debug level:&#34;, xconfig.pgdebug)
+
+        if aa[0] == &#34;-h&#34;: help();  exit(1)
+
+    if xconfig.verbose &gt; 1:
+            print(&#34;Verbose level:&#34;, xconfig.verbose)
+
+    if xconfig.verbose:
+        print( &#34;PyImgRec running on&#34;, &#34;&#39;&#34; + os.name + &#34;&#39;&#34;,
+            &#34;GTK&#34;, Gtk._version, &#34;PyGtk&#34;,
+             &#34;%d.%d.%d&#34; % (Gtk.get_major_version(), \
+                        Gtk.get_minor_version(), \
+                            Gtk.get_micro_version()))
+
+    if xconfig.verbose &gt; 1:
+        if args:
+            print(&#34;args&#34;, args)
+
+    if xconfig.verbose &gt; 1:
+        print( &#34;Imgrec Version&#34;, imgrec.version(), imgrec.builddate())
+        #print( &#34;Imgrec   &#34;, imgrec.__dict__)
+
+    if args:
+        if not os.path.isfile(args[0]):
+            print(&#34;Argument &#39;%s&#39; must be an image file.&#34; % args[0])
+            sys.exit(1)
+
+    mainwin = MainWin(args)
+    mainwin.window.show_all()
+
+    Gtk.main()
+
+# EOF</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pyimgrec.help"><code class="name flex">
+<span>def <span class="ident">help</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def help():
+
+    print( )
+    print( &#34;PyImgRec version: &#34;, version)
+    print( )
+    print( &#34;Usage: &#34; + os.path.basename(sys.argv[0]) + &#34; [options] [[filename] ... [filenameN]]&#34;)
+    print( )
+    print( &#34;Options:&#34;)
+    print( )
+    print( &#34;            -d level  - Debug level 1-10. (Limited implementation)&#34;)
+    print( &#34;            -v        - Verbose (to stdout and log) more -v for more info&#34;)
+    print( &#34;            -c        - Dump Config&#34;)
+    print( &#34;            -h        - Help&#34;)
+    print()</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyimgrec.MainWin"><code class="flex name class">
+<span>class <span class="ident">MainWin</span></span>
+<span>(</span><span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MainWin():
+
+    def __init__(self, args):
+
+        self.curr = []
+        self.reenter = 0
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        self.window.set_title(&#34;Python Image Recognition&#34;)
+        #self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        self.smrc = None
+        self.narr = []; self.shapes = []
+        ic = Gtk.Image(); ic.set_from_file(&#34;images/shapes.png&#34;)
+        #stock(Gtk.DialogType.INFO, Gtk.GtkIconSize.BUTTON)
+        self.window.set_icon(ic.get_pixbuf())
+
+        #self.window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
+        #self.window.set_events(  Gdk.POINTER_MOTION_MASK |
+        #                    Gdk.POINTER_MOTION_HINT_MASK |
+        #                    Gdk.BUTTON_PRESS_MASK |
+        #                    Gdk.BUTTON_RELEASE_MASK |
+        #                    Gdk.KEY_PRESS_MASK |
+        #                    Gdk.KEY_RELEASE_MASK |
+        #                    Gdk.FOCUS_CHANGE_MASK )
+
+        self.window.connect(&#34;destroy&#34;, self.OnExit)
+        self.window.connect(&#34;button-press-event&#34;, self.area_button)
+        self.window.connect(&#34;key-press-event&#34;, self.key_press_event)
+        self.window.connect(&#34;configure-event&#34;, self.config_event)
+
+        self.pangolayout = self.window.create_pango_layout(&#34;a&#34;)
+        try:
+            self.window.set_icon_from_file(&#34;icon.png&#34;)
+        except:
+            pass
+
+        warnings.simplefilter(&#34;ignore&#34;)
+
+        www = Gdk.Screen.width(); hhh = Gdk.Screen.height();
+
+        disp2 = Gdk.Display()
+        disp = disp2.get_default()
+        #print( disp)
+        scr = disp.get_default_screen()
+        ptr = disp.get_pointer()
+        mon = scr.get_monitor_at_point(ptr[1], ptr[2])
+        geo = scr.get_monitor_geometry(mon)
+        self.dwww = geo.width; self.dhhh = geo.height
+        xxx = geo.x;     yyy = geo.y
+
+        # Resort to old means of getting screen w / h
+        if self.dwww == 0 or self.dhhh == 0:
+            self.dwww = Gdk.screen_width(); self.dhhh = Gdk.screen_height();
+
+        #print(&#34;Window size&#34;, www, hhh)
+        #if www / hhh &gt; 2:
+        #    self.window.set_default_size(5*www/8, 7*hhh/8)
+        #else:
+        #    self.window.set_default_size(7*www/8, 7*hhh/8)
+
+        self.window.set_default_size(6*self.dwww/8, 6*self.dhhh/8)
+
+        warnings.simplefilter(&#34;default&#34;)
+
+        #print( www, hhh)
+        self.wwww = 3 * self.dwww / 4;  self.hhhh = 3 * self.dhhh / 4
+
+        self.hbox_s = Gtk.HBox()
+        self.hbox_s2 = Gtk.HBox()
+        self.hbox = Gtk.HBox()
+        self.mainbox = Gtk.HBox()
+        self.hbox2 = Gtk.HBox()
+        self.hbox2a = Gtk.HBox()
+        self.hbox3 = Gtk.HBox()
+
+        self.area = img_main.ImgMain(self)
+        self.vport = Gtk.Viewport()
+        self.scroller = Gtk.ScrolledWindow()
+        self.vport.add(self.area)
+        self.scroller.add(self.vport)
+        self.mainbox.pack_start(self.scroller, 1, 1, 4)
+
+        self.vport2 = Gtk.Viewport()
+        self.scroller2 = Gtk.ScrolledWindow()
+
+        #self.simg = Gtk.Image.new_from_file(&#34;images/star.png&#34;)
+        #a2 = self.simg.get_pixbuf()
+        #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
+
+        self.simg  = Imagex(self, ol.ARRLEN, ol.ARRLEN)
+        self.simg2 = Imagex(self, ol.ARRLEN, ol.ARRLEN)
+
+        self.simg.connect(&#34;button-press-event&#34;, self.simg_button)
+
+        vbox2 = Gtk.VBox()
+        self.tree = treehand.TreeHand(self.tree_sel_row)
+        self.tree.stree.set_size_request(-1, 200)
+        vbox2.pack_start(self.tree.stree, 0, 0, 0)
+
+        self.win2 = self.add_win()
+        self.win3 = self.add_win()
+
+        try:
+            if args:
+                self.load(args[0])
+            else:
+                # Load default image(s)
+                #self.load(&#34;images/african.jpg&#34;)
+                #self.load(&#34;images/IMG_0823.jpg&#34;)
+                #self.load(&#34;images/shapes.png&#34;)
+                self.load(&#34;images/shapex.png&#34;)
+                #self.load(&#34;images/Untitled.png&#34;)
+                #self.load(&#34;images/line.png&#34;)
+                #self.load(&#34;images/star.png&#34;)
+                #self.load(&#34;images/rect.png&#34;)
+                #self.load(&#34;images/IMG_0827.jpg&#34;)
+                #self.load(&#34;images/enrolled.pgm&#34;)
+        except:
+            print_exception(&#34;Load Image&#34;)
+            #msg(&#34;Cannot load file &#34; + self.fname)
+            raise
+
+        pix = self.area.image.get_pixbuf()
+        iww = pix.get_width(); ihh = pix.get_height()
+
+        self.vport2.add(self.simg)
+        self.scroller2.add(self.vport2)
+        self.mainbox.pack_start(self.scroller2, 1, 1, 4)
+
+        self.labx = Gtk.Label(label=&#34;&#34;)
+        self.laby = Gtk.Label(label=&#34;&#34;)
+        self.labz = Gtk.Label(label=&#34;&#34;)
+        vimgbox = Gtk.VBox()
+        vimgbox.pack_start(self.labx, 0, 0, 0)
+        vimgbox.pack_start(self.laby, 0, 0, 0)
+        vimgbox.pack_start(self.labz, 0, 0, 0)
+        vimgbox.pack_start(self.simg2, 0, 0, 0)
+        self.lab = Gtk.Label(label=&#34; None &#34;)
+        vimgbox.pack_start(self.lab, 0, 0, 0)
+        self.mainbox.pack_start(vimgbox, 0, 0, 4)
+
+        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
+                                                        0, 255, 1)
+        self.scale.set_value(220)
+        self.scale.set_inverted(True)
+        self.scale.set_tooltip_text(&#34;Mark value&#34;)
+        self.mainbox.pack_start(self.scale, 0, 0, 0)
+        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
+                                                        0, 255, 1)
+        self.mainbox.pack_start(self.scale2, 0, 0, 0)
+        self.scale2.set_value(30)
+        self.scale2.set_inverted(True)
+        self.scale2.set_tooltip_text(&#34;Threshold diff&#34;)
+
+        #if iww &gt; self.wwww or ihh &gt; self.hhhh:
+        #    self.scroller.set_size_request(self.wwww, self.hhhh)
+        #else:
+        #    self.scroller.set_size_request(iww + 30, ihh + 30)
+
+        #self.area3 = DrawingArea()
+        #vbox2.pack_start(self.area3)
+
+        #lab2 = Gtk.Label(&#34;Test Image&#34;)
+        #vbox2.pack_start(lab2, False, 0, 0)
+        #self.img = Gtk.Image();
+        #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
+
+        self.buttons(self.hbox, self.window)
+        self.buttons2(self.hbox2, self.window)
+        self.buttons3(self.hbox2a, self.window)
+        self.checks(self.hbox3, self.window)
+
+        self.spacer(self.hbox_s, False)
+        self.spacer(self.hbox_s2, False)
+
+        self.vbox = Gtk.VBox();
+
+        #self.vbox.pack_start(self.hbox_s, False, 0, 0)
+        self.vbox.pack_start(self.mainbox, True, True, 4)
+        #self.vbox.pack_start(self.hbox_s2, False, 0, 0)
+        self.vbox.pack_start(vbox2, False, 0, 0)
+        self.vbox.pack_start(self.hbox3, False, 0, 0)
+        self.vbox.pack_start(self.hbox, False, 0, 0)
+        self.vbox.pack_start(self.hbox2a, False, 0, 0)
+        self.vbox.pack_start(self.hbox2, False, 0, 0)
+
+        #frame = Gtk.Frame(); frame.add(self.img)
+        #vbox2.pack_start(frame, 1, 1, 0)
+        #
+
+        self.window.add(self.vbox)
+        GLib.timeout_add(100, self.after)
+
+    def add_win(self):
+
+        winx =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        #winx =  Gtk.Window(type=Gtk.WindowType.POPUP)
+        winx.set_skip_taskbar_hint(True)
+        winx.set_skip_pager_hint(True)
+
+        winx.set_title(&#34;Image Show&#34;)
+        winx.simg = Imagex(self)
+        winx.ww = winx.simg.ww;
+        winx.hh = winx.simg.hh
+        winx.set_size_request(winx.ww, winx.hh)
+        winx.add(winx.simg)
+        winx.move(100, 100)
+        #.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        winx.show_all()
+        return winx
+
+    def after(self):
+
+        # Move to current app to corner
+        xxx, yyy = self.window.get_position()
+        rrr = self.window.get_allocation()
+        #print(&#34;curr&#34;, xxx, yyy,rrr.width, rrr.height)
+        self.window.move(self.dwww - rrr.width - 10, 40)
+        # Flush to left
+        xxx, yyy = self.window.get_position()
+        self.win2.move(10, yyy)
+        self.win3.move(10, yyy + 300)
+        self.unpickle_shapes()
+
+    def set_small_text(self, txt):
+        self.lab.set_text(txt)
+
+    def clear_small_img(self, color = 0xffffffff):
+        # Only get this once after resize
+        #if not self.smrc:
+        #    self.smrc = self.simg.get_allocation()
+        #rc = self.simg.get_allocation()
+        #pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8,
+        #                                    rc.width, rc.height)
+        #pixbuf.fill(color)
+        #self.simg.set_from_pixbuf(pixbuf)
+        #rc = self.mainbox.get_allocation()
+        #self.mainbox.window.invalidate_rect(rc, False)
+        pass
+
+    def fill_small_img(self, img):
+
+        pass
+        # Only get this once after resize
+        #if not self.smrc:
+        #    self.smrc = self.img.get_allocation()
+        #print( &#34;fill small&#34;, self.smrc.width, self.smrc.height)
+
+        #rc = self.simg.get_allocation()
+        #print( &#34;fill small&#34;, img, rc.width, rc.height)
+        #nnn = img.get_pixbuf().scale_simple(rc.width, rc.height,
+        #                GdkPixbuf.InterpType.NEAREST)
+        #self.simg.set_from_pixbuf(nnn)
+        #self.mainbox.show_now()
+        #rc = self.mainbox.get_allocation()
+        #self.mainbox.window.invalidate_rect(rc, False)
+
+    # --------------------------------------------------------------------
+    def checks(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        self.check1 = Gtk.CheckButton.new_with_mnemonic(&#34; Draw Grid &#34;)
+        self.check1.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check1, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check2 = Gtk.CheckButton.new_with_mnemonic(&#34; _Prompt for save Shape &#34;)
+        self.check2.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check2, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check3 = Gtk.CheckButton.new_with_mnemonic(&#34; Grayscale compare &#34;)
+        self.check3.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check3, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        self.check4 = Gtk.CheckButton.new_with_mnemonic(&#34; A_nimate &#34;)
+        self.check3.connect(&#34;clicked&#34;, self.check_hell, window)
+        hbox.pack_start(self.check4, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        #self.radio1 = Gtk.RadioButton.new_with_mnemonic_from_widget(None, &#34; Flood &#34;)
+        #self.radio1.connect(&#34;clicked&#34;, self.check_hell, window)
+        #hbox.pack_start(self.radio1, False, 0, 0)
+        #
+        #self.spacer(hbox, False )
+        #
+        #self.radio2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, &#34; Rect Flood &#34;)
+        #self.radio2.connect(&#34;clicked&#34;, self.check_hell, window)
+        #hbox.pack_start(self.radio2, False, 0, 0)
+        #
+        #self.spacer(hbox, False )
+        #
+        #self.radio3 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, &#34; Walk &#34;)
+        #self.radio3.connect(&#34;clicked&#34;, self.check_hell, window)
+        #hbox.pack_start(self.radio3, False, 0, 0)
+        #
+        self.spacer(hbox, True )
+
+    def check_hell(self, arg, ww):
+        #print( &#34;check1&#34;, self.check1.get_active())
+        #print( &#34;check2&#34;, self.check2.get_active())
+        #print( &#34;radio1&#34;, self.radio1.get_active())
+        #print( &#34;radio2&#34;, self.radio2.get_active())
+        pass
+
+    # --------------------------------------------------------------------
+    # Load image
+
+    def load(self, fname):
+
+        self.fname = fname
+        self.area.load(fname)
+
+        self.simg.resize(self.area.iww, self.area.ihh)
+        self.simg.clear()
+
+        self.win2.simg.resize(self.area.iww, self.area.ihh)
+        self.win2.simg.clear()
+        self.win2.resize(self.area.iww, self.area.ihh)
+
+        self.win3.simg.resize(self.area.iww, self.area.ihh)
+        self.win3.simg.clear()
+        self.win3.resize(self.area.iww, self.area.ihh)
+
+        if self.area.iww &lt; 500:
+            self.scroller.set_size_request(self.area.iww, self.area.ihh)
+            self.scroller2.set_size_request(self.area.iww, self.area.ihh)
+
+    # --------------------------------------------------------------------
+    def buttons3(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; _Save Curr Shape &#34;)
+        butt6.connect(&#34;clicked&#34;, self.save_shape, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt7 = Gtk.Button.new_with_mnemonic(&#34; Show All S_hapes &#34;)
+        butt7.connect(&#34;clicked&#34;, self.show_all_shapes, window)
+        hbox.pack_start(butt7, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt8 = Gtk.Button.new_with_mnemonic(&#34; Pickle Shapes &#34;)
+        butt8.set_tooltip_text(&#34;Will save it to disk&#34;)
+        butt8.connect(&#34;clicked&#34;, self.pickle_shapes, window)
+        hbox.pack_start(butt8, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt9 = Gtk.Button.new_with_mnemonic(&#34; unPickle Shapes &#34;)
+        butt9.connect(&#34;clicked&#34;, self.unpickle_shapes, window)
+        butt9.set_tooltip_text(&#34;Will append it from disk&#34;)
+        hbox.pack_start(butt9, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        butt9a = Gtk.Button.new_with_mnemonic(&#34; _Clear All Shapes &#34;)
+        butt9a.connect(&#34;clicked&#34;, self.clear_shapes, window)
+        butt9a.set_tooltip_text(&#34;Will clear current shapes&#34;)
+        hbox.pack_start(butt9a, False, 0, 0)
+
+        self.spacer(hbox, False )
+
+        butt9a = Gtk.Button.new_with_mnemonic(&#34; _Delete Shape &#34;)
+        butt9a.connect(&#34;clicked&#34;, self.del_shape, window)
+        butt9a.set_tooltip_text(&#34;Will delete shape, no undo&#34;)
+        hbox.pack_start(butt9a, False, 0, 0)
+
+        self.spacer(hbox, True )
+
+    def clear_shapes(self, win, a3):
+        self.shapes = []
+
+    # --------------------------------------------------------------------
+    def buttons(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; _Load Image &#34;)
+        butt1.connect(&#34;clicked&#34;, self.load_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; Sav_e Image &#34;)
+        butt1.connect(&#34;clicked&#34;, self.save_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; _Analize &#34;)
+        butt1.connect(&#34;clicked&#34;, self.anal_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt1 = Gtk.Button.new_with_mnemonic(&#34; _Fractal &#34;)
+        butt1.connect(&#34;clicked&#34;, self.fractal_image, window)
+        hbox.pack_start(butt1, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt3 = Gtk.Button.new_with_mnemonic(&#34; _Refresh &#34;)
+        butt3.connect(&#34;clicked&#34;, self.refr_image, window)
+        hbox.pack_start(butt3, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt3 = Gtk.Button.new_with_mnemonic(&#34; _Clear Subs &#34;)
+        butt3.connect(&#34;clicked&#34;, self.clear_subs, window)
+        hbox.pack_start(butt3, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt4 = Gtk.Button.new_with_mnemonic(&#34; Mark _Image &#34;)
+        butt4.connect(&#34;clicked&#34;, self.mark_image, window)
+        hbox.pack_start(butt4, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt5 = Gtk.Button.new_with_mnemonic(&#34; Test B_utt (seek) &#34;)
+        butt5.connect(&#34;clicked&#34;, self.test_butt, window)
+        hbox.pack_start(butt5, False, 0, 0)
+        self.spacer(hbox)
+
+        self.spacer(hbox, True )
+
+
+    def buttons2(self, hbox, window):
+
+        self.spacer(hbox, True )
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; N_ormalize &#34;)
+        butt6.connect(&#34;clicked&#34;, self.norm, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; His_togram &#34;)
+        butt6.connect(&#34;clicked&#34;, self.histo, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt6 = Gtk.Button.new_with_mnemonic(&#34; _Grey &#34;)
+        butt6.connect(&#34;clicked&#34;, self.grey, window)
+        hbox.pack_start(butt6, False, 0, 0)
+
+        self.spacer(hbox)
+
+        butt7 = Gtk.Button.new_with_mnemonic(&#34; _Brighten &#34;)
+        butt7.connect(&#34;clicked&#34;, self.bri, window)
+        hbox.pack_start(butt7, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt8 = Gtk.Button.new_with_mnemonic(&#34; Dar_ken &#34;)
+        butt8.connect(&#34;clicked&#34;, self.dar, window)
+        hbox.pack_start(butt8, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt9 = Gtk.Button.new_with_mnemonic(&#34; _Walk &#34;)
+        butt9.connect(&#34;clicked&#34;, self.walk, window)
+        hbox.pack_start(butt9, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt9 = Gtk.Button.new_with_mnemonic(&#34; _Edge &#34;)
+        butt9.connect(&#34;clicked&#34;, self.edge, window)
+        hbox.pack_start(butt9, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt91 = Gtk.Button.new_with_mnemonic(&#34; Smooth &#34;)
+        butt91.connect(&#34;clicked&#34;, self.smooth, window)
+        hbox.pack_start(butt91, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt92 = Gtk.Button.new_with_mnemonic(&#34; Blank &#34;)
+        butt92.connect(&#34;clicked&#34;, self.blank, window)
+        hbox.pack_start(butt92, False,0 ,0)
+
+        self.spacer(hbox)
+
+        butt92a = Gtk.Button.new_with_mnemonic(&#34; Line &#34;)
+        butt92a.connect(&#34;clicked&#34;, self.line, window)
+        hbox.pack_start(butt92a, False, 0 ,0)
+
+        self.spacer(hbox)
+
+        butt92b = Gtk.Button.new_with_mnemonic(&#34; Frame &#34;)
+        butt92b.connect(&#34;clicked&#34;, self.frame, window)
+        hbox.pack_start(butt92b, False, 0 ,0)
+
+        self.spacer(hbox)
+
+        butt99 = Gtk.Button.new_with_mnemonic(&#34; E_xit &#34;)
+        butt99.connect(&#34;clicked&#34;, self.exit, window)
+        hbox.pack_start(butt99, False,0 ,0)
+
+        self.spacer(hbox, True )
+
+    def exit(self, butt, window):
+        self.OnExit(1)
+
+    def blank(self, butt, window):
+        self.area.blank_image()
+
+    def line(self, butt, window):
+        self.area.line_image()
+
+    def frame(self, butt, window):
+        self.area.frame_image()
+
+    def smooth(self, butt, window):
+        self.area.smooth_image()
+
+    def dar(self, butt, window):
+        self.area.dar_image()
+
+    def bri(self, butt, window):
+        self.area.bri_image()
+
+    def norm(self, butt, window):
+        #print( &#34;Norm&#34; #,butt, window)
+        self.area.norm_image()
+
+    def histo(self, butt, window):
+        #print( &#34;Norm&#34; #,butt, window)
+        self.area.histo_image()
+
+    def grey(self, butt, window):
+        #print( &#34;Norm&#34; #,butt, window)
+        self.area.grey_image()
+
+    def walk(self, butt, window):
+        #print( &#34;Walk&#34; #,butt, window)
+        self.area.walk_image(4, 4)
+
+    def edge(self, butt, window):
+        #print( &#34;Walk&#34; #,butt, window)
+        self.area.edge_image()
+
+    def spacer(self, hbox, flag = False ):
+        lab14 = Gtk.Label(label=&#34; &#34;);
+        hbox.pack_start(lab14, flag, 0, 0)
+
+    def mark_image(self, area, a3):
+        self.area.mark_image()
+
+    # Paint the image
+    def area_motion(self, area, event):
+        #print(  &#34;area_motion&#34;, event.x, event.y)
+        #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,
+        #                           Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
+        #gc.set_foreground(colormap.alloc_color(&#34;#aaaaaa&#34;))
+        #winn.draw_line(gc, 0, 7, rc.width, rc.height+7 )
+        #gc.set_foreground(colormap.alloc_color(&#34;#ffffff&#34;))
+        #winn.draw_line(gc, 0, 0, rc.width, rc.height)
+        pass
+
+    def load_image(self, arg, ww):
+        self.fname = ofd(&#34;Open Image File&#34;).result
+        if not self.fname:
+            return
+        try:
+            self.load(self.fname)
+        except:
+            msg(&#34;Cannot load file:\n%s&#34; % self.fname)
+
+    def save_image(self, arg, ww):
+        fname = ofd(&#34;Save Image File&#34;, Gtk.FileChooserAction.SAVE).result
+        if not fname:
+            return
+        try:
+            if fname[-4:] != &#34;.jpg&#34;:
+                fname += &#34;.jpg&#34;
+            pix = self.area.image2.get_pixbuf()
+            pix.save(fname, &#34;jpeg&#34;, {&#34;quality&#34;:&#34;100&#34;});
+        except:
+            print( sys.exc_info())
+            msg(&#34;Cannot save file:\n%s&#34; % fname)
+
+    # Button_press event on small image
+    def simg_button(self, win, eve):
+
+        #print(&#34;simg_butt&#34;, int(eve.x), int(eve.y)) #, eve.state)
+
+        #for cnt, cc in enumerate(self.area.sumx[1]):
+        #    print(&#34;sumx[1]&#34;, cnt, cc[:12])
+
+        if not (eve.state &amp; Gdk.ModifierType.SHIFT_MASK):
+            self.win3.simg.clear()
+
+        for aa in self.area.sumx:
+            if not len(aa):
+                continue
+
+            # see if on top of a fill
+            for aaa in aa[3]:
+                #print(&#34;aaa&#34;,aaa)
+                xdiff = abs(aaa[0] - int(eve.x))
+                if  xdiff &lt; 1:
+                    #print(&#34;x match&#34;, xdiff, aa[0], aa[1], aa[2])
+                    ydiff = abs(aaa[1] - int(eve.y))
+                    if ydiff &lt; 1:
+                        print(&#34;xy match&#34;, aa[0], aa[1], aa[2])
+                        self.curr = aa
+
+                        #newcol = (random.randint(0, 0x80),
+                        #                    random.randint(0, 0x80),
+                        #                            random.randint(0, 0x80), 0xff)
+                        # Draw / Erase
+                        if eve.state &amp; Gdk.ModifierType.CONTROL_MASK:
+                            newcol = (102, 128, 128, 0xff)
+                        else:
+                            #newcol = aa[2]
+                            newcol = (0x00, 0x00, 0x00, 0xff)
+
+                        for aaa in aa[3]:
+                            #print(&#34;aaa&#34;, aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    pass
+                                    self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print(&#34;win3 exc&#34;, &#34;aa&#34;, aa[:5], &#34;aaa&#34;,
+                                                aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        newcol = (0x00, 0x00, 0xff, 0xff)
+                        for aaa in aa[4]:
+                            #print(&#34;aaa&#34;, aaa)
+                            row = 4 * (aaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaa[0])
+                            for cnt, cc in enumerate(newcol):
+                                try:
+                                    pass
+                                    #self.win3.simg.buf[cnt + row + col] = cc
+                                except:
+                                    print(&#34;win3 exc&#34;, &#34;aa&#34;, aa[:5], &#34;aaa&#34;,
+                                                aaa, sys.exc_info())
+                        self.win3.simg.invalidate()
+                        usleep(100)
+                        #break
+
+    def fractal_image(self, win, a3):
+
+        &#39;&#39;&#39; see selection animated &#39;&#39;&#39;
+
+        if self.reenter:
+           self.reenter = 0
+           return
+        self.reenter = 1
+        self.win3.simg.clear()
+        for cnt, aa in enumerate(self.area.sumx):
+            if self.reenter == 0:
+                break
+            if len(aa) == 0:
+                continue
+            #self.win3.simg.clear()
+            for aaa in aa[4]:
+                #newcol = aa[2]
+                newcol = (0x00, 0x00, 0x00, 0xff)
+                row = 4 * (aaa[1]) * self.win3.simg.ww
+                col = 4 * (aaa[0])
+                for cnt, cc in enumerate(newcol):
+                    try:
+                        self.win3.simg.buf[cnt + row + col] = cc
+                    except:
+                        print(&#34;win3 exc&#34;, &#34;aa[:5] =&#34;, aa[:5], &#34;aaa =&#34;,
+                                        aaa, sys.exc_info())
+            self.win3.simg.invalidate()
+            usleep(100)
+        self.reenter = 0
+
+
+    def fractal_image2(self, win, a3):
+
+        &#39;&#39;&#39; attempt to see if random selection would hit ... NO &#39;&#39;&#39;
+
+        self.win3.simg.clear()
+
+        if self.reenter:
+           self.reenter = 0
+           return
+        self.reenter = 1
+        while True:
+            if self.reenter == 0:
+                break
+
+            usleep(1000)
+            self.win3.simg.clear()
+            amount = random.randint(1, len(self.area.sumx) - 1)
+            for aaa in range(amount):
+                if self.reenter == 0:
+                    break
+                # select random image
+                cnt = random.randint(0, len(self.area.sumx) - 1)
+                aa = self.area.sumx[cnt]
+
+                if not len(aa):
+                    continue
+                #if cnt % 6 == 0:
+                #    self.win3.simg.clear()
+                #newcol = (random.randint(0, 0x80),
+                #                    random.randint(0, 0x80),
+                #                            random.randint(0, 0x80), 0xff)
+                newcol = aa[5]
+                #print(&#34;aa&#34;, aa[:5])
+                #for aaa in aa[7]:
+
+                for aaa in aa[8]:
+                    row = 4 * (aaa[1]) * self.win3.simg.ww
+                    col = 4 * (aaa[0])
+                    for cnt, cc in enumerate(newcol):
+                        try:
+                            self.win3.simg.buf[cnt + row + col] = cc
+                        except:
+                            print(&#34;win3 exc&#34;, &#34;aa[:5] =&#34;, aa[:5], &#34;aaa =&#34;,
+                                            aaa, sys.exc_info())
+                self.win3.simg.invalidate()
+                usleep(1)
+
+    def anal_image(self, win, a3):
+        self.clear_small_img()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.area.anal_image(0, 0)
+        self.area.invalidate()
+
+    def refr_image(self, arg, ww):
+        self.area.refresh()
+        self.area.invalidate()
+        self.area.sumx = []
+        self.simg.clear()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.tree.update_treestore(&#34;&#34;)
+
+    def clear_subs(self, arg, ww):
+        self.simg.clear()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self.tree.update_treestore(&#34;&#34;)
+
+    def invalidate(self):
+        self.area.invalidate()
+
+    def config_event(self, win, event):
+        rc = self.window.get_allocation()
+        #print( &#34;rc&#34;, rc)
+        if rc.width != event.width or rc.height != event.height:
+            #print( &#34;config_event resize&#34;, event)
+            self.smrc = None
+
+    def  area_button(self, win, event):
+        #print( &#34;main&#34;, event)
+        #self.fill_small_img(self.area.image2)
+        pass
+
+    def test_butt(self, win, a3):
+        self.area.test_butt()
+
+    def pickle_shapes(self, win = None, a3 = None):
+        try:
+            fp = open(&#34;shapes.txt&#34;, &#34;wb&#34;)
+            pickle.dump(self.shapes, fp)
+            fp.close()
+        except:
+            print(_exception(&#34;pickle&#34;))
+
+    def unpickle_shapes(self, win = None, a3 = None):
+        try:
+            fp = open(&#34;shapes.txt&#34;, &#34;rb&#34;)
+            self.shapes = pickle.load( fp)
+            fp.close()
+        except:
+            print(_exception(&#34;pickle&#34;))
+
+    def save_shape(self, win, a3):
+        #print( &#34;Save shape data&#34;, len(self.narr))
+        if len(self.curr) == 0:
+            msg(&#34;No shape yet&#34;)
+            return
+        sss = get_str(&#34;Enter name for (the selected) shape:&#34;)
+        if sss != &#34;&#34;:
+            #print( &#34;Adding shape&#34;, sss)
+            #print(&#34;save&#34;, self.curr[:8])
+            xarr = ol.norm_vectors(self.curr[7], self.curr[1], self.curr[2])
+            res = (sss, *self.curr[1:5], xarr)
+            self.shapes.append(res)
+            print(&#34;Added&#34;, res)
+
+    def del_shape(self, win, a3):
+        #print( &#34;Delete shape&#34;)
+        sss = get_str(&#34;Enter name for shape to delete:&#34;)
+        if sss == &#34;&#34;:
+            return
+        cnt = 0
+        #print( &#34;Deleteing shape&#34;, sss)
+        for aa in range(len(self.shapes)-1, -1, -1):
+            if self.shapes[aa][0] == sss:
+                print(&#34;Deleting&#34;, sss)
+                del self.shapes[aa]
+                cnt += 1
+        if not cnt:
+            msg(&#34;No such shape&#34;, sss)
+
+    def show_all_shapes(self, win, a3):
+        if not self.shapes:
+            print(&#34;No shapes saved&#34;)
+            return
+        for ss in self.shapes:
+            self.simg2.clear()
+            #print( ss[0:5], &#34;len:&#34;, len(ss[7]), ss[7][:3])
+            #print(&#34;ss&#34;, ss[:10])
+            #self.lab.set_text(ss[0])
+            #ctx = cairo.Context(self.simg2.surface)
+            for aa in ss[5]:
+                #print(aa[0], aa[1])
+                offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
+                try:
+                    self.simg2.buf[offs]   = 0xff
+                    self.simg2.buf[offs+1] = 0xff
+                    self.simg2.buf[offs+2] = 0xff
+                    self.simg2.buf[offs+3] = 0xff
+                except:
+                    #print(&#34;exc nbounds&#34;, aa[0], aa[1], sys.exc_info())
+                    pass
+                self.simg2.invalidate()
+                usleep(5)
+            usleep(100)
+            self.lab.set_text(&#34;&#34;)
+
+    # --------------------------------------------------------------------
+
+    def exit_all(self, area):
+        Gtk.main_quit()
+
+    def OnExit(self, aa):
+        #print(&#34;Saving shapes&#34;)
+        self.pickle_shapes()
+        Gtk.main_quit()
+
+    def tree_sel_row(self, xtree):
+        #print( &#34;tree sel&#34;)
+        global xstr
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected_rows()
+        for aa in xiter:
+            xstr = xmodel.get_value(xmodel.get_iter(aa), 0)
+            break
+
+    def key_press_event(self, win, event):
+        #print( &#34;main key_press_event&#34;, win, event)
+        if event.state &amp; Gdk.ModifierType.MOD1_MASK:
+            if event.keyval == Gdk.KEY_x or event.keyval == Gdk.KEY_X:
+                sys.exit(0)
+
+        if event.keyval == Gdk.KEY_Escape:
+            self.mag = False
+            self.invalidate()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="pyimgrec.MainWin.OnExit"><code class="name flex">
+<span>def <span class="ident">OnExit</span></span>(<span>self, aa)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def OnExit(self, aa):
+    #print(&#34;Saving shapes&#34;)
+    self.pickle_shapes()
+    Gtk.main_quit()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.add_win"><code class="name flex">
+<span>def <span class="ident">add_win</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_win(self):
+
+    winx =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+    #winx =  Gtk.Window(type=Gtk.WindowType.POPUP)
+    winx.set_skip_taskbar_hint(True)
+    winx.set_skip_pager_hint(True)
+
+    winx.set_title(&#34;Image Show&#34;)
+    winx.simg = Imagex(self)
+    winx.ww = winx.simg.ww;
+    winx.hh = winx.simg.hh
+    winx.set_size_request(winx.ww, winx.hh)
+    winx.add(winx.simg)
+    winx.move(100, 100)
+    #.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+    winx.show_all()
+    return winx</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.after"><code class="name flex">
+<span>def <span class="ident">after</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def after(self):
+
+    # Move to current app to corner
+    xxx, yyy = self.window.get_position()
+    rrr = self.window.get_allocation()
+    #print(&#34;curr&#34;, xxx, yyy,rrr.width, rrr.height)
+    self.window.move(self.dwww - rrr.width - 10, 40)
+    # Flush to left
+    xxx, yyy = self.window.get_position()
+    self.win2.move(10, yyy)
+    self.win3.move(10, yyy + 300)
+    self.unpickle_shapes()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.anal_image"><code class="name flex">
+<span>def <span class="ident">anal_image</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def anal_image(self, win, a3):
+    self.clear_small_img()
+    self.win2.simg.clear()
+    self.win3.simg.clear()
+    self.area.anal_image(0, 0)
+    self.area.invalidate()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.area_button"><code class="name flex">
+<span>def <span class="ident">area_button</span></span>(<span>self, win, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  area_button(self, win, event):
+    #print( &#34;main&#34;, event)
+    #self.fill_small_img(self.area.image2)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.area_motion"><code class="name flex">
+<span>def <span class="ident">area_motion</span></span>(<span>self, area, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_motion(self, area, event):
+    #print(  &#34;area_motion&#34;, event.x, event.y)
+    #gc.set_line_attributes(6, Gtk.gdk.LINE_SOLID,
+    #                           Gtk.gdk.CAP_NOT_LAST, gdk.JOIN_MITER)
+    #gc.set_foreground(colormap.alloc_color(&#34;#aaaaaa&#34;))
+    #winn.draw_line(gc, 0, 7, rc.width, rc.height+7 )
+    #gc.set_foreground(colormap.alloc_color(&#34;#ffffff&#34;))
+    #winn.draw_line(gc, 0, 0, rc.width, rc.height)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.blank"><code class="name flex">
+<span>def <span class="ident">blank</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def blank(self, butt, window):
+    self.area.blank_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.bri"><code class="name flex">
+<span>def <span class="ident">bri</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bri(self, butt, window):
+    self.area.bri_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.buttons"><code class="name flex">
+<span>def <span class="ident">buttons</span></span>(<span>self, hbox, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def buttons(self, hbox, window):
+
+    self.spacer(hbox, True )
+
+    butt1 = Gtk.Button.new_with_mnemonic(&#34; _Load Image &#34;)
+    butt1.connect(&#34;clicked&#34;, self.load_image, window)
+    hbox.pack_start(butt1, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt1 = Gtk.Button.new_with_mnemonic(&#34; Sav_e Image &#34;)
+    butt1.connect(&#34;clicked&#34;, self.save_image, window)
+    hbox.pack_start(butt1, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt1 = Gtk.Button.new_with_mnemonic(&#34; _Analize &#34;)
+    butt1.connect(&#34;clicked&#34;, self.anal_image, window)
+    hbox.pack_start(butt1, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt1 = Gtk.Button.new_with_mnemonic(&#34; _Fractal &#34;)
+    butt1.connect(&#34;clicked&#34;, self.fractal_image, window)
+    hbox.pack_start(butt1, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt3 = Gtk.Button.new_with_mnemonic(&#34; _Refresh &#34;)
+    butt3.connect(&#34;clicked&#34;, self.refr_image, window)
+    hbox.pack_start(butt3, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt3 = Gtk.Button.new_with_mnemonic(&#34; _Clear Subs &#34;)
+    butt3.connect(&#34;clicked&#34;, self.clear_subs, window)
+    hbox.pack_start(butt3, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt4 = Gtk.Button.new_with_mnemonic(&#34; Mark _Image &#34;)
+    butt4.connect(&#34;clicked&#34;, self.mark_image, window)
+    hbox.pack_start(butt4, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt5 = Gtk.Button.new_with_mnemonic(&#34; Test B_utt (seek) &#34;)
+    butt5.connect(&#34;clicked&#34;, self.test_butt, window)
+    hbox.pack_start(butt5, False, 0, 0)
+    self.spacer(hbox)
+
+    self.spacer(hbox, True )</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.buttons2"><code class="name flex">
+<span>def <span class="ident">buttons2</span></span>(<span>self, hbox, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def buttons2(self, hbox, window):
+
+    self.spacer(hbox, True )
+
+    butt6 = Gtk.Button.new_with_mnemonic(&#34; N_ormalize &#34;)
+    butt6.connect(&#34;clicked&#34;, self.norm, window)
+    hbox.pack_start(butt6, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt6 = Gtk.Button.new_with_mnemonic(&#34; His_togram &#34;)
+    butt6.connect(&#34;clicked&#34;, self.histo, window)
+    hbox.pack_start(butt6, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt6 = Gtk.Button.new_with_mnemonic(&#34; _Grey &#34;)
+    butt6.connect(&#34;clicked&#34;, self.grey, window)
+    hbox.pack_start(butt6, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt7 = Gtk.Button.new_with_mnemonic(&#34; _Brighten &#34;)
+    butt7.connect(&#34;clicked&#34;, self.bri, window)
+    hbox.pack_start(butt7, False,0 ,0)
+
+    self.spacer(hbox)
+
+    butt8 = Gtk.Button.new_with_mnemonic(&#34; Dar_ken &#34;)
+    butt8.connect(&#34;clicked&#34;, self.dar, window)
+    hbox.pack_start(butt8, False,0 ,0)
+
+    self.spacer(hbox)
+
+    butt9 = Gtk.Button.new_with_mnemonic(&#34; _Walk &#34;)
+    butt9.connect(&#34;clicked&#34;, self.walk, window)
+    hbox.pack_start(butt9, False,0 ,0)
+
+    self.spacer(hbox)
+
+    butt9 = Gtk.Button.new_with_mnemonic(&#34; _Edge &#34;)
+    butt9.connect(&#34;clicked&#34;, self.edge, window)
+    hbox.pack_start(butt9, False,0 ,0)
+
+    self.spacer(hbox)
+
+    butt91 = Gtk.Button.new_with_mnemonic(&#34; Smooth &#34;)
+    butt91.connect(&#34;clicked&#34;, self.smooth, window)
+    hbox.pack_start(butt91, False,0 ,0)
+
+    self.spacer(hbox)
+
+    butt92 = Gtk.Button.new_with_mnemonic(&#34; Blank &#34;)
+    butt92.connect(&#34;clicked&#34;, self.blank, window)
+    hbox.pack_start(butt92, False,0 ,0)
+
+    self.spacer(hbox)
+
+    butt92a = Gtk.Button.new_with_mnemonic(&#34; Line &#34;)
+    butt92a.connect(&#34;clicked&#34;, self.line, window)
+    hbox.pack_start(butt92a, False, 0 ,0)
+
+    self.spacer(hbox)
+
+    butt92b = Gtk.Button.new_with_mnemonic(&#34; Frame &#34;)
+    butt92b.connect(&#34;clicked&#34;, self.frame, window)
+    hbox.pack_start(butt92b, False, 0 ,0)
+
+    self.spacer(hbox)
+
+    butt99 = Gtk.Button.new_with_mnemonic(&#34; E_xit &#34;)
+    butt99.connect(&#34;clicked&#34;, self.exit, window)
+    hbox.pack_start(butt99, False,0 ,0)
+
+    self.spacer(hbox, True )</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.buttons3"><code class="name flex">
+<span>def <span class="ident">buttons3</span></span>(<span>self, hbox, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def buttons3(self, hbox, window):
+
+    self.spacer(hbox, True )
+
+    butt6 = Gtk.Button.new_with_mnemonic(&#34; _Save Curr Shape &#34;)
+    butt6.connect(&#34;clicked&#34;, self.save_shape, window)
+    hbox.pack_start(butt6, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt7 = Gtk.Button.new_with_mnemonic(&#34; Show All S_hapes &#34;)
+    butt7.connect(&#34;clicked&#34;, self.show_all_shapes, window)
+    hbox.pack_start(butt7, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt8 = Gtk.Button.new_with_mnemonic(&#34; Pickle Shapes &#34;)
+    butt8.set_tooltip_text(&#34;Will save it to disk&#34;)
+    butt8.connect(&#34;clicked&#34;, self.pickle_shapes, window)
+    hbox.pack_start(butt8, False, 0, 0)
+
+    self.spacer(hbox)
+
+    butt9 = Gtk.Button.new_with_mnemonic(&#34; unPickle Shapes &#34;)
+    butt9.connect(&#34;clicked&#34;, self.unpickle_shapes, window)
+    butt9.set_tooltip_text(&#34;Will append it from disk&#34;)
+    hbox.pack_start(butt9, False, 0, 0)
+
+    self.spacer(hbox, False )
+
+    butt9a = Gtk.Button.new_with_mnemonic(&#34; _Clear All Shapes &#34;)
+    butt9a.connect(&#34;clicked&#34;, self.clear_shapes, window)
+    butt9a.set_tooltip_text(&#34;Will clear current shapes&#34;)
+    hbox.pack_start(butt9a, False, 0, 0)
+
+    self.spacer(hbox, False )
+
+    butt9a = Gtk.Button.new_with_mnemonic(&#34; _Delete Shape &#34;)
+    butt9a.connect(&#34;clicked&#34;, self.del_shape, window)
+    butt9a.set_tooltip_text(&#34;Will delete shape, no undo&#34;)
+    hbox.pack_start(butt9a, False, 0, 0)
+
+    self.spacer(hbox, True )</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.check_hell"><code class="name flex">
+<span>def <span class="ident">check_hell</span></span>(<span>self, arg, ww)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_hell(self, arg, ww):
+    #print( &#34;check1&#34;, self.check1.get_active())
+    #print( &#34;check2&#34;, self.check2.get_active())
+    #print( &#34;radio1&#34;, self.radio1.get_active())
+    #print( &#34;radio2&#34;, self.radio2.get_active())
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.checks"><code class="name flex">
+<span>def <span class="ident">checks</span></span>(<span>self, hbox, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def checks(self, hbox, window):
+
+    self.spacer(hbox, True )
+
+    self.check1 = Gtk.CheckButton.new_with_mnemonic(&#34; Draw Grid &#34;)
+    self.check1.connect(&#34;clicked&#34;, self.check_hell, window)
+    hbox.pack_start(self.check1, False, 0, 0)
+
+    self.spacer(hbox, False )
+
+    self.check2 = Gtk.CheckButton.new_with_mnemonic(&#34; _Prompt for save Shape &#34;)
+    self.check2.connect(&#34;clicked&#34;, self.check_hell, window)
+    hbox.pack_start(self.check2, False, 0, 0)
+
+    self.spacer(hbox, False )
+
+    self.check3 = Gtk.CheckButton.new_with_mnemonic(&#34; Grayscale compare &#34;)
+    self.check3.connect(&#34;clicked&#34;, self.check_hell, window)
+    hbox.pack_start(self.check3, False, 0, 0)
+
+    self.spacer(hbox, False )
+
+    self.check4 = Gtk.CheckButton.new_with_mnemonic(&#34; A_nimate &#34;)
+    self.check3.connect(&#34;clicked&#34;, self.check_hell, window)
+    hbox.pack_start(self.check4, False, 0, 0)
+
+    self.spacer(hbox, False )
+
+    #self.radio1 = Gtk.RadioButton.new_with_mnemonic_from_widget(None, &#34; Flood &#34;)
+    #self.radio1.connect(&#34;clicked&#34;, self.check_hell, window)
+    #hbox.pack_start(self.radio1, False, 0, 0)
+    #
+    #self.spacer(hbox, False )
+    #
+    #self.radio2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, &#34; Rect Flood &#34;)
+    #self.radio2.connect(&#34;clicked&#34;, self.check_hell, window)
+    #hbox.pack_start(self.radio2, False, 0, 0)
+    #
+    #self.spacer(hbox, False )
+    #
+    #self.radio3 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio1, &#34; Walk &#34;)
+    #self.radio3.connect(&#34;clicked&#34;, self.check_hell, window)
+    #hbox.pack_start(self.radio3, False, 0, 0)
+    #
+    self.spacer(hbox, True )</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.clear_shapes"><code class="name flex">
+<span>def <span class="ident">clear_shapes</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_shapes(self, win, a3):
+    self.shapes = []</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.clear_small_img"><code class="name flex">
+<span>def <span class="ident">clear_small_img</span></span>(<span>self, color=4294967295)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_small_img(self, color = 0xffffffff):
+    # Only get this once after resize
+    #if not self.smrc:
+    #    self.smrc = self.simg.get_allocation()
+    #rc = self.simg.get_allocation()
+    #pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8,
+    #                                    rc.width, rc.height)
+    #pixbuf.fill(color)
+    #self.simg.set_from_pixbuf(pixbuf)
+    #rc = self.mainbox.get_allocation()
+    #self.mainbox.window.invalidate_rect(rc, False)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.clear_subs"><code class="name flex">
+<span>def <span class="ident">clear_subs</span></span>(<span>self, arg, ww)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_subs(self, arg, ww):
+    self.simg.clear()
+    self.win2.simg.clear()
+    self.win3.simg.clear()
+    self.tree.update_treestore(&#34;&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.config_event"><code class="name flex">
+<span>def <span class="ident">config_event</span></span>(<span>self, win, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def config_event(self, win, event):
+    rc = self.window.get_allocation()
+    #print( &#34;rc&#34;, rc)
+    if rc.width != event.width or rc.height != event.height:
+        #print( &#34;config_event resize&#34;, event)
+        self.smrc = None</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.dar"><code class="name flex">
+<span>def <span class="ident">dar</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dar(self, butt, window):
+    self.area.dar_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.del_shape"><code class="name flex">
+<span>def <span class="ident">del_shape</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def del_shape(self, win, a3):
+    #print( &#34;Delete shape&#34;)
+    sss = get_str(&#34;Enter name for shape to delete:&#34;)
+    if sss == &#34;&#34;:
+        return
+    cnt = 0
+    #print( &#34;Deleteing shape&#34;, sss)
+    for aa in range(len(self.shapes)-1, -1, -1):
+        if self.shapes[aa][0] == sss:
+            print(&#34;Deleting&#34;, sss)
+            del self.shapes[aa]
+            cnt += 1
+    if not cnt:
+        msg(&#34;No such shape&#34;, sss)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.edge"><code class="name flex">
+<span>def <span class="ident">edge</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def edge(self, butt, window):
+    #print( &#34;Walk&#34; #,butt, window)
+    self.area.edge_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.exit"><code class="name flex">
+<span>def <span class="ident">exit</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exit(self, butt, window):
+    self.OnExit(1)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.exit_all"><code class="name flex">
+<span>def <span class="ident">exit_all</span></span>(<span>self, area)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exit_all(self, area):
+    Gtk.main_quit()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.fill_small_img"><code class="name flex">
+<span>def <span class="ident">fill_small_img</span></span>(<span>self, img)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fill_small_img(self, img):
+
+    pass
+    # Only get this once after resize
+    #if not self.smrc:
+    #    self.smrc = self.img.get_allocation()
+    #print( &#34;fill small&#34;, self.smrc.width, self.smrc.height)
+
+    #rc = self.simg.get_allocation()
+    #print( &#34;fill small&#34;, img, rc.width, rc.height)
+    #nnn = img.get_pixbuf().scale_simple(rc.width, rc.height,
+    #                GdkPixbuf.InterpType.NEAREST)
+    #self.simg.set_from_pixbuf(nnn)
+    #self.mainbox.show_now()
+    #rc = self.mainbox.get_allocation()
+    #self.mainbox.window.invalidate_rect(rc, False)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.fractal_image"><code class="name flex">
+<span>def <span class="ident">fractal_image</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>see selection animated</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fractal_image(self, win, a3):
+
+    &#39;&#39;&#39; see selection animated &#39;&#39;&#39;
+
+    if self.reenter:
+       self.reenter = 0
+       return
+    self.reenter = 1
+    self.win3.simg.clear()
+    for cnt, aa in enumerate(self.area.sumx):
+        if self.reenter == 0:
+            break
+        if len(aa) == 0:
+            continue
+        #self.win3.simg.clear()
+        for aaa in aa[4]:
+            #newcol = aa[2]
+            newcol = (0x00, 0x00, 0x00, 0xff)
+            row = 4 * (aaa[1]) * self.win3.simg.ww
+            col = 4 * (aaa[0])
+            for cnt, cc in enumerate(newcol):
+                try:
+                    self.win3.simg.buf[cnt + row + col] = cc
+                except:
+                    print(&#34;win3 exc&#34;, &#34;aa[:5] =&#34;, aa[:5], &#34;aaa =&#34;,
+                                    aaa, sys.exc_info())
+        self.win3.simg.invalidate()
+        usleep(100)
+    self.reenter = 0</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.fractal_image2"><code class="name flex">
+<span>def <span class="ident">fractal_image2</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>attempt to see if random selection would hit &hellip; NO</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fractal_image2(self, win, a3):
+
+    &#39;&#39;&#39; attempt to see if random selection would hit ... NO &#39;&#39;&#39;
+
+    self.win3.simg.clear()
+
+    if self.reenter:
+       self.reenter = 0
+       return
+    self.reenter = 1
+    while True:
+        if self.reenter == 0:
+            break
+
+        usleep(1000)
+        self.win3.simg.clear()
+        amount = random.randint(1, len(self.area.sumx) - 1)
+        for aaa in range(amount):
+            if self.reenter == 0:
+                break
+            # select random image
+            cnt = random.randint(0, len(self.area.sumx) - 1)
+            aa = self.area.sumx[cnt]
+
+            if not len(aa):
+                continue
+            #if cnt % 6 == 0:
+            #    self.win3.simg.clear()
+            #newcol = (random.randint(0, 0x80),
+            #                    random.randint(0, 0x80),
+            #                            random.randint(0, 0x80), 0xff)
+            newcol = aa[5]
+            #print(&#34;aa&#34;, aa[:5])
+            #for aaa in aa[7]:
+
+            for aaa in aa[8]:
+                row = 4 * (aaa[1]) * self.win3.simg.ww
+                col = 4 * (aaa[0])
+                for cnt, cc in enumerate(newcol):
+                    try:
+                        self.win3.simg.buf[cnt + row + col] = cc
+                    except:
+                        print(&#34;win3 exc&#34;, &#34;aa[:5] =&#34;, aa[:5], &#34;aaa =&#34;,
+                                        aaa, sys.exc_info())
+            self.win3.simg.invalidate()
+            usleep(1)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.frame"><code class="name flex">
+<span>def <span class="ident">frame</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def frame(self, butt, window):
+    self.area.frame_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.grey"><code class="name flex">
+<span>def <span class="ident">grey</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def grey(self, butt, window):
+    #print( &#34;Norm&#34; #,butt, window)
+    self.area.grey_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.histo"><code class="name flex">
+<span>def <span class="ident">histo</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def histo(self, butt, window):
+    #print( &#34;Norm&#34; #,butt, window)
+    self.area.histo_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.invalidate"><code class="name flex">
+<span>def <span class="ident">invalidate</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def invalidate(self):
+    self.area.invalidate()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.key_press_event"><code class="name flex">
+<span>def <span class="ident">key_press_event</span></span>(<span>self, win, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def key_press_event(self, win, event):
+    #print( &#34;main key_press_event&#34;, win, event)
+    if event.state &amp; Gdk.ModifierType.MOD1_MASK:
+        if event.keyval == Gdk.KEY_x or event.keyval == Gdk.KEY_X:
+            sys.exit(0)
+
+    if event.keyval == Gdk.KEY_Escape:
+        self.mag = False
+        self.invalidate()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.line"><code class="name flex">
+<span>def <span class="ident">line</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def line(self, butt, window):
+    self.area.line_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.load"><code class="name flex">
+<span>def <span class="ident">load</span></span>(<span>self, fname)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load(self, fname):
+
+    self.fname = fname
+    self.area.load(fname)
+
+    self.simg.resize(self.area.iww, self.area.ihh)
+    self.simg.clear()
+
+    self.win2.simg.resize(self.area.iww, self.area.ihh)
+    self.win2.simg.clear()
+    self.win2.resize(self.area.iww, self.area.ihh)
+
+    self.win3.simg.resize(self.area.iww, self.area.ihh)
+    self.win3.simg.clear()
+    self.win3.resize(self.area.iww, self.area.ihh)
+
+    if self.area.iww &lt; 500:
+        self.scroller.set_size_request(self.area.iww, self.area.ihh)
+        self.scroller2.set_size_request(self.area.iww, self.area.ihh)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.load_image"><code class="name flex">
+<span>def <span class="ident">load_image</span></span>(<span>self, arg, ww)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_image(self, arg, ww):
+    self.fname = ofd(&#34;Open Image File&#34;).result
+    if not self.fname:
+        return
+    try:
+        self.load(self.fname)
+    except:
+        msg(&#34;Cannot load file:\n%s&#34; % self.fname)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.mark_image"><code class="name flex">
+<span>def <span class="ident">mark_image</span></span>(<span>self, area, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mark_image(self, area, a3):
+    self.area.mark_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.norm"><code class="name flex">
+<span>def <span class="ident">norm</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def norm(self, butt, window):
+    #print( &#34;Norm&#34; #,butt, window)
+    self.area.norm_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.pickle_shapes"><code class="name flex">
+<span>def <span class="ident">pickle_shapes</span></span>(<span>self, win=None, a3=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pickle_shapes(self, win = None, a3 = None):
+    try:
+        fp = open(&#34;shapes.txt&#34;, &#34;wb&#34;)
+        pickle.dump(self.shapes, fp)
+        fp.close()
+    except:
+        print(_exception(&#34;pickle&#34;))</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.refr_image"><code class="name flex">
+<span>def <span class="ident">refr_image</span></span>(<span>self, arg, ww)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def refr_image(self, arg, ww):
+    self.area.refresh()
+    self.area.invalidate()
+    self.area.sumx = []
+    self.simg.clear()
+    self.win2.simg.clear()
+    self.win3.simg.clear()
+    self.tree.update_treestore(&#34;&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.save_image"><code class="name flex">
+<span>def <span class="ident">save_image</span></span>(<span>self, arg, ww)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_image(self, arg, ww):
+    fname = ofd(&#34;Save Image File&#34;, Gtk.FileChooserAction.SAVE).result
+    if not fname:
+        return
+    try:
+        if fname[-4:] != &#34;.jpg&#34;:
+            fname += &#34;.jpg&#34;
+        pix = self.area.image2.get_pixbuf()
+        pix.save(fname, &#34;jpeg&#34;, {&#34;quality&#34;:&#34;100&#34;});
+    except:
+        print( sys.exc_info())
+        msg(&#34;Cannot save file:\n%s&#34; % fname)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.save_shape"><code class="name flex">
+<span>def <span class="ident">save_shape</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_shape(self, win, a3):
+    #print( &#34;Save shape data&#34;, len(self.narr))
+    if len(self.curr) == 0:
+        msg(&#34;No shape yet&#34;)
+        return
+    sss = get_str(&#34;Enter name for (the selected) shape:&#34;)
+    if sss != &#34;&#34;:
+        #print( &#34;Adding shape&#34;, sss)
+        #print(&#34;save&#34;, self.curr[:8])
+        xarr = ol.norm_vectors(self.curr[7], self.curr[1], self.curr[2])
+        res = (sss, *self.curr[1:5], xarr)
+        self.shapes.append(res)
+        print(&#34;Added&#34;, res)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.set_small_text"><code class="name flex">
+<span>def <span class="ident">set_small_text</span></span>(<span>self, txt)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_small_text(self, txt):
+    self.lab.set_text(txt)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.show_all_shapes"><code class="name flex">
+<span>def <span class="ident">show_all_shapes</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def show_all_shapes(self, win, a3):
+    if not self.shapes:
+        print(&#34;No shapes saved&#34;)
+        return
+    for ss in self.shapes:
+        self.simg2.clear()
+        #print( ss[0:5], &#34;len:&#34;, len(ss[7]), ss[7][:3])
+        #print(&#34;ss&#34;, ss[:10])
+        #self.lab.set_text(ss[0])
+        #ctx = cairo.Context(self.simg2.surface)
+        for aa in ss[5]:
+            #print(aa[0], aa[1])
+            offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
+            try:
+                self.simg2.buf[offs]   = 0xff
+                self.simg2.buf[offs+1] = 0xff
+                self.simg2.buf[offs+2] = 0xff
+                self.simg2.buf[offs+3] = 0xff
+            except:
+                #print(&#34;exc nbounds&#34;, aa[0], aa[1], sys.exc_info())
+                pass
+            self.simg2.invalidate()
+            usleep(5)
+        usleep(100)
+        self.lab.set_text(&#34;&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.simg_button"><code class="name flex">
+<span>def <span class="ident">simg_button</span></span>(<span>self, win, eve)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simg_button(self, win, eve):
+
+    #print(&#34;simg_butt&#34;, int(eve.x), int(eve.y)) #, eve.state)
+
+    #for cnt, cc in enumerate(self.area.sumx[1]):
+    #    print(&#34;sumx[1]&#34;, cnt, cc[:12])
+
+    if not (eve.state &amp; Gdk.ModifierType.SHIFT_MASK):
+        self.win3.simg.clear()
+
+    for aa in self.area.sumx:
+        if not len(aa):
+            continue
+
+        # see if on top of a fill
+        for aaa in aa[3]:
+            #print(&#34;aaa&#34;,aaa)
+            xdiff = abs(aaa[0] - int(eve.x))
+            if  xdiff &lt; 1:
+                #print(&#34;x match&#34;, xdiff, aa[0], aa[1], aa[2])
+                ydiff = abs(aaa[1] - int(eve.y))
+                if ydiff &lt; 1:
+                    print(&#34;xy match&#34;, aa[0], aa[1], aa[2])
+                    self.curr = aa
+
+                    #newcol = (random.randint(0, 0x80),
+                    #                    random.randint(0, 0x80),
+                    #                            random.randint(0, 0x80), 0xff)
+                    # Draw / Erase
+                    if eve.state &amp; Gdk.ModifierType.CONTROL_MASK:
+                        newcol = (102, 128, 128, 0xff)
+                    else:
+                        #newcol = aa[2]
+                        newcol = (0x00, 0x00, 0x00, 0xff)
+
+                    for aaa in aa[3]:
+                        #print(&#34;aaa&#34;, aaa)
+                        row = 4 * (aaa[1]) * self.win3.simg.ww
+                        col = 4 * (aaa[0])
+                        for cnt, cc in enumerate(newcol):
+                            try:
+                                pass
+                                self.win3.simg.buf[cnt + row + col] = cc
+                            except:
+                                print(&#34;win3 exc&#34;, &#34;aa&#34;, aa[:5], &#34;aaa&#34;,
+                                            aaa, sys.exc_info())
+                    self.win3.simg.invalidate()
+                    newcol = (0x00, 0x00, 0xff, 0xff)
+                    for aaa in aa[4]:
+                        #print(&#34;aaa&#34;, aaa)
+                        row = 4 * (aaa[1]) * self.win3.simg.ww
+                        col = 4 * (aaa[0])
+                        for cnt, cc in enumerate(newcol):
+                            try:
+                                pass
+                                #self.win3.simg.buf[cnt + row + col] = cc
+                            except:
+                                print(&#34;win3 exc&#34;, &#34;aa&#34;, aa[:5], &#34;aaa&#34;,
+                                            aaa, sys.exc_info())
+                    self.win3.simg.invalidate()
+                    usleep(100)
+                    #break</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.smooth"><code class="name flex">
+<span>def <span class="ident">smooth</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def smooth(self, butt, window):
+    self.area.smooth_image()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.spacer"><code class="name flex">
+<span>def <span class="ident">spacer</span></span>(<span>self, hbox, flag=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def spacer(self, hbox, flag = False ):
+    lab14 = Gtk.Label(label=&#34; &#34;);
+    hbox.pack_start(lab14, flag, 0, 0)</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.test_butt"><code class="name flex">
+<span>def <span class="ident">test_butt</span></span>(<span>self, win, a3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_butt(self, win, a3):
+    self.area.test_butt()</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.tree_sel_row"><code class="name flex">
+<span>def <span class="ident">tree_sel_row</span></span>(<span>self, xtree)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tree_sel_row(self, xtree):
+    #print( &#34;tree sel&#34;)
+    global xstr
+    sel = xtree.get_selection()
+    xmodel, xiter = sel.get_selected_rows()
+    for aa in xiter:
+        xstr = xmodel.get_value(xmodel.get_iter(aa), 0)
+        break</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.unpickle_shapes"><code class="name flex">
+<span>def <span class="ident">unpickle_shapes</span></span>(<span>self, win=None, a3=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unpickle_shapes(self, win = None, a3 = None):
+    try:
+        fp = open(&#34;shapes.txt&#34;, &#34;rb&#34;)
+        self.shapes = pickle.load( fp)
+        fp.close()
+    except:
+        print(_exception(&#34;pickle&#34;))</code></pre>
+</details>
+</dd>
+<dt id="pyimgrec.MainWin.walk"><code class="name flex">
+<span>def <span class="ident">walk</span></span>(<span>self, butt, window)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def walk(self, butt, window):
+    #print( &#34;Walk&#34; #,butt, window)
+    self.area.walk_image(4, 4)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pyimgrec.help" href="#pyimgrec.help">help</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyimgrec.MainWin" href="#pyimgrec.MainWin">MainWin</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyimgrec.MainWin.OnExit" href="#pyimgrec.MainWin.OnExit">OnExit</a></code></li>
+<li><code><a title="pyimgrec.MainWin.add_win" href="#pyimgrec.MainWin.add_win">add_win</a></code></li>
+<li><code><a title="pyimgrec.MainWin.after" href="#pyimgrec.MainWin.after">after</a></code></li>
+<li><code><a title="pyimgrec.MainWin.anal_image" href="#pyimgrec.MainWin.anal_image">anal_image</a></code></li>
+<li><code><a title="pyimgrec.MainWin.area_button" href="#pyimgrec.MainWin.area_button">area_button</a></code></li>
+<li><code><a title="pyimgrec.MainWin.area_motion" href="#pyimgrec.MainWin.area_motion">area_motion</a></code></li>
+<li><code><a title="pyimgrec.MainWin.blank" href="#pyimgrec.MainWin.blank">blank</a></code></li>
+<li><code><a title="pyimgrec.MainWin.bri" href="#pyimgrec.MainWin.bri">bri</a></code></li>
+<li><code><a title="pyimgrec.MainWin.buttons" href="#pyimgrec.MainWin.buttons">buttons</a></code></li>
+<li><code><a title="pyimgrec.MainWin.buttons2" href="#pyimgrec.MainWin.buttons2">buttons2</a></code></li>
+<li><code><a title="pyimgrec.MainWin.buttons3" href="#pyimgrec.MainWin.buttons3">buttons3</a></code></li>
+<li><code><a title="pyimgrec.MainWin.check_hell" href="#pyimgrec.MainWin.check_hell">check_hell</a></code></li>
+<li><code><a title="pyimgrec.MainWin.checks" href="#pyimgrec.MainWin.checks">checks</a></code></li>
+<li><code><a title="pyimgrec.MainWin.clear_shapes" href="#pyimgrec.MainWin.clear_shapes">clear_shapes</a></code></li>
+<li><code><a title="pyimgrec.MainWin.clear_small_img" href="#pyimgrec.MainWin.clear_small_img">clear_small_img</a></code></li>
+<li><code><a title="pyimgrec.MainWin.clear_subs" href="#pyimgrec.MainWin.clear_subs">clear_subs</a></code></li>
+<li><code><a title="pyimgrec.MainWin.config_event" href="#pyimgrec.MainWin.config_event">config_event</a></code></li>
+<li><code><a title="pyimgrec.MainWin.dar" href="#pyimgrec.MainWin.dar">dar</a></code></li>
+<li><code><a title="pyimgrec.MainWin.del_shape" href="#pyimgrec.MainWin.del_shape">del_shape</a></code></li>
+<li><code><a title="pyimgrec.MainWin.edge" href="#pyimgrec.MainWin.edge">edge</a></code></li>
+<li><code><a title="pyimgrec.MainWin.exit" href="#pyimgrec.MainWin.exit">exit</a></code></li>
+<li><code><a title="pyimgrec.MainWin.exit_all" href="#pyimgrec.MainWin.exit_all">exit_all</a></code></li>
+<li><code><a title="pyimgrec.MainWin.fill_small_img" href="#pyimgrec.MainWin.fill_small_img">fill_small_img</a></code></li>
+<li><code><a title="pyimgrec.MainWin.fractal_image" href="#pyimgrec.MainWin.fractal_image">fractal_image</a></code></li>
+<li><code><a title="pyimgrec.MainWin.fractal_image2" href="#pyimgrec.MainWin.fractal_image2">fractal_image2</a></code></li>
+<li><code><a title="pyimgrec.MainWin.frame" href="#pyimgrec.MainWin.frame">frame</a></code></li>
+<li><code><a title="pyimgrec.MainWin.grey" href="#pyimgrec.MainWin.grey">grey</a></code></li>
+<li><code><a title="pyimgrec.MainWin.histo" href="#pyimgrec.MainWin.histo">histo</a></code></li>
+<li><code><a title="pyimgrec.MainWin.invalidate" href="#pyimgrec.MainWin.invalidate">invalidate</a></code></li>
+<li><code><a title="pyimgrec.MainWin.key_press_event" href="#pyimgrec.MainWin.key_press_event">key_press_event</a></code></li>
+<li><code><a title="pyimgrec.MainWin.line" href="#pyimgrec.MainWin.line">line</a></code></li>
+<li><code><a title="pyimgrec.MainWin.load" href="#pyimgrec.MainWin.load">load</a></code></li>
+<li><code><a title="pyimgrec.MainWin.load_image" href="#pyimgrec.MainWin.load_image">load_image</a></code></li>
+<li><code><a title="pyimgrec.MainWin.mark_image" href="#pyimgrec.MainWin.mark_image">mark_image</a></code></li>
+<li><code><a title="pyimgrec.MainWin.norm" href="#pyimgrec.MainWin.norm">norm</a></code></li>
+<li><code><a title="pyimgrec.MainWin.pickle_shapes" href="#pyimgrec.MainWin.pickle_shapes">pickle_shapes</a></code></li>
+<li><code><a title="pyimgrec.MainWin.refr_image" href="#pyimgrec.MainWin.refr_image">refr_image</a></code></li>
+<li><code><a title="pyimgrec.MainWin.save_image" href="#pyimgrec.MainWin.save_image">save_image</a></code></li>
+<li><code><a title="pyimgrec.MainWin.save_shape" href="#pyimgrec.MainWin.save_shape">save_shape</a></code></li>
+<li><code><a title="pyimgrec.MainWin.set_small_text" href="#pyimgrec.MainWin.set_small_text">set_small_text</a></code></li>
+<li><code><a title="pyimgrec.MainWin.show_all_shapes" href="#pyimgrec.MainWin.show_all_shapes">show_all_shapes</a></code></li>
+<li><code><a title="pyimgrec.MainWin.simg_button" href="#pyimgrec.MainWin.simg_button">simg_button</a></code></li>
+<li><code><a title="pyimgrec.MainWin.smooth" href="#pyimgrec.MainWin.smooth">smooth</a></code></li>
+<li><code><a title="pyimgrec.MainWin.spacer" href="#pyimgrec.MainWin.spacer">spacer</a></code></li>
+<li><code><a title="pyimgrec.MainWin.test_butt" href="#pyimgrec.MainWin.test_butt">test_butt</a></code></li>
+<li><code><a title="pyimgrec.MainWin.tree_sel_row" href="#pyimgrec.MainWin.tree_sel_row">tree_sel_row</a></code></li>
+<li><code><a title="pyimgrec.MainWin.unpickle_shapes" href="#pyimgrec.MainWin.unpickle_shapes">unpickle_shapes</a></code></li>
+<li><code><a title="pyimgrec.MainWin.walk" href="#pyimgrec.MainWin.walk">walk</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

@@ -44,7 +44,19 @@ def timeit(fn):
         return ret
     return wrapped
 
+# Configure app here for sharing on submodules
+
+class Config():
+    verbose = 0
+    pgdebug = 0
+    pass
+
+# ONE instance
+xconfig = Config()
+
 class Imagex(Gtk.DrawingArea):
+
+    ''' Utility class to operate on images'''
 
     def __init__(self, xparent, ww = 20, hh = 20):
         super().__init__()
@@ -71,9 +83,13 @@ class Imagex(Gtk.DrawingArea):
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
         self.buf = self.surface.get_data()
 
-    def clear(self):
+    def clear(self, rr=0.5, gg=0.5, bb=0.4):
+
+        ''' Fill in color. We default to a tainted shade of grey for
+        recognizing content better  '''
+
         ctx = cairo.Context(self.surface)
-        ctx.set_source_rgba(0.5, 0.5, 0.4 )
+        ctx.set_source_rgba(rr, gg, bb)
         ctx.rectangle(0, 0, self.ww, self.hh)
         ctx.fill()
         self.invalidate()
@@ -81,7 +97,9 @@ class Imagex(Gtk.DrawingArea):
 
     #@timeit
     def copyfrom(self, ww, hh, xbuf):
-        ''' Duplicate image '''
+
+        ''' Duplicate image from buffer'''
+
         #self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, ww, hh)
         self.ww = ww
         self.hh = hh
@@ -92,13 +110,16 @@ class Imagex(Gtk.DrawingArea):
 
     #@timeit
     def copyto(self, target):
-        ''' Display Image '''
+
+        ''' Display Image on target '''
+
         target.resize(self.ww, self.hh)
         #for aa in range(len(self.buf)):
         #    target.buf[aa] = self.buf[aa]
         target.buf[:] = self.buf[:]
 
     def getcol(self, xx, yy):
+
         ''' Return color tuple from coordinate.
             Tuple is RGBA in machine byte order '''
 
@@ -110,6 +131,7 @@ class Imagex(Gtk.DrawingArea):
         return val
 
     def setcol(self, xx, yy, colorx):
+
         ''' Set color tuple at coordinate.
             Color is RGBA in machine byte order '''
 
@@ -118,6 +140,9 @@ class Imagex(Gtk.DrawingArea):
             self.buf[aa + offs] = colorx[aa]
 
     def drawcross(self, xxx, yyy, newcol = (0xff, 0xff, 0xff, 0xff), size = 4):
+
+        ''' Just a cross on screen '''
+
         row =  self.bpx * yyy * self.ww
         try:
             for line in range(-size, +size):
@@ -138,6 +163,9 @@ class Imagex(Gtk.DrawingArea):
         #return True
 
     def invalidate(self):
+
+        ''' Output changed to actual screen '''
+
         ctx = cairo.Context(self.surface)
         # Needs some op to actually draw. We fake a pixel into 0, 0
         ctx.set_source_rgba(0, 0, 0, .1 )
@@ -148,6 +176,9 @@ class Imagex(Gtk.DrawingArea):
 
     def area_motion(self, area, event):
         #print("motion", event.x, event.y)
+
+        ''' Dynamic display of current point '''
+
         self.event_x = event.x
         self.event_y = event.y
 
@@ -168,6 +199,7 @@ class Imagex(Gtk.DrawingArea):
 
 
 old_dir = ""
+''' Remember previous directory here '''
 
 class ofd():
 
@@ -259,9 +291,9 @@ class ofd():
 
         return None
 
-# --------------------------------------------------------------------
-
 def msg(*xstr, xtype = Gtk.MessageType.INFO):
+
+    ''' Message Dialog '''
 
     xstr2 = ""
     if type(xstr) == type(()):
@@ -278,6 +310,8 @@ def msg(*xstr, xtype = Gtk.MessageType.INFO):
     md.destroy()
 
 def  get_str(prompt):
+
+    ''' Get string Dialog '''
 
     resp = ""
     dialog = Gtk.Dialog(title="Enter string", modal = True, destroy_with_parent = True)
@@ -338,8 +372,16 @@ def printarr(arr):
         print( "%.2d %d  " % (aa[0], aa[1]),)
     print()
 
-# Create enums
-def do_enums(dot_strs, localx):
+def create_enums(dot_strs, localx):
+
+    ''' Create enum variables from string array, place it in local scope.
+        Arguments: <br>
+
+            dot_strs    tuple / list of strings
+            localx      scope to create it in
+
+    '''
+
     for cnt, aa in enumerate(dot_strs):
         localx.setdefault(aa, cnt)
         #xstr = "print(locals().get('%s'))" % (aa)
