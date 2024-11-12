@@ -82,10 +82,10 @@ def flush_upleft(vects, minx, miny):
         xarr.append(([aa[0] - minx, aa[1] - miny]))
     return xarr
 
-# ========================================================================
-# Order vectors. Calculate vector tangent and sort by it.
-
 def order_vectors(carr, midx, midy, rev = False):
+
+    ''' Order vectors. Calculate vector tangent and sort by it.
+    '''
 
     vec = []; resarr = []
     for cc in carr.keys():
@@ -97,11 +97,11 @@ def order_vectors(carr, midx, midy, rev = False):
         resarr.append((dd[1][0] + midx, dd[1][1] + midy))
     return resarr
 
-# ========================================================================
-# Scale array to preset lenth. Discards the rest, or duplicates
-# dependent on the array size and parameter newsize
-
 def scale_vectors(carr, newsize):
+
+    ''' Scale array to preset lenth. Discards the rest, or duplicates
+    dependent on the array size and parameter newsize
+    '''
 
     resarr = []; arrlen = len(carr)
     step = float(arrlen) / newsize
@@ -178,10 +178,10 @@ def cmp_arrays2(arr1, arr2):
 
     return ret
 
-# ========================================================================
-# Process the array for vector proximity (old)
-
 def norm_array2(fparm):
+
+    ''' Process the array for vector proximity (old)
+    '''
 
     resarr = [];
 

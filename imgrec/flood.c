@@ -173,7 +173,7 @@ PyObject *_seek(PyObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
         }
 
-    #printf("Seek()");
+    //printf("Seek()");
 
     return Py_BuildValue("i", 0);
 
