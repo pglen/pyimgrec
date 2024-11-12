@@ -786,6 +786,9 @@ class ImgMain(Gtk.DrawingArea):
             if xconfig.verbose:
                 print("worker2() found", found, "thresh", thresh)
 
+            # BREAK out, no dancing here
+            break
+
             # Image is too simple, break
             if found < 20:
                 print("Image too simple")
