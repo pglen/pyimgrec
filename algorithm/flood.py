@@ -71,6 +71,7 @@ class floodParm():
 
         self.tmesub = [];       self.dones = {}
         self.bounds = [];       self.body  = []
+        self.no = []
         self.stack = stack.Stack()
 
 # Seek(xxx, yyy, param, gl_dones)
@@ -312,7 +313,7 @@ def Flood(xxx, yyy, param, gl_dones):
                 break  # jump to next
             elif  retx == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
-                param.bounds.append((xxxx, yyyy))
+                param.no.append((xxxx, yyyy))
                 __callb(xxxx, yyyy, DOT_NO, param);
             elif retx == DOT_BOUND:
                 #print("bound", xxx2, yyy2, end = " ")

@@ -18,10 +18,8 @@ from timeit import Timer
 
 from pyimgutils import *
 
-import treehand, img_main
-import algorithm.norm_outline as ol
-
-ol.ARRLEN
+import  treehand, img_main
+import  algorithm.norm_outline as norm
 
 try:
     import imgrec.imgrec as imgrec
@@ -71,6 +69,7 @@ class MainWin():
 
         self.curr = []
         self.reenter = 0
+        self.merge = []
         self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_title("Python Image Recognition")
         #self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
@@ -93,6 +92,8 @@ class MainWin():
         self.window.connect("button-press-event", self.area_button)
         self.window.connect("key-press-event", self.key_press_event)
         self.window.connect("configure-event", self.config_event)
+        self.window.connect("focus-in-event", self.focus_event)
+        #self.window.connect("focus-out-event", self.focus_event2)
 
         self.pangolayout = self.window.create_pango_layout("a")
         try:
@@ -149,22 +150,21 @@ class MainWin():
         self.vport2 = Gtk.Viewport()
         self.scroller2 = Gtk.ScrolledWindow()
 
-        #self.simg = Gtk.Image.new_from_file("images/star.png")
-        #a2 = self.simg.get_pixbuf()
-        #self.scroller2.set_size_request(a2.get_width(), a2.get_width())
 
-        self.simg  = Imagex(self, ol.ARRLEN, ol.ARRLEN)
-        self.simg2 = Imagex(self, ol.ARRLEN, ol.ARRLEN)
+        self.simg  = Imagex(self, norm.ARRLEN, norm.ARRLEN)
+        self.simg2 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
+        self.simg3 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
 
         self.simg.connect("button-press-event", self.simg_button)
 
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
-        self.tree.stree.set_size_request(-1, 200)
+        self.tree.stree.set_size_request(-1, 140)
         vbox2.pack_start(self.tree.stree, 0, 0, 0)
 
         self.win2 = self.add_win()
         self.win3 = self.add_win()
+        self.win4 = self.add_win()
 
         try:
             if args:
@@ -174,7 +174,8 @@ class MainWin():
                 #self.load("images/african.jpg")
                 #self.load("images/IMG_0823.jpg")
                 #self.load("images/shapes.png")
-                self.load("images/shapex.png")
+                #self.load("images/shapex.png")
+                self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/image_12.png")
                 #self.load("images/Untitled.png")
                 #self.load("images/line.png")
                 #self.load("images/star.png")
@@ -200,7 +201,8 @@ class MainWin():
         vimgbox.pack_start(self.labx, 0, 0, 0)
         vimgbox.pack_start(self.laby, 0, 0, 0)
         vimgbox.pack_start(self.labz, 0, 0, 0)
-        vimgbox.pack_start(self.simg2, 0, 0, 0)
+        vimgbox.pack_start(self.simg2, 0, 0, 2)
+        vimgbox.pack_start(self.simg3, 0, 0, 2)
         self.lab = Gtk.Label(label=" None ")
         vimgbox.pack_start(self.lab, 0, 0, 0)
         self.mainbox.pack_start(vimgbox, 0, 0, 4)
@@ -214,7 +216,7 @@ class MainWin():
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
         self.mainbox.pack_start(self.scale2, 0, 0, 0)
-        self.scale2.set_value(30)
+        self.scale2.set_value(70)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
 
@@ -257,6 +259,21 @@ class MainWin():
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
 
+    def focus_event(self, win, event):
+        #print("focus_event:", win, "in:", event.in_, event.type)
+
+        # Tried many ... this works somewhat
+        self.win2.set_keep_above(True)
+        self.win2.set_keep_above(False)
+        self.win3.set_keep_above(True)
+        self.win3.set_keep_above(False)
+        self.win4.set_keep_above(True)
+        self.win4.set_keep_above(False)
+
+    def focus_event2(self, win, event):
+        #print("focus_event2:", win, "in:", event.in_, event.type)
+        pass
+
     def add_win(self):
 
         winx =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
@@ -277,15 +294,17 @@ class MainWin():
 
     def after(self):
 
-        # Move to current app to corner
+        # Move to current app and test windows
+
         xxx, yyy = self.window.get_position()
         rrr = self.window.get_allocation()
         #print("curr", xxx, yyy,rrr.width, rrr.height)
         self.window.move(self.dwww - rrr.width - 10, 40)
         # Flush to left
         xxx, yyy = self.window.get_position()
-        self.win2.move(10, yyy)
-        self.win3.move(10, yyy + 300)
+        self.win2.move(10, yyy + 20)
+        self.win3.move(10, yyy + 220)
+        self.win4.move(10, yyy + 420)
         self.unpickle_shapes()
 
     def set_small_text(self, txt):
@@ -394,6 +413,10 @@ class MainWin():
         self.win3.simg.clear()
         self.win3.resize(self.area.iww, self.area.ihh)
 
+        self.win4.simg.resize(self.area.iww, self.area.ihh)
+        self.win4.simg.clear()
+        self.win4.resize(self.area.iww, self.area.ihh)
+
         if self.area.iww < 500:
             self.scroller.set_size_request(self.area.iww, self.area.ihh)
             self.scroller2.set_size_request(self.area.iww, self.area.ihh)
@@ -429,7 +452,7 @@ class MainWin():
 
         self.spacer(hbox, False )
 
-        butt9a = Gtk.Button.new_with_mnemonic(" _Clear All Shapes ")
+        butt9a = Gtk.Button.new_with_mnemonic(" Clear All Shapes ")
         butt9a.connect("clicked", self.clear_shapes, window)
         butt9a.set_tooltip_text("Will clear current shapes")
         hbox.pack_start(butt9a, False, 0, 0)
@@ -457,7 +480,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt1 = Gtk.Button.new_with_mnemonic(" Sav_e Image ")
+        butt1 = Gtk.Button.new_with_mnemonic(" Save Image ")
         butt1.connect("clicked", self.save_image, window)
         hbox.pack_start(butt1, False, 0, 0)
 
@@ -469,8 +492,8 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt1 = Gtk.Button.new_with_mnemonic(" _Fractal ")
-        butt1.connect("clicked", self.fractal_image, window)
+        butt1 = Gtk.Button.new_with_mnemonic(" R_ecog ")
+        butt1.connect("clicked", self.recog_image, window)
         hbox.pack_start(butt1, False, 0, 0)
 
         self.spacer(hbox)
@@ -541,7 +564,7 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt9 = Gtk.Button.new_with_mnemonic(" _Edge ")
+        butt9 = Gtk.Button.new_with_mnemonic(" Edge ")
         butt9.connect("clicked", self.edge, window)
         hbox.pack_start(butt9, False,0 ,0)
 
@@ -668,10 +691,16 @@ class MainWin():
 
         if not (eve.state & Gdk.ModifierType.SHIFT_MASK):
             self.win3.simg.clear()
+            self.win4.simg.clear()
+            self.simg2.clear()
+            #self.simg3.clear()
+            #self.merge = []
 
         for aa in self.area.sumx:
             if not len(aa):
                 continue
+
+            #print("area.sumx", aa[0:3])
 
             # see if on top of a fill
             for aaa in aa[3]:
@@ -694,17 +723,17 @@ class MainWin():
                             #newcol = aa[2]
                             newcol = (0x00, 0x00, 0x00, 0xff)
 
-                        for aaa in aa[3]:
+                        for aaaa in aa[3]:
                             #print("aaa", aaa)
-                            row = 4 * (aaa[1]) * self.win3.simg.ww
-                            col = 4 * (aaa[0])
+                            row = 4 * (aaaa[1]) * self.win3.simg.ww
+                            col = 4 * (aaaa[0])
                             for cnt, cc in enumerate(newcol):
                                 try:
                                     pass
                                     self.win3.simg.buf[cnt + row + col] = cc
                                 except:
                                     print("win3 exc", "aa", aa[:5], "aaa",
-                                                aaa, sys.exc_info())
+                                                aaaa, sys.exc_info())
                         self.win3.simg.invalidate()
                         newcol = (0x00, 0x00, 0xff, 0xff)
                         for aaa in aa[4]:
@@ -714,13 +743,78 @@ class MainWin():
                             for cnt, cc in enumerate(newcol):
                                 try:
                                     pass
-                                    #self.win3.simg.buf[cnt + row + col] = cc
+                                    self.win4.simg.buf[cnt + row + col] = cc
                                 except:
-                                    print("win3 exc", "aa", aa[:5], "aaa",
+                                    print("win4 exc", "aa", aa[:5], "aaa",
                                                 aaa, sys.exc_info())
                         self.win3.simg.invalidate()
+                        self.win4.simg.invalidate()
                         usleep(100)
                         #break
+                        # Process data
+                        uls = norm.flush_upleft(aa[4])
+                        nbs = norm.scale_vectors(uls, norm.ARRLEN)
+                        nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
+                        self.merge.append(nbounds)
+
+                        #for aa in nbounds:
+                        #    #print(aa[0], aa[1])
+                        #    offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
+                        #    try:
+                        #        self.simg2.buf[offs]   = 0xff
+                        #        self.simg2.buf[offs+1] = 0xff
+                        #        self.simg2.buf[offs+2] = 0xff
+                        #        self.simg2.buf[offs+3] = 0xff
+                        #    except:
+                        #        #print("exc nbounds", aa[0], aa[1], sys.exc_info())
+                        #        pass
+                        #    self.simg2.invalidate()
+                        #    usleep(5)
+
+                        self.simg3.clear()
+                        sss = []
+                        for mmm in self.merge:
+                            sss = norm.merge_vectors(sss, mmm)
+                            print("merged len sss", len(sss))
+
+                            for aa in sss:
+                                offs = 4 * (aa[0] + aa[1] * self.simg3.ww)
+                                try:
+                                    self.simg3.buf[offs]   = 0xff
+                                    self.simg3.buf[offs+1] = 0xff
+                                    self.simg3.buf[offs+2] = 0xff
+                                    self.simg3.buf[offs+3] = 0xff
+                                except:
+                                    #print("exc nbounds", aa[0], aa[1], sys.exc_info())
+                                    pass
+                                self.simg3.invalidate()
+                                #usleep(5)
+
+    def recog_image(self, win, a3):
+
+        if not len(self.area.sumx):
+            msg("No scan yet")
+            return
+
+        print("Recog", len(self.area.sumx) )
+
+        normarr = []
+        for aa in self.area.sumx:
+            if not len(aa):
+                continue
+            arrx = norm.norm_vectors(aa[4])
+            normarr.append( (*aa[0:4], arrx))
+
+        resarr = []
+        for aa in normarr:
+            #print("cmp:", aa[0], len(aa[4]))
+            for bb in self.shapes:
+                res = norm.cmp_arrays(aa[4], bb[4])
+                #print(" cmp with:", bb[0], len(bb[4]), "res =", res)
+                resarr.append((res, bb[:3], aa[:3]))
+
+        resarr.sort()
+        print(resarr[0:4])
 
     def fractal_image(self, win, a3):
 
@@ -753,9 +847,9 @@ class MainWin():
         self.reenter = 0
 
 
-    def fractal_image2(self, win, a3):
+    def recog_image2(self, win, a3):
 
-        ''' attempt to see if random selection would hit ... NO '''
+        ''' attempt to recog '''
 
         self.win3.simg.clear()
 
@@ -811,16 +905,30 @@ class MainWin():
         self.area.refresh()
         self.area.invalidate()
         self.area.sumx = []
+        self.merge = []
+        self.clear_subs()
+
+    def clear_subs(self, arg = None, ww = None):
         self.simg.clear()
         self.win2.simg.clear()
         self.win3.simg.clear()
+        self.win4.simg.clear()
+        self.simg2.clear()
+        self.simg3.clear()
         self.tree.update_treestore("")
 
-    def clear_subs(self, arg, ww):
-        self.simg.clear()
-        self.win2.simg.clear()
-        self.win3.simg.clear()
-        self.tree.update_treestore("")
+        # Test
+        #for aa in range(100):
+        #    col = [ random.randint(0, 255),
+        #            random.randint(0, 255),
+        #            random.randint(0, 255),
+        #            random.randint(0, 255)]
+        #    self.simg2.drawline(random.randint(0, norm.ARRLEN-1),
+        #                        random.randint(0, norm.ARRLEN-1),
+        #                        random.randint(0, norm.ARRLEN-1),
+        #                        random.randint(0, norm.ARRLEN-1),
+        #                        col);
+        #self.simg2.invalidate()
 
     def invalidate(self):
         self.area.invalidate()
@@ -859,16 +967,14 @@ class MainWin():
     def save_shape(self, win, a3):
         #print( "Save shape data", len(self.narr))
         if len(self.curr) == 0:
-            msg("No shape yet")
+            msg("No shape marked yet")
             return
         sss = get_str("Enter name for (the selected) shape:")
         if sss != "":
-            #print( "Adding shape", sss)
-            #print("save", self.curr[:8])
-            xarr = ol.norm_vectors(self.curr[7], self.curr[1], self.curr[2])
-            res = (sss, *self.curr[1:5], xarr)
+            print("save", sss, self.curr[1:3])
+            xarr = norm.norm_vectors(self.curr[4], self.curr[1][0], self.curr[1][1])
+            res = (sss, *self.curr[1:3], self.curr[3], xarr)
             self.shapes.append(res)
-            print("Added", res)
 
     def del_shape(self, win, a3):
         #print( "Delete shape")
@@ -886,30 +992,33 @@ class MainWin():
             msg("No such shape", sss)
 
     def show_all_shapes(self, win, a3):
+
+        self.simg2.clear()
+        self.simg3.clear()
+
         if not self.shapes:
+            msg("No shapes yet")
             print("No shapes saved")
             return
-        for ss in self.shapes:
-            self.simg2.clear()
-            #print( ss[0:5], "len:", len(ss[7]), ss[7][:3])
-            #print("ss", ss[:10])
-            #self.lab.set_text(ss[0])
-            #ctx = cairo.Context(self.simg2.surface)
-            for aa in ss[5]:
-                #print(aa[0], aa[1])
-                offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
-                try:
-                    self.simg2.buf[offs]   = 0xff
-                    self.simg2.buf[offs+1] = 0xff
-                    self.simg2.buf[offs+2] = 0xff
-                    self.simg2.buf[offs+3] = 0xff
-                except:
-                    #print("exc nbounds", aa[0], aa[1], sys.exc_info())
-                    pass
-                self.simg2.invalidate()
-                usleep(5)
-            usleep(100)
-            self.lab.set_text("")
+
+        #for ss in self.shapes:
+        #    self.simg2.clear()
+        #    print( ss[0:3], "len:", len(ss[4]), ss[4][:3])
+        #    self.lab.set_text(ss[0])
+        #    for aa in ss[4]:
+        #        #print(aa[0], aa[1])
+        #        offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
+        #        try:
+        #            self.simg2.buf[offs]   = 0xff
+        #            self.simg2.buf[offs+1] = 0xff
+        #            self.simg2.buf[offs+2] = 0xff
+        #            self.simg2.buf[offs+3] = 0xff
+        #        except:
+        #            #print("exc nbounds", aa[0], aa[1], sys.exc_info())
+        #            pass
+        #        self.simg2.invalidate()
+        #        usleep(5)
+        #    usleep(100)
 
     # --------------------------------------------------------------------
 

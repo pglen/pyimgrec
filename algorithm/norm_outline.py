@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import math
-import pyimgutils as iut
+import pyimgutils
 
 __doc__ = '''
 
@@ -13,29 +13,36 @@ __doc__ = '''
 '''
 
 #: This is the sample size that is stored in the shape array
-ARRLEN = 100
+ARRLEN = 150
 
-def norm_array(fparm):
+def sort_by_angles(xarr):
 
     '''
         Process the array for vector rotation. Return normalized coordinate array.
         This is superseeded by simple sorting, with similar results.
+
+        Turns out this is the heart of it all.
     '''
+
+    # Estabilish boundaries
+    bbb = calc_bounds(xarr)
+    #print("calc_bounds()",
+    #        "minx =", bbb[0], "miny =", bbb[1],
+    #            "maxx =",  bbb[2], "maxy =", bbb[3])
+    midx, midy = calc_center(bbb)
 
     resarr = [];
 
     # Correct order
-    minx2 = min(fparm.minx, fparm.maxx);  miny2 = min(fparm.miny, fparm.maxy)
-    maxx2 = max(fparm.minx, fparm.maxx);  maxy2 = max(fparm.miny, fparm.maxy)
+    #minx2 = min(fparm.minx, fparm.maxx);  miny2 = min(fparm.miny, fparm.maxy)
+    #maxx2 = max(fparm.minx, fparm.maxx);  maxy2 = max(fparm.miny, fparm.maxy)
     #print( "minx2", minx2, "maxx2", maxx2, "miny2", miny2, "maxy2", maxy2)
-    maxwx = maxx2 - minx2; maxhy = maxy2 - miny2
+    #maxwx = maxx2 - minx2; maxhy = maxy2 - miny2
 
-    midx = maxwx // 2; midy = maxhy // 2;
     #print( "midx", midx, "midy", midy       )
 
     # Normalize to zero based for the small image, clean non zeros
-    xarr = flush_upleft(fparm)
-
+    #xarr = flush_upleft(fparm)
     #xsarr = sorted(xarr.keys())
     #xsarr = xarr.keys();
 
@@ -66,29 +73,37 @@ def norm_array(fparm):
         #print("carr1", carr1)
 
     # Sort them by angle
-    resarr += order_vectors(carr1, midx, midy)
-    resarr += order_vectors(carr2, midx, midy)
-    resarr += order_vectors(carr3, midx, midy)
-    resarr += order_vectors(carr4, midx, midy)
+    resarr += _order_vectors(carr1, midx, midy)
+    resarr += _order_vectors(carr2, midx, midy)
+    resarr += _order_vectors(carr3, midx, midy)
+    resarr += _order_vectors(carr4, midx, midy)
     #print( "shape arr len", len(resarr))
-    #return resarr
+    return resarr
 
+def uniform(resarr3):
     # Shape them uniform, number of elements, maximum magnitude
-    resarr2 = scale_vectors(resarr, ARRLEN)
+    # Yep, this was not needed
+
+    #resarr2 = scale_vectors(resarr, ARRLEN)
     #return resarr2
-    resarr3 = scale_magnitude(resarr2, ARRLEN)
+    #resarr3 = scale_magnitude(resarr2, ARRLEN)
     return resarr3
 
-def norm_vectors(vects, minx, miny, size = ARRLEN):
+def norm_vectors(vects, minx=-1, miny=-1, size = ARRLEN):
 
     ''' Call subsequent norm / scale routines '''
 
+    # Calculate minx miny if needed
+    if minx < 0 or miny < 0:
+        minx, miny, _, _ = norm_calc_bounds(vects)
+
     ulf = flush_upleft(vects, minx, miny)
+
     nbs = scale_vectors(ulf, size)
     nbm = scale_magnitude(nbs, size)
     return nbm
 
-def flush_upleft(vects, minx = 0, miny = 0):
+def flush_upleft(vects, minx=-1, miny=-1):
 
     ''' Make sure vector origin at 0,0 (minx, miny)
 
@@ -96,26 +111,75 @@ def flush_upleft(vects, minx = 0, miny = 0):
     ----------
 
         vects           vectors to operate on
-        minx, miny      flush reference point
 
     '''
+
+    # Calculate minx miny if needed
+    if minx < 0 or miny < 0:
+        minx, miny, _, _ = norm_calc_bounds(vects)
 
     xarr = []
     for aa in vects:
         xarr.append(([aa[0] - minx, aa[1] - miny]))
     return xarr
 
-def order_vectors(carr, midx, midy, rev = False):
+def merge_vectors(carr, addarr):
+
+    ''' Merge two arrays of vectors '''
+
+    # Was nothing there, just copy
+    if not carr:
+        return addarr
+
+    # Sort by distance to middle point
+
+    def cmp(aa, bb):
+
+        # Calc middle point
+        aaa_0 = aa[0] - ARRLEN // 2
+        aaa_1 = aa[1] - ARRLEN // 2
+        bbb_0 = bb[0] - ARRLEN // 2
+        bbb_1 = bb[1] - ARRLEN // 2
+
+        # Square is more precise, however simple addition is sufficient
+        dist_a = (aaa_0 + aaa_1) // 2
+        dist_b = (bbb_0 + bbb_1) // 2
+
+        # Compare now
+        if dist_a > dist_b:
+            return  1
+        elif dist_a < dist_b:
+            return -1
+        else:
+            return 0
+
+    sumarr = carr + addarr
+    from functools import cmp_to_key
+    distarr = sorted(sumarr, key=cmp_to_key(cmp))
+    #print("distarr:", distarr[:24])
+    #print("tmp len:", len(xarr))
+    #xarr2 = scale_vectors(distarr, ARRLEN)
+    # Discard second half
+    xarr2 = distarr[:ARRLEN]
+
+    return xarr2
+
+def _order_vectors(carr, midx, midy, rev = False):
 
     ''' Order vectors. Calculate vector tangent and sort by it.
         Obsolete. Kept because it may be useful in the future.
+        Yep, turns aout it was crucial.
     '''
 
+    #carr.keys():
+
     vec = []; resarr = []
-    for cc in carr.keys():
+    for cc in carr:
         if cc[0]:                           # prevent divide by zero
             vvv = float(cc[1]) / cc[0]
+            #print("tangent", vvv)
             vec.append((vvv, cc))
+
     vec.sort()
     for dd in vec:
         resarr.append((dd[1][0] + midx, dd[1][1] + midy))
@@ -276,21 +340,45 @@ def norm_array2(fparm):
 
 def sqrdiff(aa, bb):
 
-    ''' Math sugar for absolute difference. Not used, as it is too expensive. '''
+    ''' Math sugar for absolute difference. Not used, as it
+        is too expensive. Simple sum / substract will do just fine'''
 
     dist = math.sqrt(abs(math.pow(bb, 2) - \
                 math.pow(aa, 2)))
     return dist
 
-def norm_bounds(boundx, bounds):
+def flush_upper_left(boundx, bounds):
 
     ''' Make it upper left aligned '''
 
-    print("norm_bounds() boundx = ", boundx)
+    print("flush_upper_left() boundx = ", boundx)
     retdict = {}
     for aa in bounds.keys():
         if bounds[aa]:
-            iut.mark_cell(aa[0] - boundx[0], aa[1] - boundx[1],  1, retdict)
+            pyimageutils.mark_cell(aa[0] - boundx[0], aa[1] - boundx[1],  1, retdict)
     return retdict
+
+def calc_bounds(bounds):
+
+    ''' Calculate boundaries of the data '''
+
+    minx = miny = 0xffffffff;
+    maxx = maxy = 0
+
+    for aa in bounds:
+        #print( aa,)
+        if minx > aa[0]: minx = aa[0]
+        if miny > aa[1]: miny = aa[1]
+        if maxx < aa[0]: maxx = aa[0]
+        if maxy < aa[1]: maxy = aa[1]
+
+    #print("calc_bounds() minx =", minx, "miny =", miny,
+    #                            "maxx =",  maxx,  "maxy =", maxy)
+    return (minx, miny, maxx, maxy)
+
+def calc_center(minmax):
+    xx = minmax[0] + (minmax[2] - minmax[0]) // 2
+    yy = minmax[1] + (minmax[3] - minmax[1]) // 2
+    return xx, yy
 
 # EOF

@@ -22,7 +22,7 @@ from gi.repository import GObject
 from gi.repository import Pango
 from gi.repository import GdkPixbuf
 
-from pyimgutils import *
+from    pyimgutils import *
 import  treehand
 
 try:
@@ -524,173 +524,6 @@ class ImgMain(Gtk.DrawingArea):
         imgrec.edge()
         self.invalidate()
 
-    def scanxx(self, ximg):
-
-        # Scan for xx marking points
-
-        xuparr = []; xdwnarr = []
-
-        for yy in range(ximg.hh):
-            row = ximg.bpx * yy * ximg.ww
-            # Get first pixel in a row
-            prev = ximg.getcol(0, yy)
-            # Scan THIS line
-            wasup = 0; wasdown = 0; lastup = 0; lastdown = 0
-            for xx in range(ximg.ww):
-                val = ximg.getcol(xx, yy)
-                diff =  abs( prev - val)
-                if diff < MARKDIFF:
-                    prev = val
-                    continue
-                if val > 200:
-                    continue
-
-                if prev < val:
-                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
-                    if not wasup:
-                        xpos = lastdown + (xx - lastdown) // 2
-                        xuparr.append((xpos, yy))
-                        wasup = True; wasdown = False; lastup = xx
-                elif prev > val:
-                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
-                    if not wasdown:
-                        xpos = lastup + (xx - lastup) // 2
-                        xdwnarr.append((xpos, yy))
-                        wasdown = True; wasup = False; lastdown = xx
-                else:
-                    pass
-                prev = val
-            # Output remnant
-            if wasup:
-                xpos = lastdown + (xx - lastdown) // 2
-                xuparr.append((xpos, yy))
-                #print("lastdown", lastdown, yy)
-            if wasdown:
-                xpos = lastup + (xx - lastup) // 2
-                xdwnarr.append((xpos, yy))
-                #print("lastup", lastup, yy)
-        return xuparr, xdwnarr
-
-    def scanyy(self, ximg):
-
-        ''' Scan for yy marking points '''
-
-        yuparr = []; ydwnarr = []
-        for xx in range(ximg.ww):
-            prev = 0
-            # Get first pixel in a column
-            prev = ximg.getcol(xx, 0)
-            # Scan THIS cloumn
-            wasup = wasdown = lastup = lastdown = 0
-            for yy in range(ximg.hh):
-                val = ximg.getcol(xx, yy)
-                if abs(prev - val) < MARKDIFF:
-                    prev = val
-                    continue
-                if val > 200:
-                    continue
-                if prev < val:
-                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
-                    if not wasup:
-                        ypos = (lastdown + (yy - lastdown) // 2)
-                        yuparr.append((xx, ypos))
-                        wasup = True; wasdown = False; lastup = yy
-                elif prev > val:
-                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
-                    if not wasdown:
-                        ypos = (lastup + (yy - lastup) // 2)
-                        ydwnarr.append((xx, ypos))
-                        wasdown = True; wasup = False; lastdown = yy
-                else:
-                    # Same values, do nothing
-                    pass
-                prev = val
-            # Output remnant
-            if wasup:
-                ypos = (lastdown + (yy - lastdown) // 2)
-                yuparr.append((xx, ypos))
-            if wasdown:
-                ypos = (lastup + (yy - lastup) // 2)
-                ydwnarr.append((xx, ypos))
-        return yuparr, ydwnarr
-
-    def mark_image(self):
-
-        ''' Mark crossing of significant regions '''
-
-        simg = Imagex(self)
-        simg.copyfrom(self.iww, self.ihh, self.buf);
-        simg.copyto(self.xparent.win3.simg)
-        ximg = self.xparent.win3.simg # Alias
-        imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
-        #factor = 5; imgrec.smooth(factor); imgrec.smoothv(factor)
-
-        xuparr, xdwnarr = self.scanxx(ximg)
-        # Test output
-        for aa in xuparr:
-            ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
-        #for aa in xdwnarr:
-        #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
-
-        yuparr, ydwnarr = self.scanyy(ximg)
-
-        # Mark middle point of X line ups
-        iarr = []
-        inup = False; oldx = 0; starty = 0
-
-        for xx2, yy2 in xuparr:
-            #print((xx2, yy2))
-            if oldx != xx2:
-                if inup:
-                    inup = False
-                    iarr.append((xx2, starty + (yy2 - starty) // 2))
-                else:
-                    starty = yy2
-                    inup = True
-            oldx = xx2
-
-        for aa in iarr:
-            #print("iarr", aa)
-            ximg.drawcross(aa[0], aa[1], (0xff, 0xff, 0xff, 0xff))
-            ximg.drawcross(aa[0]+1, aa[1]+1, (0x00, 0x00, 0x00, 0xff))
-            pass
-
-        print("%d marks" % len(xuparr))
-
-        # Mark middle point of line ups for Y axis
-        '''iyarr = []
-        inup = False; oldy = 0; startx = 0
-        sumyarr = yuparr + ydwnarr
-        sumyarr.sort()
-        for xx2, yy2 in sumyarr:
-            #print((xx2, yy2))
-            if oldy != yy2:
-                if inup:
-                    inup = False
-                    iarr.append(( (startx + (yy2 - startx) // 2), yy2) )
-                else:
-                    startx = xx2
-                    inup = True
-            oldy = yy2
-
-        for aa in iyarr:
-            print("iyarr", aa)
-            ximg.drawcross(aa[0], aa[1], (0xff, 0xff, 0xff, 0xff))
-            ximg.drawcross(aa[0]+1, aa[1]+1, (0x00, 0x00, 0x00, 0xff))
-            pass
-        '''
-
-        ## Paint to test window
-
-        #for aa in yuparr:
-        #    ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
-
-        #for aa in ydwnarr:
-        #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
-
-        self.xparent.win3.simg.invalidate()
-        return xuparr, xdwnarr, #yuparr, ydwnarr
-
     def callb(self, xxx, yyy, kind, fparam):
         #print( "callb", xxx, yyy, fparam)
         #return
@@ -701,29 +534,33 @@ class ImgMain(Gtk.DrawingArea):
         newcol = None
         try:
             if kind == flood.DOT_YES:
-                #newcol = (0x00, 0x00, 0x00), 0xff)
-                newcol = fparam.mark
-                #newcol = None
+                #newcol = fparam.mark
+                #newcol = (0x00, 0x00, 0x00, 0xff)
+                newcol = None
             elif kind == flood.DOT_NO:
                 newcol = (0xff, 0xff, 0x00, 0xff)
                 #newcol = None
             elif kind == flood.DOT_BOUND:
-                newcol = (0x00, 0x00, 0xff, 0xff)
+                #newcol = (0x00, 0x00, 0xff, 0xff)
+                newcol = None
             elif kind == flood.DOT_POP:
                 #newcol = (0x00, 0xff, 0xff, 0xff)
                 newcol = None
             elif kind == flood.DOT_MARK:
-                newcol = (0xff, 0xff, 0xff, 0xff)
-                self.xparent.simg.drawcross(xxx, yyy, newcol)
+                #newcol = (0xff, 0xff, 0xff, 0xff)
                 newcol = None
+                #self.xparent.simg.drawcross(xxx, yyy, newcol)
+
             elif kind == flood.DOT_INVALIDATE:
                 pass
             else:
                 print("unkown kind in callb")
-                newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
+                #newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
+                newcol = None
             if newcol:
                 for cnt, aa in enumerate(newcol):
                     self.xparent.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
+                pass
 
             # ------------------------------------------------------------
             if kind == flood.DOT_YES:
@@ -760,7 +597,6 @@ class ImgMain(Gtk.DrawingArea):
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
             print_exception("callb")
-
 
     def _anal_image_worker(self, xxx, yyy, single, addx):
 
@@ -805,10 +641,8 @@ class ImgMain(Gtk.DrawingArea):
 
         print("anal time: %.2f ms" % ((time.time() - ttt) * 1000))
 
-
     def _anal_image_worker2(self, xxx, yyy, single, thresh, addx):
 
-        nbounds = [];
         self.sumx = []
         found = 0
 
@@ -871,15 +705,6 @@ class ImgMain(Gtk.DrawingArea):
             #nbs = norm.scale_vectors(uls, norm.ARRLEN)
             #nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
 
-            # Short circuit for now
-            #nbounds = fparam.bounds
-            #nbounds.sort()
-
-            # Just for test
-            #bbounds = fparam.body
-            #bbounds.sort
-            #print("nbounds len", len(nbounds))
-
             # Save last
             coords = (fparam.minx, fparam.miny, fparam.maxx, fparam.maxy,)
             self.xparent.narr = [str(found), coords, fparam.mark,
@@ -889,45 +714,81 @@ class ImgMain(Gtk.DrawingArea):
 
             # Compare with stock
             #sss = self.compare(nbounds, fparam)
-            if not addx:
-                self.xparent.simg2.clear()
+            #if not addx:
+            #    self.xparent.simg2.clear()
 
             # Display results
-            for aa in nbounds:
-                #print(aa[0], aa[1])
-                offs = BPX * (aa[1] + aa[1] * self.xparent.simg2.ww)
-                #offs += 4 * fparam.minx
-                #offs += 4 * self.xparent.simg2.ww * fparam.miny
-                try:
-                    self.xparent.simg2.buf[offs]   = 0x00
-                    self.xparent.simg2.buf[offs+1] = 0x00
-                    self.xparent.simg2.buf[offs+2] = 0x00
-                    self.xparent.simg2.buf[offs+3] = 0xff
-                except:
-                    #print("disp nbounds", offs, sys.exc_info())
-                    pass
-                self.xparent.simg2.invalidate()
-                #usleep(15)
-
+            self.island(fparam.no)
             if self.xparent.check2.get_active():
                 if len(nbounds) == 0:
                     msg("No shape yet")
 
             if single:
                 break
+            #print()
 
-        for aa in self.sumx:
-            #print("aa", aa)
-            try:
-                print(aa[0:5], aa[5][0:3], aa[6], aa[7][:2], "...")
-            except IndexError:
-                #print("exc sumx", sys.exc_info())
-                pass
-            except:
-                print("exc sumx", sys.exc_info())
+        #for aa in self.sumx:
+        #    print("aa", aa)
+        #    try:
+        #        print(aa[0:5], aa[5][0:3], aa[6], aa[7][:2], "...")
+        #    except IndexError:
+        #        #print("exc sumx", sys.exc_info())
+        #        pass
+        #    except:
+        #        print("exc sumx", sys.exc_info())
 
         print("%d segments found." % found)
         return found
+
+    class cIsland():
+        def __init__(self, data):
+            self.data = data
+
+
+    def island(self, nbounds):
+
+        ''' Display one island '''
+
+        if len(nbounds) == 0:  # Is it an island?
+            return
+        if len(nbounds) > 300:  # Is it a small island?
+            return
+
+        #print("nbounds len:", len(nbounds))
+        #for aa in nbounds:
+        #    print(aa, end = " ")
+        #print("nbounds end")
+
+        nbounds = norm.sort_by_angles(nbounds)
+        #nbounds = norm.scale_vectors(nbounds, 10)
+
+        col = (0xff, 0xff, 0xff, 0xff)
+        prev = nbounds[0]
+        for aa in nbounds:
+            #print(aa, end = " ")
+            #offs = BPX * (aa[0] + aa[1] * self.xparent.simg2.ww)
+            try:
+                #print("parms",  prev[0], prev[1], aa[0], aa[1])
+                self.xparent.simg2.setcol(aa[0], aa[1], col)
+                #self.xparent.simg2.drawline(prev[0], prev[1],
+                #                                aa[0], aa[1], col)
+            except:
+                print("disp nbounds", prev[0], prev[1], aa[0], aa[1],
+                                        sys.exc_info())
+                pass
+            self.xparent.simg2.invalidate()
+            if self.xparent.check4.get_active():
+                usleep(10   )
+            #prev[0] = aa[0]; prev[1] = aa[1]
+            prev = aa
+
+        #usleep(10)
+
+        # Show center
+        #ccc = norm.calc_center(norm.calc_bounds(nbounds))
+        #newcol = (0xff, 0x00, 0x00, 0xff)
+        #self.xparent.simg2.drawcross(ccc[0], ccc[1], newcol)
+
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer

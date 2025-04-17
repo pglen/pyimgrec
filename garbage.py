@@ -648,7 +648,7 @@ def funcrev(item):
         for aa in arrm:
             sumxarr.append(aa)
 
-# Compare array
+        # Compare array
         def cmp(aa, bb):
             if aa[1] > bb[1]:
                 return 1
@@ -670,5 +670,172 @@ def funcrev(item):
         from functools import cmp_to_key
         sumxarr = sorted(xuparr, key=cmp_to_key(cmp))
         print(sumxarr)
+
+def scanxx(self, ximg):
+
+        # Scan for xx marking points
+
+        xuparr = []; xdwnarr = []
+
+        for yy in range(ximg.hh):
+            row = ximg.bpx * yy * ximg.ww
+            # Get first pixel in a row
+            prev = ximg.getcol(0, yy)
+            # Scan THIS line
+            wasup = 0; wasdown = 0; lastup = 0; lastdown = 0
+            for xx in range(ximg.ww):
+                val = ximg.getcol(xx, yy)
+                diff =  abs( prev - val)
+                if diff < MARKDIFF:
+                    prev = val
+                    continue
+                if val > 200:
+                    continue
+
+                if prev < val:
+                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasup:
+                        xpos = lastdown + (xx - lastdown) // 2
+                        xuparr.append((xpos, yy))
+                        wasup = True; wasdown = False; lastup = xx
+                elif prev > val:
+                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasdown:
+                        xpos = lastup + (xx - lastup) // 2
+                        xdwnarr.append((xpos, yy))
+                        wasdown = True; wasup = False; lastdown = xx
+                else:
+                    pass
+                prev = val
+            # Output remnant
+            if wasup:
+                xpos = lastdown + (xx - lastdown) // 2
+                xuparr.append((xpos, yy))
+                #print("lastdown", lastdown, yy)
+            if wasdown:
+                xpos = lastup + (xx - lastup) // 2
+                xdwnarr.append((xpos, yy))
+                #print("lastup", lastup, yy)
+        return xuparr, xdwnarr
+
+    def scanyy(self, ximg):
+
+        ''' Scan for yy marking points '''
+
+        yuparr = []; ydwnarr = []
+        for xx in range(ximg.ww):
+            prev = 0
+            # Get first pixel in a column
+            prev = ximg.getcol(xx, 0)
+            # Scan THIS cloumn
+            wasup = wasdown = lastup = lastdown = 0
+            for yy in range(ximg.hh):
+                val = ximg.getcol(xx, yy)
+                if abs(prev - val) < MARKDIFF:
+                    prev = val
+                    continue
+                if val > 200:
+                    continue
+                if prev < val:
+                    #print("Edge   UP: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasup:
+                        ypos = (lastdown + (yy - lastdown) // 2)
+                        yuparr.append((xx, ypos))
+                        wasup = True; wasdown = False; lastup = yy
+                elif prev > val:
+                    #print("Edge DOWN: %d/%d: %d - %d " % (xx, yy, val, prev) )
+                    if not wasdown:
+                        ypos = (lastup + (yy - lastup) // 2)
+                        ydwnarr.append((xx, ypos))
+                        wasdown = True; wasup = False; lastdown = yy
+                else:
+                    # Same values, do nothing
+                    pass
+                prev = val
+            # Output remnant
+            if wasup:
+                ypos = (lastdown + (yy - lastdown) // 2)
+                yuparr.append((xx, ypos))
+            if wasdown:
+                ypos = (lastup + (yy - lastup) // 2)
+                ydwnarr.append((xx, ypos))
+        return yuparr, ydwnarr
+
+def mark_image(self):
+
+        ''' Mark crossing of significant regions '''
+
+        simg = Imagex(self)
+        simg.copyfrom(self.iww, self.ihh, self.buf);
+        simg.copyto(self.xparent.win3.simg)
+        ximg = self.xparent.win3.simg # Alias
+        imgrec.anchor(ximg.buf, shape=(ximg.ww, ximg.hh, ximg.bpx))
+        #factor = 5; imgrec.smooth(factor); imgrec.smoothv(factor)
+
+        xuparr, xdwnarr = self.scanxx(ximg)
+        # Test output
+        for aa in xuparr:
+            ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
+        #for aa in xdwnarr:
+        #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
+
+        yuparr, ydwnarr = self.scanyy(ximg)
+
+        # Mark middle point of X line ups
+        iarr = []
+        inup = False; oldx = 0; starty = 0
+
+        for xx2, yy2 in xuparr:
+            #print((xx2, yy2))
+            if oldx != xx2:
+                if inup:
+                    inup = False
+                    iarr.append((xx2, starty + (yy2 - starty) // 2))
+                else:
+                    starty = yy2
+                    inup = True
+            oldx = xx2
+
+        for aa in iarr:
+            #print("iarr", aa)
+            ximg.drawcross(aa[0], aa[1], (0xff, 0xff, 0xff, 0xff))
+            ximg.drawcross(aa[0]+1, aa[1]+1, (0x00, 0x00, 0x00, 0xff))
+            pass
+
+        print("%d marks" % len(xuparr))
+
+        # Mark middle point of line ups for Y axis
+        '''iyarr = []
+        inup = False; oldy = 0; startx = 0
+        sumyarr = yuparr + ydwnarr
+        sumyarr.sort()
+        for xx2, yy2 in sumyarr:
+            #print((xx2, yy2))
+            if oldy != yy2:
+                if inup:
+                    inup = False
+                    iarr.append(( (startx + (yy2 - startx) // 2), yy2) )
+                else:
+                    startx = xx2
+                    inup = True
+            oldy = yy2
+
+        for aa in iyarr:
+            print("iyarr", aa)
+            ximg.drawcross(aa[0], aa[1], (0xff, 0xff, 0xff, 0xff))
+            ximg.drawcross(aa[0]+1, aa[1]+1, (0x00, 0x00, 0x00, 0xff))
+            pass
+        '''
+
+        ## Paint to test window
+
+        #for aa in yuparr:
+        #    ximg.setcol(aa[0], aa[1], (0x00, 0xff, 0xff, 0xff))
+
+        #for aa in ydwnarr:
+        #    ximg.setcol(aa[0], aa[1], (0xff, 0xff, 0x00, 0xff))
+
+        self.xparent.win3.simg.invalidate()
+        return xuparr, xdwnarr, #yuparr, ydwnarr
 
 # EOF
