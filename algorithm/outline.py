@@ -179,6 +179,9 @@ def _order_vectors(carr, midx, midy, rev = False):
             vvv = float(cc[1]) / cc[0]
             #print("tangent", vvv)
             vec.append((vvv, cc))
+        else:
+            # Fake a big number
+            vec.append((0xfffffff, cc))
 
     vec.sort()
     for dd in vec:
