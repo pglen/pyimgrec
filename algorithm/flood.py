@@ -13,7 +13,7 @@ from gi.repository import Pango
 from  pyimgutils import *
 import  stack
 
-import imgrec.imgrec as imgrec
+#import imgrec.imgrec as imgrec
 
 __doc__ = \
 '''
@@ -22,9 +22,20 @@ __doc__ = \
     to a 'C'  module.
     The local list is copied to global at the end of every scan.
 '''
+
+#DOT_NO = 0
+#DOT_YES = 1
+#DOT_BOUND = 2
+#DOT_MARK = 3
+#DOT_POP = 4
+#DOT_INVALIDATE = 5
+
 # Results of compare, and more enums
 dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_MARK",
                     "DOT_POP", "DOT_INVALIDATE")
+def str_enum(val):
+    return dot_strs[val]
+
 # Create enums
 create_enums(dot_strs, locals())
 
@@ -71,7 +82,7 @@ class floodParm():
 
         self.tmesub = [];       self.dones = {}
         self.bounds = [];       self.body  = []
-        self.no = []
+        self.nox = []
         self.stack = stack.Stack()
 
 # Seek(xxx, yyy, param, gl_dones)
@@ -313,7 +324,7 @@ def Flood(xxx, yyy, param, gl_dones):
                 break  # jump to next
             elif  retx == DOT_NO:
                 #print("no", xxx2, yyy2, end = " ")
-                param.no.append((xxxx, yyyy))
+                param.nox.append((xxxx, yyyy))
                 __callb(xxxx, yyyy, DOT_NO, param);
             elif retx == DOT_BOUND:
                 #print("bound", xxx2, yyy2, end = " ")

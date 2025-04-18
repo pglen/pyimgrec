@@ -409,13 +409,10 @@ def create_enums(dot_strs, localx):
 
             dot_strs    tuple / list of strings
             localx      scope to create it in
-
     '''
 
     for cnt, aa in enumerate(dot_strs):
         localx.setdefault(aa, cnt)
-        #xstr = "print(locals().get('%s'))" % (aa)
-        #print(xstr)
-        #eval(xstr)
+        #print("%s = %d" % (aa, localx.get(aa)))
 
 # EOF

@@ -31,7 +31,7 @@ except:
     pass
 
 import  algorithm.flood  as flood
-import  algorithm.norm_outline as norm
+import  algorithm.outline as norm
 
 DIVIDER     = 32                 # How many divisions, mostly for testing
 MAG_FACT    = 2
@@ -525,7 +525,9 @@ class ImgMain(Gtk.DrawingArea):
         self.invalidate()
 
     def callb(self, xxx, yyy, kind, fparam):
-        #print( "callb", xxx, yyy, fparam)
+
+        #print("callb", xxx, yyy, kind);
+        #print("callb", flood.str_enum(kind))
         #return
 
         bpx = self.xparent.simg.bpx
@@ -536,57 +538,30 @@ class ImgMain(Gtk.DrawingArea):
             if kind == flood.DOT_YES:
                 #newcol = fparam.mark
                 #newcol = (0x00, 0x00, 0x00, 0xff)
-                newcol = None
+                pass
             elif kind == flood.DOT_NO:
-                newcol = (0xff, 0xff, 0x00, 0xff)
-                #newcol = None
+                #newcol = (0xff, 0xff, 0x00, 0xff)
+                pass
             elif kind == flood.DOT_BOUND:
-                #newcol = (0x00, 0x00, 0xff, 0xff)
-                newcol = None
+                newcol = (0x00, 0xff, 0xff, 0xff)
+                pass
             elif kind == flood.DOT_POP:
                 #newcol = (0x00, 0xff, 0xff, 0xff)
-                newcol = None
+                pass
             elif kind == flood.DOT_MARK:
                 #newcol = (0xff, 0xff, 0xff, 0xff)
-                newcol = None
                 #self.xparent.simg.drawcross(xxx, yyy, newcol)
-
+                pass
             elif kind == flood.DOT_INVALIDATE:
                 pass
             else:
                 print("unkown kind in callb")
                 #newcol = (0x00, 0x00, 0x00, 0x00)  # transparent
-                newcol = None
+                pass
             if newcol:
                 for cnt, aa in enumerate(newcol):
                     self.xparent.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
                 pass
-
-            # ------------------------------------------------------------
-            if kind == flood.DOT_YES:
-                newcol = (0x0, 0x0, 0x0, 0xff)
-                for cnt, aa in enumerate(newcol):
-                    pass
-                    #self.xparent.win2.simg.buf[cnt + BPX * xxx + row] = newcol[cnt]
-                    #self.xparent.win2.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
-                    #self.xparent.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
-
-            if kind == flood.DOT_NO:
-                newcol = (0x0, 0x0, 0x0, 0xff)
-                for cnt, aa in enumerate(newcol):
-                    self.xparent.win2.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
-                    #self.xparent.win2.simg.buf[cnt + BPX4 * xxx + row] = fparam.mark[cnt]
-                    #self.xparent.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
-
-            if kind == flood.DOT_BOUND:
-                    xcol = (0x0, 0x0, 0xff, 0xff)
-                    for cnt, aa in enumerate(xcol):
-                        self.xparent.win2.simg.buf[cnt + bpx * xxx + row] = xcol[cnt]
-
-            if kind == flood.DOT_INVALIDATE:
-                # flush graphics
-                self.xparent.win2.simg.invalidate()
-                self.xparent.simg.invalidate()
 
             if fparam.cnt % fparam.breath == 0:
                 self.xparent.win2.simg.invalidate()
@@ -718,7 +693,7 @@ class ImgMain(Gtk.DrawingArea):
             #    self.xparent.simg2.clear()
 
             # Display results
-            self.island(fparam.no)
+            self.island(fparam.bounds)
             if self.xparent.check2.get_active():
                 if len(nbounds) == 0:
                     msg("No shape yet")
@@ -744,17 +719,17 @@ class ImgMain(Gtk.DrawingArea):
         def __init__(self, data):
             self.data = data
 
-
     def island(self, nbounds):
 
         ''' Display one island '''
+
+        #print("nbounds len:", len(nbounds))
 
         if len(nbounds) == 0:  # Is it an island?
             return
         if len(nbounds) > 300:  # Is it a small island?
             return
 
-        #print("nbounds len:", len(nbounds))
         #for aa in nbounds:
         #    print(aa, end = " ")
         #print("nbounds end")

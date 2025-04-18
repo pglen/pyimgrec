@@ -116,7 +116,7 @@ def flush_upleft(vects, minx=-1, miny=-1):
 
     # Calculate minx miny if needed
     if minx < 0 or miny < 0:
-        minx, miny, _, _ = norm_calc_bounds(vects)
+        minx, miny, _, _ = calc_bounds(vects)
 
     xarr = []
     for aa in vects:

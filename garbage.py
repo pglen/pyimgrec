@@ -838,4 +838,32 @@ def mark_image(self):
         self.xparent.win3.simg.invalidate()
         return xuparr, xdwnarr, #yuparr, ydwnarr
 
+# ------------------------------------------------------------
+            if kind == flood.DOT_YES:
+                newcol = (0x0, 0x0, 0x0, 0xff)
+                for cnt, aa in enumerate(newcol):
+                    pass
+                    #self.xparent.win2.simg.buf[cnt + BPX * xxx + row] = newcol[cnt]
+                    #self.xparent.win2.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
+
+            if kind == flood.DOT_NO:
+                newcol = (0x0, 0x0, 0x0, 0xff)
+                for cnt, aa in enumerate(newcol):
+                    pass
+                    #self.xparent.win2.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
+                    #self.xparent.win2.simg.buf[cnt + BPX4 * xxx + row] = fparam.mark[cnt]
+                    #self.xparent.simg.buf[cnt + BPX * xxx + row] = fparam.mark[cnt]
+                #self.xparent.win2.simg.setcol(xxx, newcol)
+
+            if kind == flood.DOT_BOUND:
+                    xcol = (0x0, 0x0, 0xff, 0xff)
+                    for cnt, aa in enumerate(xcol):
+                        self.xparent.win2.simg.buf[cnt + bpx * xxx + row] = xcol[cnt]
+
+            if kind == flood.DOT_INVALIDATE:
+                # flush graphics
+                self.xparent.win2.simg.invalidate()
+                self.xparent.simg.invalidate()
+
 # EOF

@@ -19,7 +19,7 @@ from timeit import Timer
 from pyimgutils import *
 
 import  treehand, img_main
-import  algorithm.norm_outline as norm
+import  algorithm.outline as norm
 
 try:
     import imgrec.imgrec as imgrec
