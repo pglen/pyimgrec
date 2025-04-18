@@ -734,28 +734,39 @@ class ImgMain(Gtk.DrawingArea):
         #    print(aa, end = " ")
         #print("nbounds end")
 
+        # Process it
         nbounds = norm.sort_by_angles(nbounds)
-        #nbounds = norm.scale_vectors(nbounds, 10)
+        nbounds = norm.scale_vectors(nbounds, 20)
 
         col = (0xff, 0xff, 0xff, 0xff)
-        prev = nbounds[0]
+        col2 = (0x00, 0x00, 0x0, 0xff)
+
+        prev = list(nbounds[0])
+        org = list(nbounds[0])
+        end  = list(nbounds[len(nbounds)-1])
+
         for aa in nbounds:
             #print(aa, end = " ")
-            #offs = BPX * (aa[0] + aa[1] * self.xparent.simg2.ww)
             try:
                 #print("parms",  prev[0], prev[1], aa[0], aa[1])
-                self.xparent.simg2.setcol(aa[0], aa[1], col)
-                #self.xparent.simg2.drawline(prev[0], prev[1],
-                #                                aa[0], aa[1], col)
+                self.xparent.simg2.drawline(prev[0], prev[1], aa[0], aa[1], col)
+                #self.xparent.simg2.setcol(aa[0], aa[1], col2)
             except:
-                print("disp nbounds", prev[0], prev[1], aa[0], aa[1],
-                                        sys.exc_info())
+                #print("disp nbounds", prev, aa, sys.exc_info())
                 pass
             self.xparent.simg2.invalidate()
             if self.xparent.check4.get_active():
                 usleep(10   )
             #prev[0] = aa[0]; prev[1] = aa[1]
-            prev = aa
+            prev = list(aa)
+
+        # Connect last to first
+        self.xparent.simg2.drawline(end[0], end[1], org[0], org[1], col)
+
+        col3 = (0xff, 0x00, 0x00, 0xff)
+        col4 = (0x00, 0xff, 0xff, 0xff)
+        self.xparent.simg2.setcol(org[0], org[1], col3)
+        self.xparent.simg2.setcol(end[0], end[1], col4)
 
         #usleep(10)
 

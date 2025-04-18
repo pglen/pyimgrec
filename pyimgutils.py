@@ -139,31 +139,58 @@ class Imagex(Gtk.DrawingArea):
         for aa in range(self.bpx):
             self.buf[aa + offs] = colorx[aa]
 
+    # Not trivial -- crap
     def drawline(self, xxx, yyy, xxx2, yyy2, newcol = (0xff, 0xff, 0xff, 0xff)):
 
+        #print("line:", xxx, yyy, xxx2, yyy2)
+        dx = xxx2 - xxx; dy = yyy2 - yyy
+
         # No zero len line
-        if xxx2 - xxx == 0:
-            return
-        if yyy2 - yyy == 0:
+        if dx == 0 and dy == 0:
+            Eprint("No line")
+            # Just draw a dot
+            self.setcol(xxx, yyy, newcol)
             return
 
-        # Swap (obsolete)
-        #if xxx > xxx2:
-        #    xxx3 = xxx2 ;xxx2 = xxx; xxx = xxx3
-        #    yyy3 = yyy2 ; yyy2 = yyy ; yyy = yyy3
+        if dx == 0:
+            #print("vert")
+            if yyy > yyy2:
+               xxx3 = xxx2 ; xxx2 = xxx; xxx = xxx3
+               yyy3 = yyy2 ; yyy2 = yyy ; yyy = yyy3
+            for yy in range(yyy, yyy2):
+                self.setcol(xxx, yy, newcol)
+            return
 
-        if (xxx2 - xxx) > (yyy2 - yyy):
-            slope = (yyy2 - yyy) / (xxx2 - xxx)
-            #print("slope", slope)
-            cnt = 0;
+        if dy == 0:
+            #print("horiz")
+            if xxx > xxx2:
+               xxx3 = xxx2 ; xxx2 = xxx; xxx = xxx3
+               yyy3 = yyy2 ; yyy2 = yyy ; yyy = yyy3
+            for xx in range(xxx, xxx2):
+                self.setcol(xx, yyy, newcol)
+            return
+
+        cnt = 0;
+        if abs(dx) > abs(dy):
+            slope = dy / dx
+            #print("xmaj slope", slope)
+            # Swap
+            if xxx > xxx2:
+               xxx3 = xxx2 ;xxx2 = xxx; xxx = xxx3
+               yyy3 = yyy2 ; yyy2 = yyy ; yyy = yyy3
+
             for xx in range(xxx, xxx2):
                 yy = int(yyy + slope * cnt)
                 self.setcol(xx, yy, newcol)
                 cnt += 1
         else:
-            slope = (xxx2 - xxx) / (yyy2 - yyy)
-            #print("slope", slope)
-            cnt = 0;
+             # Swap
+            if yyy > yyy2:
+               xxx3 = xxx2 ; xxx2 = xxx; xxx = xxx3
+               yyy3 = yyy2 ; yyy2 = yyy ; yyy = yyy3
+
+            slope = dx / dy
+            #print("ymaj slope", slope, xxx, xxx2, yyy, yyy2)
             for yy in range(yyy, yyy2):
                 xx = int(xxx + slope * cnt)
                 self.setcol(xx, yy, newcol)

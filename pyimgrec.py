@@ -917,18 +917,32 @@ class MainWin():
         self.simg3.clear()
         self.tree.update_treestore("")
 
+        '''
         # Test
-        #for aa in range(100):
-        #    col = [ random.randint(0, 255),
-        #            random.randint(0, 255),
-        #            random.randint(0, 255),
-        #            random.randint(0, 255)]
-        #    self.simg2.drawline(random.randint(0, norm.ARRLEN-1),
-        #                        random.randint(0, norm.ARRLEN-1),
-        #                        random.randint(0, norm.ARRLEN-1),
-        #                        random.randint(0, norm.ARRLEN-1),
-        #                        col);
-        #self.simg2.invalidate()
+        for aa in range(4):
+            col = [ random.randint(0, 255),
+                    random.randint(0, 255),
+                    random.randint(0, 255),
+                    random.randint(0, 255)]
+            xx  = random.randint(0, norm.ARRLEN-1)
+            yy  = random.randint(0, norm.ARRLEN-1)
+            xx2 = random.randint(0, norm.ARRLEN-1)
+            yy2 = random.randint(0, norm.ARRLEN-1)
+            print(xx, yy, xx2, yy2)
+            self.simg2.drawline(xx, yy, xx2, yy2, col);
+            pass
+        col = [0xff, 0xff, 0xff, 0xff, ]
+        self.simg2.drawline(30, 40, 110, 120, col);
+        self.simg2.drawline(100, 100, 20, 20, col);
+
+        self.simg2.drawline(20, 20, 20, 100, col);
+        self.simg2.drawline(30, 120, 30, 20, col);
+
+        self.simg2.drawline(40, 40, 100, 40, col);
+        self.simg2.drawline(100, 50, 40, 50, col);
+        '''
+
+        self.simg2.invalidate()
 
     def invalidate(self):
         self.area.invalidate()

@@ -180,7 +180,8 @@ def _order_vectors(carr, midx, midy, rev = False):
             #print("tangent", vvv)
             vec.append((vvv, cc))
         else:
-            # Fake a big number
+            #vec.append((float('inf'), cc))
+            # Fake a big number, instead of infinite
             vec.append((0xfffffff, cc))
 
     vec.sort()
