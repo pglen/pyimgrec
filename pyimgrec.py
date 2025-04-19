@@ -792,29 +792,16 @@ class MainWin():
 
     def recog_image(self, win, a3):
 
-        if not len(self.area.sumx):
-            msg("No scan yet")
-            return
-
+        ''' compare current with saved scans '''
         print("Recog", len(self.area.sumx) )
 
-        normarr = []
-        for aa in self.area.sumx:
-            if not len(aa):
-                continue
-            arrx = norm.norm_vectors(aa[4])
-            normarr.append( (*aa[0:4], arrx))
+        if len(self.area.sumx) < 2:
+            print("Recog: must have more than one scan")
+            return
 
-        resarr = []
-        for aa in normarr:
-            #print("cmp:", aa[0], len(aa[4]))
-            for bb in self.shapes:
-                res = norm.cmp_arrays(aa[4], bb[4])
-                #print(" cmp with:", bb[0], len(bb[4]), "res =", res)
-                resarr.append((res, bb[:3], aa[:3]))
-
-        resarr.sort()
-        print(resarr[0:4])
+        ref =  self.area.sumx[0]
+        for aa in self.area.sumx[1:]:
+            print("compare:", ref, aa)
 
     def fractal_image(self, win, a3):
 

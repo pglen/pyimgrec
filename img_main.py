@@ -43,6 +43,19 @@ MARKCOL     = 180                # Color counts as mark
 MARKDIFF    = 30
 BPX         = 4                  # Bits per pixel
 
+class cIsland():
+    def __init__(self, data):
+        self.data = data
+        self.bounds = None
+        self.center = None
+        self.lenorg = 0
+
+    def __str__(self):
+        return((self.center))
+
+    def __repr__(self):
+        return(str(self.center))
+
 class ImgMain(Gtk.DrawingArea):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
@@ -63,7 +76,7 @@ class ImgMain(Gtk.DrawingArea):
 
         self.annote = []; self.aframe = []; self.bframe = []
         self.atext = []
-
+        self.islands = []
         self.mag = False
         self.event_x = self.event_y = 0
         self.image  = None
@@ -618,8 +631,9 @@ class ImgMain(Gtk.DrawingArea):
 
     def _anal_image_worker2(self, xxx, yyy, single, thresh, addx):
 
-        self.sumx = []
+        #self.sumx = []
         found = 0
+        self.islands = []
 
         # Iterate all shapes
         while True:
@@ -685,14 +699,14 @@ class ImgMain(Gtk.DrawingArea):
             self.xparent.narr = [str(found), coords, fparam.mark,
                                                 fparam.body, fparam.bounds]
             # Save cummulative
-            self.sumx.append(self.xparent.narr)
+            #self.sumx.append(self.xparent.narr)
 
             # Compare with stock
             #sss = self.compare(nbounds, fparam)
             #if not addx:
             #    self.xparent.simg2.clear()
 
-            # Display results
+            # Scan for results
             self.island(fparam.bounds)
             if self.xparent.check2.get_active():
                 if len(nbounds) == 0:
@@ -713,11 +727,14 @@ class ImgMain(Gtk.DrawingArea):
         #        print("exc sumx", sys.exc_info())
 
         print("%d segments found." % found)
-        return found
 
-    class cIsland():
-        def __init__(self, data):
-            self.data = data
+        self.sumx.append(self.islands)
+
+        # Display results
+        #for aa in self.islands:
+        #    print(aa.center, aa.bounds, aa.lenorg )
+
+        return found
 
     def island(self, nbounds):
 
@@ -735,17 +752,17 @@ class ImgMain(Gtk.DrawingArea):
         #print("nbounds end")
 
         # Process it
-        nbounds = norm.sort_by_angles(nbounds)
-        nbounds = norm.scale_vectors(nbounds, 20)
+        nbounds2 = norm.sort_by_angles(nbounds)
+        nbounds3 = norm.scale_vectors(nbounds2, 20)
 
         col = (0xff, 0xff, 0xff, 0xff)
         col2 = (0x00, 0x00, 0x0, 0xff)
 
-        prev = list(nbounds[0])
-        org = list(nbounds[0])
-        end  = list(nbounds[len(nbounds)-1])
+        prev = list(nbounds3[0])
+        org = list(nbounds3[0])
+        end  = list(nbounds3[len(nbounds3)-1])
 
-        for aa in nbounds:
+        for aa in nbounds3:
             #print(aa, end = " ")
             try:
                 #print("parms",  prev[0], prev[1], aa[0], aa[1])
@@ -774,6 +791,14 @@ class ImgMain(Gtk.DrawingArea):
         #ccc = norm.calc_center(norm.calc_bounds(nbounds))
         #newcol = (0xff, 0x00, 0x00, 0xff)
         #self.xparent.simg2.drawcross(ccc[0], ccc[1], newcol)
+
+        # Add to collection
+        islandx = cIsland(nbounds3)
+        #islandx.dataorg = nbounds
+        islandx.lenorg = len(nbounds)
+        islandx.bounds = norm.calc_bounds(nbounds3)
+        islandx.center = norm.calc_center(islandx.bounds)
+        self.islands.append(islandx)
 
 
     # --------------------------------------------------------------------
