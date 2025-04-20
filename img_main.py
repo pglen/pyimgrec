@@ -48,44 +48,42 @@ class ImgMain(Gtk.DrawingArea):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
 
+        Gtk.DrawingArea.__init__(self);
+
+        self.fname = ""
         self.gl_dones = {};
         self.reanal = 0
         self.xparent = xparent
-        Gtk.DrawingArea.__init__(self);
+        #self.wwww = wwww; self.hhhh = hhhh
+        self.iww = wwww
+        self.ihh = hhhh
 
         self.pb = GdkPixbuf.Pixbuf.new \
                    (GdkPixbuf.Colorspace.RGB, True, 8,
                          MAG_SIZE / MAG_FACT , MAG_SIZE / MAG_FACT)
         self.pb.fill(0x888888ff)
+        self.image = Gtk.Image()
+        self.image.set_from_pixbuf(self.pb)
+        # Create default surface
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, wwww, hhhh)
+        self.buf = self.surface.get_data()
 
         self.divider = DIVIDER;
-        self.wwww = wwww; self.hhhh = hhhh
-        #self.set_size_request(wwww, hhhh)
+        self.set_size_request(wwww, hhhh)
 
         self.annote = []; self.aframe = []; self.bframe = []
         self.atext = []
         self.islands = []
         self.mag = False
         self.event_x = self.event_y = 0
-        self.image  = None
-        #self.colormap = Gtk.get_default_colormap()
-        #self.set_flags(Gtk.CAN_FOCUS | Gtk.SENSITIVE)
         self.sumx = []
+        self.sumf = []
 
         self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
-
-        #self.set_events(  Gtk.gdk.POINTER_MOTION_MASK |
-        #                    Gtk.gdk.POINTER_MOTION_HINT_MASK |
-        #                    Gtk.gdk.BUTTON_PRESS_MASK |
-        #                    Gtk.gdk.BUTTON_RELEASE_MASK |
-        #                    Gtk.gdk.KEY_PRESS_MASK |
-        #                    Gtk.gdk.KEY_RELEASE_MASK |
-        #                    Gtk.gdk.FOCUS_CHANGE_MASK )
-
         self.laststate = 0
+
         self.connect("key-press-event", self.key_press_event)
         self.connect("button-press-event", self.area_button)
-        #self.connect("expose-event", self.expose)
         self.connect("draw", self.draw)
         self.connect("motion-notify-event", self.area_motion)
         self.connect("leave_notify_event", self.area_leave)
@@ -301,8 +299,6 @@ class ImgMain(Gtk.DrawingArea):
         ''' Load image file '''
 
         try:
-            self.fname = fname
-            self.image = Gtk.Image()
             self.image.set_from_file(fname)
 
             pix = self.image.get_pixbuf()
@@ -367,7 +363,7 @@ class ImgMain(Gtk.DrawingArea):
         #iww = pix.get_width(); ihh = pix.get_height()
         #pixbuf = self.image2.get_pixbuf()
         #pix.copy_area(0, 0, iww, ihh, pixbuf, 0, 0)
-        print("refresh")
+        #print("refresh")
 
         ctx = cairo.Context(self.surface)
         pbx = self.image.get_pixbuf()
@@ -717,6 +713,7 @@ class ImgMain(Gtk.DrawingArea):
         print("%d segments found." % found)
 
         self.sumx.append(self.islands)
+        self.sumf.append(self.fname)
 
         # Display results
         #for aa in self.islands:
@@ -753,8 +750,8 @@ class ImgMain(Gtk.DrawingArea):
         col2 = (0x00, 0x00, 0x0, 0xff)
 
         prev = list(nbounds3[0])
-        org = list(nbounds3[0])
-        end  = list(nbounds3[len(nbounds4)-1])
+        org = nbounds3[0]
+        end  = nbounds3[len(nbounds3)-1]
 
         for aa in nbounds3:
             #print(aa, end = " ")
@@ -775,8 +772,8 @@ class ImgMain(Gtk.DrawingArea):
         self.xparent.simg2.drawline(end[0], end[1], org[0], org[1], col)
 
         col3 = (0xff, 0x00, 0x00, 0xff)
-        col4 = (0x00, 0xff, 0xff, 0xff)
         self.xparent.simg2.setcol(org[0], org[1], col3)
+        col4 = (0x00, 0xff, 0xff, 0xff)
         self.xparent.simg2.setcol(end[0], end[1], col4)
 
         #usleep(10)

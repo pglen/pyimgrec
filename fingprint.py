@@ -12,6 +12,9 @@ from gi.repository import GObject
 from gi.repository import Pango
 from gi.repository import GdkPixbuf
 
+gi.require_version('FPrint', '2.0')
+from gi.repository import FPrint
+
 import cairo
 
 from timeit import Timer
@@ -43,6 +46,7 @@ xstr = ""
 # profiled code here
 #print(  "Str", time.clock() - got_clock        )
 
+
 # Where things are stored (backups, orgs, macros)
 config_dir = os.path.expanduser("~/.pyimgrec")
 
@@ -67,9 +71,11 @@ class MainWin():
 
     def __init__(self, args):
 
+        self.fname = ""
         self.curr = []
         self.reenter = 0
         self.merge = []
+        self.enrollx = False
         self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_title("Python Image Recognition")
         #self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
@@ -78,6 +84,7 @@ class MainWin():
         ic = Gtk.Image(); ic.set_from_file("images/shapes.png")
         #stock(Gtk.DialogType.INFO, Gtk.GtkIconSize.BUTTON)
         self.window.set_icon(ic.get_pixbuf())
+        self.reenter = False
 
         #self.window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
         #self.window.set_events(  Gdk.POINTER_MOTION_MASK |
@@ -103,7 +110,7 @@ class MainWin():
 
         warnings.simplefilter("ignore")
 
-        www = Gdk.Screen.width(); hhh = Gdk.Screen.height();
+        #www = Gdk.Screen.width(); hhh = Gdk.Screen.height();
 
         disp2 = Gdk.Display()
         disp = disp2.get_default()
@@ -115,7 +122,7 @@ class MainWin():
         self.dwww = geo.width; self.dhhh = geo.height
         xxx = geo.x;     yyy = geo.y
 
-        # Resort to old means of getting screen w / h
+        # Fall back to old means of getting screen w / h
         if self.dwww == 0 or self.dhhh == 0:
             self.dwww = Gdk.screen_width(); self.dhhh = Gdk.screen_height();
 
@@ -125,7 +132,9 @@ class MainWin():
         #else:
         #    self.window.set_default_size(7*www/8, 7*hhh/8)
 
-        self.window.set_default_size(6*self.dwww/8, 6*self.dhhh/8)
+        #self.window.set_default_size(4*self.dwww/8, 5*self.dhhh/8)
+        self.window.set_default_size(640, 480)
+        self.window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
         warnings.simplefilter("default")
 
@@ -135,35 +144,39 @@ class MainWin():
         self.hbox_s = Gtk.HBox()
         self.hbox_s2 = Gtk.HBox()
         self.hbox = Gtk.HBox()
-        self.mainbox = Gtk.HBox()
+        self.mainboxh = Gtk.HBox()
+        self.mainbox = Gtk.VBox()
         self.hbox2 = Gtk.HBox()
         self.hbox2a = Gtk.HBox()
         self.hbox3 = Gtk.HBox()
 
-        self.area = img_main.ImgMain(self)
-        self.vport = Gtk.Viewport()
-        self.scroller = Gtk.ScrolledWindow()
-        self.vport.add(self.area)
-        self.scroller.add(self.vport)
-        self.mainbox.pack_start(self.scroller, 1, 1, 4)
+        self.mainbox.pack_start(Gtk.Label(label=" "), 1, 1, 4)
 
-        self.vport2 = Gtk.Viewport()
-        self.scroller2 = Gtk.ScrolledWindow()
+        #self.framex = Gtk.Frame()
+        self.area = img_main.ImgMain(self, 80, 140)
+        #self.vport = Gtk.Viewport()
+        #self.scroller = Gtk.ScrolledWindow()
+        #self.framex.add(self.area)
+        #self.vport.add(self.area)
+        #self.vport.add(self.framex)
+        #self.scroller.add(self.vport)
+
+        self.mainboxh.pack_start(Gtk.Label(label=" "), 1, 1, 4)
+        self.mainboxh.pack_start(self.area, 0, 0, 4)
+        self.mainboxh.pack_start(Gtk.Label(label=" "), 1, 1, 4)
+
+        self.mainbox.pack_start(self.mainboxh, 0, 0, 4)
+        self.mainbox.pack_start(Gtk.Label(label=" "), 1, 1, 4)
+        self.status = Gtk.Label(label=" Status ")
+        self.mainbox.pack_start(self.status, 0, 0, 4)
 
         self.simg  = Imagex(self, norm.ARRLEN, norm.ARRLEN)
-        self.simg2 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
-        self.simg3 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
-
         self.simg.connect("button-press-event", self.simg_button)
 
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
         self.tree.stree.set_size_request(-1, 140)
         vbox2.pack_start(self.tree.stree, 0, 0, 0)
-
-        self.win2 = self.add_win()
-        self.win3 = self.add_win()
-        self.win4 = self.add_win()
 
         try:
             if args:
@@ -174,13 +187,14 @@ class MainWin():
                 #self.load("images/IMG_0823.jpg")
                 #self.load("images/shapes.png")
                 #self.load("images/shapex.png")
-                self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/image_8.png")
+                #self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/image_8.png")
                 #self.load("images/Untitled.png")
                 #self.load("images/line.png")
                 #self.load("images/star.png")
                 #self.load("images/rect.png")
                 #self.load("images/IMG_0827.jpg")
                 #self.load("images/enrolled.pgm")
+                pass
         except:
             print_exception("Load Image")
             #msg("Cannot load file " + self.fname)
@@ -189,10 +203,6 @@ class MainWin():
         pix = self.area.image.get_pixbuf()
         iww = pix.get_width(); ihh = pix.get_height()
 
-        self.vport2.add(self.simg)
-        self.scroller2.add(self.vport2)
-        self.mainbox.pack_start(self.scroller2, 1, 1, 4)
-
         self.labx = Gtk.Label(label="")
         self.laby = Gtk.Label(label="")
         self.labz = Gtk.Label(label="")
@@ -200,21 +210,21 @@ class MainWin():
         vimgbox.pack_start(self.labx, 0, 0, 0)
         vimgbox.pack_start(self.laby, 0, 0, 0)
         vimgbox.pack_start(self.labz, 0, 0, 0)
-        vimgbox.pack_start(self.simg2, 0, 0, 2)
-        vimgbox.pack_start(self.simg3, 0, 0, 2)
+        #vimgbox.pack_start(self.simg2, 0, 0, 2)
+        #vimgbox.pack_start(self.simg3, 0, 0, 2)
         self.lab = Gtk.Label(label=" None ")
         vimgbox.pack_start(self.lab, 0, 0, 0)
-        self.mainbox.pack_start(vimgbox, 0, 0, 4)
+        #self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
         self.scale.set_value(220)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
-        self.mainbox.pack_start(self.scale, 0, 0, 0)
+        #self.mainbox.pack_start(self.scale, 0, 0, 0)
         self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
-        self.mainbox.pack_start(self.scale2, 0, 0, 0)
+        #self.mainbox.pack_start(self.scale2, 0, 0, 0)
         self.scale2.set_value(70)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
@@ -232,10 +242,9 @@ class MainWin():
         #self.img = Gtk.Image();
         #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
 
-        self.buttons(self.hbox, self.window)
         self.buttons2(self.hbox2, self.window)
-        self.buttons3(self.hbox2a, self.window)
-        self.checks(self.hbox3, self.window)
+        #self.checks(self.hbox3, self.window)
+        #self.vspacer()
 
         self.spacer(self.hbox_s, False)
         self.spacer(self.hbox_s2, False)
@@ -245,11 +254,11 @@ class MainWin():
         #self.vbox.pack_start(self.hbox_s, False, 0, 0)
         self.vbox.pack_start(self.mainbox, True, True, 4)
         #self.vbox.pack_start(self.hbox_s2, False, 0, 0)
-        self.vbox.pack_start(vbox2, False, 0, 0)
-        self.vbox.pack_start(self.hbox3, False, 0, 0)
-        self.vbox.pack_start(self.hbox, False, 0, 0)
-        self.vbox.pack_start(self.hbox2a, False, 0, 0)
-        self.vbox.pack_start(self.hbox2, False, 0, 0)
+        self.vbox.pack_start(vbox2, False, 0, 2)
+        self.vbox.pack_start(self.hbox3, False, 0, 2)
+        self.vbox.pack_start(self.hbox, False, 0, 2)
+        self.vbox.pack_start(self.hbox2a, False, 0, 2)
+        self.vbox.pack_start(self.hbox2, False, 0, 2)
 
         #frame = Gtk.Frame(); frame.add(self.img)
         #vbox2.pack_start(frame, 1, 1, 0)
@@ -258,16 +267,94 @@ class MainWin():
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
 
+    def scanx(self):
+
+        if self.reenter:
+            return
+        self.reenter = True
+
+        ctx = GLib.main_context_default()
+
+        c = FPrint.Context()
+        c.enumerate()
+        devices = c.get_devices()
+        d = devices[0]
+        #print(d)
+        assert d.has_feature(FPrint.DeviceFeature.CAPTURE)
+        assert d.has_feature(FPrint.DeviceFeature.IDENTIFY)
+        assert d.has_feature(FPrint.DeviceFeature.VERIFY)
+
+        assert not d.has_feature(FPrint.DeviceFeature.DUPLICATES_CHECK)
+        assert not d.has_feature(FPrint.DeviceFeature.STORAGE)
+        assert not d.has_feature(FPrint.DeviceFeature.STORAGE_LIST)
+        assert not d.has_feature(FPrint.DeviceFeature.STORAGE_DELETE)
+        assert not d.has_feature(FPrint.DeviceFeature.STORAGE_CLEAR)
+
+        #del devices
+        d.open_sync()
+        if self.enrollx:
+            self.status.set_text("Please scan finger for enroll")
+        else:
+            self.status.set_text("Please scan finger")
+
+        print("Please scan finger: ", end = " "); sys.stdout.flush()
+        tryx = 0
+        while True:
+            tryx += 1
+            try:
+                img = d.capture_sync(True)
+                #print("\n")
+                if self.enrollx:
+                    self.status.set_text("Scan for enroll successful. (%d)" % self.enrollx)
+                else:
+                    self.status.set_text("Scan successful.")
+                print("Scan successful.", end = " "); sys.stdout.flush()
+                break
+            except GLib.Error:
+                self.status.set_text("Try again (%d)" % tryx)
+                print("Did not get that, please scan again: ")
+                #time.sleep(1)
+            except:
+                print(sys.exc_info())
+
+            if tryx > 10:
+                break
+
+        d.close_sync()
+        del d;  del c; del ctx
+
+        # Output image
+        width = img.get_width();  height = img.get_height()
+        buf   = img.get_data()
+
+        #print("Got:", width, height)
+
+        self.area.surface = cairo.ImageSurface(cairo.FORMAT_RGB24, width, height)
+        c_buf = self.area.surface.get_data()
+        c_rowstride = self.area.surface.get_stride()
+
+        for x in range(width):
+            for y in range(height):
+                # The upper byte is don't care, but the location depends on endianness,
+                # so just set all of them.
+                c_buf[y * c_rowstride + x * 4 + 0] = buf[y * width + x]
+                c_buf[y * c_rowstride + x * 4 + 1] = buf[y * width + x]
+                c_buf[y * c_rowstride + x * 4 + 2] = buf[y * width + x]
+                c_buf[y * c_rowstride + x * 4 + 3] = buf[y * width + x]
+        del img
+        self.area.invalidate()
+        self.reenter = False
+
+    def vspacer(self, vbox):
+        vbox2 = Gtk.VBox()
+        vbox.pack_start(vbox2, 0, 0, 2)
+
     def focus_event(self, win, event):
         #print("focus_event:", win, "in:", event.in_, event.type)
-
         # Tried many ... this works somewhat
-        self.win2.set_keep_above(True)
-        self.win2.set_keep_above(False)
-        self.win3.set_keep_above(True)
-        self.win3.set_keep_above(False)
-        self.win4.set_keep_above(True)
-        self.win4.set_keep_above(False)
+        #self.win2.set_keep_above(True)
+        #self.win2.set_keep_above(False)
+        pass
 
     def focus_event2(self, win, event):
         #print("focus_event2:", win, "in:", event.in_, event.type)
@@ -287,11 +374,13 @@ class MainWin():
         winx.set_size_request(winx.ww, winx.hh)
         winx.add(winx.simg)
         winx.move(100, 100)
-        #.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        #winx.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         winx.show_all()
         return winx
 
     def after(self):
+
+        self.area.refresh()
 
         # Move to current app and test windows
 
@@ -301,10 +390,11 @@ class MainWin():
         self.window.move(self.dwww - rrr.width - 10, 40)
         # Flush to left
         xxx, yyy = self.window.get_position()
-        self.win2.move(10, yyy + 20)
-        self.win3.move(10, yyy + 220)
-        self.win4.move(10, yyy + 420)
+        #self.win2.move(10, yyy + 20)
+        #self.win3.move(10, yyy + 220)
+        #self.win4.move(10, yyy + 420)
         self.unpickle_shapes()
+        self.scanx()
 
     def set_small_text(self, txt):
         self.lab.set_text(txt)
@@ -404,167 +494,28 @@ class MainWin():
         self.simg.resize(self.area.iww, self.area.ihh)
         self.simg.clear()
 
-        self.win2.simg.resize(self.area.iww, self.area.ihh)
-        self.win2.simg.clear()
-        self.win2.resize(self.area.iww, self.area.ihh)
-
-        self.win3.simg.resize(self.area.iww, self.area.ihh)
-        self.win3.simg.clear()
-        self.win3.resize(self.area.iww, self.area.ihh)
-
-        self.win4.simg.resize(self.area.iww, self.area.ihh)
-        self.win4.simg.clear()
-        self.win4.resize(self.area.iww, self.area.ihh)
+        #self.win2.simg.resize(self.area.iww, self.area.ihh)
+        #self.win2.simg.clear()
+        #self.win2.resize(self.area.iww, self.area.ihh)
 
         if self.area.iww < 500:
             self.scroller.set_size_request(self.area.iww, self.area.ihh)
-            self.scroller2.set_size_request(self.area.iww, self.area.ihh)
-
-    # --------------------------------------------------------------------
-    def buttons3(self, hbox, window):
-
-        self.spacer(hbox, True )
-
-        butt6 = Gtk.Button.new_with_mnemonic(" _Save Curr Shape ")
-        butt6.connect("clicked", self.save_shape, window)
-        hbox.pack_start(butt6, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt7 = Gtk.Button.new_with_mnemonic(" Show All S_hapes ")
-        butt7.connect("clicked", self.show_all_shapes, window)
-        hbox.pack_start(butt7, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt8 = Gtk.Button.new_with_mnemonic(" Pickle Shapes ")
-        butt8.set_tooltip_text("Will save it to disk")
-        butt8.connect("clicked", self.pickle_shapes, window)
-        hbox.pack_start(butt8, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt9 = Gtk.Button.new_with_mnemonic(" unPickle Shapes ")
-        butt9.connect("clicked", self.unpickle_shapes, window)
-        butt9.set_tooltip_text("Will append it from disk")
-        hbox.pack_start(butt9, False, 0, 0)
-
-        self.spacer(hbox, False )
-
-        butt9a = Gtk.Button.new_with_mnemonic(" Clear All Shapes ")
-        butt9a.connect("clicked", self.clear_shapes, window)
-        butt9a.set_tooltip_text("Will clear current shapes")
-        hbox.pack_start(butt9a, False, 0, 0)
-
-        self.spacer(hbox, False )
-
-        butt9a = Gtk.Button.new_with_mnemonic(" _Delete Shape ")
-        butt9a.connect("clicked", self.del_shape, window)
-        butt9a.set_tooltip_text("Will delete shape, no undo")
-        hbox.pack_start(butt9a, False, 0, 0)
-
-        self.spacer(hbox, True )
 
     def clear_shapes(self, win, a3):
         self.shapes = []
-
-    # --------------------------------------------------------------------
-    def buttons(self, hbox, window):
-
-        self.spacer(hbox, True )
-
-        butt1 = Gtk.Button.new_with_mnemonic(" _Load Image ")
-        butt1.connect("clicked", self.load_image, window)
-        hbox.pack_start(butt1, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt1 = Gtk.Button.new_with_mnemonic(" Save Image ")
-        butt1.connect("clicked", self.save_image, window)
-        hbox.pack_start(butt1, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt1 = Gtk.Button.new_with_mnemonic(" _Analize ")
-        butt1.connect("clicked", self.anal_image, window)
-        hbox.pack_start(butt1, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt1 = Gtk.Button.new_with_mnemonic(" R_ecog ")
-        butt1.connect("clicked", self.recog_image, window)
-        hbox.pack_start(butt1, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt3 = Gtk.Button.new_with_mnemonic(" _Refresh ")
-        butt3.connect("clicked", self.refr_image, window)
-        hbox.pack_start(butt3, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt3 = Gtk.Button.new_with_mnemonic(" _Clear Subs ")
-        butt3.connect("clicked", self.clear_subs, window)
-        hbox.pack_start(butt3, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt4 = Gtk.Button.new_with_mnemonic(" Mark _Image ")
-        butt4.connect("clicked", self.mark_image, window)
-        hbox.pack_start(butt4, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt5 = Gtk.Button.new_with_mnemonic(" Test B_utt (seek) ")
-        butt5.connect("clicked", self.test_butt, window)
-        hbox.pack_start(butt5, False, 0, 0)
-        self.spacer(hbox)
-
-        self.spacer(hbox, True )
-
 
     def buttons2(self, hbox, window):
 
         self.spacer(hbox, True )
 
-        butt6 = Gtk.Button.new_with_mnemonic(" N_ormalize ")
-        butt6.connect("clicked", self.norm, window)
-        hbox.pack_start(butt6, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt6 = Gtk.Button.new_with_mnemonic(" His_togram ")
-        butt6.connect("clicked", self.histo, window)
-        hbox.pack_start(butt6, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt6 = Gtk.Button.new_with_mnemonic(" _Grey ")
-        butt6.connect("clicked", self.grey, window)
-        hbox.pack_start(butt6, False, 0, 0)
-
-        self.spacer(hbox)
-
-        butt7 = Gtk.Button.new_with_mnemonic(" _Brighten ")
-        butt7.connect("clicked", self.bri, window)
-        hbox.pack_start(butt7, False,0 ,0)
-
-        self.spacer(hbox)
-
-        butt8 = Gtk.Button.new_with_mnemonic(" Dar_ken ")
-        butt8.connect("clicked", self.dar, window)
-        hbox.pack_start(butt8, False,0 ,0)
-
-        self.spacer(hbox)
-
-        butt9 = Gtk.Button.new_with_mnemonic(" _Walk ")
-        butt9.connect("clicked", self.walk, window)
+        butt9 = Gtk.Button.new_with_mnemonic(" _Scan ")
+        butt9.connect("clicked", self.scan, window)
         hbox.pack_start(butt9, False,0 ,0)
 
         self.spacer(hbox)
 
-        butt9 = Gtk.Button.new_with_mnemonic(" Edge ")
-        butt9.connect("clicked", self.edge, window)
+        butt9 = Gtk.Button.new_with_mnemonic(" _Enroll ")
+        butt9.connect("clicked", self.enroll, window)
         hbox.pack_start(butt9, False,0 ,0)
 
         self.spacer(hbox)
@@ -632,13 +583,16 @@ class MainWin():
         #print( "Norm" #,butt, window)
         self.area.grey_image()
 
-    def walk(self, butt, window):
+    def scan(self, butt, window):
         #print( "Walk" #,butt, window)
-        self.area.walk_image(4, 4)
+        #self.area.walk_image(4, 4)
+        self.enrollx = False
+        self.scanx()
 
-    def edge(self, butt, window):
-        #print( "Walk" #,butt, window)
-        self.area.edge_image()
+    def enroll(self, butt, window):
+        self.status.set_text("Enrolling. Scan finger.")
+        self.enrollx = True
+        self.scanx()
 
     def spacer(self, hbox, flag = False ):
         lab14 = Gtk.Label(label=" ");
@@ -700,8 +654,6 @@ class MainWin():
         #    print("sumx[1]", cnt, cc[:12])
 
         if not (eve.state & Gdk.ModifierType.SHIFT_MASK):
-            self.win3.simg.clear()
-            self.win4.simg.clear()
             self.simg2.clear()
             #self.simg3.clear()
             #self.merge = []
@@ -744,7 +696,7 @@ class MainWin():
                                 except:
                                     print("win3 exc", "aa", aa[:5], "aaa",
                                                 aaaa, sys.exc_info())
-                        self.win3.simg.invalidate()
+                        #self.win3.simg.invalidate()
                         newcol = (0x00, 0x00, 0xff, 0xff)
                         for aaa in aa[4]:
                             #print("aaa", aaa)
@@ -753,12 +705,10 @@ class MainWin():
                             for cnt, cc in enumerate(newcol):
                                 try:
                                     pass
-                                    self.win4.simg.buf[cnt + row + col] = cc
+                                    #self.win4.simg.buf[cnt + row + col] = cc
                                 except:
                                     print("win4 exc", "aa", aa[:5], "aaa",
                                                 aaa, sys.exc_info())
-                        self.win3.simg.invalidate()
-                        self.win4.simg.invalidate()
                         usleep(100)
                         #break
                         # Process data
@@ -814,8 +764,8 @@ class MainWin():
             targ = self.area.sumx[aa]
             #print("compare:", ref)
             #print("to:     ", targ)
-            print("compare:", aa, self.area.sumf[aa])
-            res = ref[aa].find_similar(ref[aa], targ[aa], 2)
+            print("compare:", aa)
+            res = ref[aa].find_similar(ref[aa], targ[aa])
             #print("res:", res)
 
             # Ref - Targ
@@ -854,7 +804,7 @@ class MainWin():
            self.reenter = 0
            return
         self.reenter = 1
-        self.win3.simg.clear()
+        #self.win3.simg.clear()
         for cnt, aa in enumerate(self.area.sumx):
             if self.reenter == 0:
                 break
@@ -868,7 +818,9 @@ class MainWin():
                 col = 4 * (aaa[0])
                 for cnt, cc in enumerate(newcol):
                     try:
-                        self.win3.simg.buf[cnt + row + col] = cc
+                        #self.win3.simg.buf[cnt + row + col] = cc
+                        pass
+
                     except:
                         print("win3 exc", "aa[:5] =", aa[:5], "aaa =",
                                         aaa, sys.exc_info())
@@ -881,7 +833,7 @@ class MainWin():
 
         ''' attempt to recog '''
 
-        self.win3.simg.clear()
+        #self.win3.simg.clear()
 
         if self.reenter:
            self.reenter = 0
@@ -892,7 +844,7 @@ class MainWin():
                 break
 
             usleep(1000)
-            self.win3.simg.clear()
+            #self.win3.simg.clear()
             amount = random.randint(1, len(self.area.sumx) - 1)
             for aaa in range(amount):
                 if self.reenter == 0:
@@ -913,11 +865,12 @@ class MainWin():
                 #for aaa in aa[7]:
 
                 for aaa in aa[8]:
-                    row = 4 * (aaa[1]) * self.win3.simg.ww
+                    row = 4 * (aaa[1]) * 1 #self.win3.simg.ww
                     col = 4 * (aaa[0])
                     for cnt, cc in enumerate(newcol):
                         try:
-                            self.win3.simg.buf[cnt + row + col] = cc
+                            #self.win3.simg.buf[cnt + row + col] = cc
+                            pass
                         except:
                             print("win3 exc", "aa[:5] =", aa[:5], "aaa =",
                                             aaa, sys.exc_info())
@@ -926,8 +879,8 @@ class MainWin():
 
     def anal_image(self, win, a3):
         self.clear_small_img()
-        self.win2.simg.clear()
-        self.win3.simg.clear()
+        #self.win2.simg.clear()
+        #self.win3.simg.clear()
         self.area.anal_image(0, 0)
         self.area.invalidate()
 
@@ -941,8 +894,8 @@ class MainWin():
     def clear_subs(self, arg = None, ww = None):
         self.simg.clear()
         self.win2.simg.clear()
-        self.win3.simg.clear()
-        self.win4.simg.clear()
+        #self.win3.simg.clear()
+        #self.win4.simg.clear()
         self.simg2.clear()
         self.simg3.clear()
         self.tree.update_treestore("")

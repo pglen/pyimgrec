@@ -266,9 +266,12 @@ class ofd():
 
         #global old_dir
         #if not old_dir:
-        os.chdir(startdir)
+        try:
+            os.chdir(startdir)
+        except:
+            pass
         self.old = os.getcwd()
-        old_dir = self.old
+        #old_dir = self.old
 
         #print("old_dir:", old_dir)
 
@@ -288,7 +291,7 @@ class ofd():
 
     def _done_opendlg(self, win, resp):
 
-        global old_dir
+        #global old_dir
 
         #print("Done", resp)
         os.chdir(self.old)
