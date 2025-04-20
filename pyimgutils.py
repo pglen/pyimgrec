@@ -264,10 +264,9 @@ class ofd():
                                         mode=Gtk.FileChooserAction.OPEN):
         self.result = None
 
-        global old_dir
-        if not old_dir:
-            os.chdir(startdir)
-
+        #global old_dir
+        #if not old_dir:
+        os.chdir(startdir)
         self.old = os.getcwd()
         old_dir = self.old
 

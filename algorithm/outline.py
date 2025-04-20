@@ -133,7 +133,7 @@ def merge_vectors(carr, addarr):
 
     # Sort by distance to middle point
 
-    def cmp(aa, bb):
+    def _cmp(aa, bb):
 
         # Calc middle point
         aaa_0 = aa[0] - ARRLEN // 2
@@ -155,7 +155,7 @@ def merge_vectors(carr, addarr):
 
     sumarr = carr + addarr
     from functools import cmp_to_key
-    distarr = sorted(sumarr, key=cmp_to_key(cmp))
+    distarr = sorted(sumarr, key=cmp_to_key(_cmp))
     #print("distarr:", distarr[:24])
     #print("tmp len:", len(xarr))
     #xarr2 = scale_vectors(distarr, ARRLEN)
@@ -191,7 +191,7 @@ def _order_vectors(carr, midx, midy, rev = False):
 
 def scale_vectors(carr, newsize):
 
-    ''' Scale array to preset lenth. Discards the rest, or duplicates
+    ''' Scale array to a preset lenth. Discards the rest, or duplicates
     dependent on the array size and parameter newsize
     '''
 

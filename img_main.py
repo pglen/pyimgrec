@@ -31,7 +31,8 @@ except:
     pass
 
 import  algorithm.flood  as flood
-import  algorithm.outline as norm
+import  algorithm.outline as outline
+import  algorithm.island as island
 
 DIVIDER     = 32                 # How many divisions, mostly for testing
 MAG_FACT    = 2
@@ -42,19 +43,6 @@ MARKCOL     = 180                # Color counts as mark
 
 MARKDIFF    = 30
 BPX         = 4                  # Bits per pixel
-
-class cIsland():
-    def __init__(self, data):
-        self.data = data
-        self.bounds = None
-        self.center = None
-        self.lenorg = 0
-
-    def __str__(self):
-        return((self.center))
-
-    def __repr__(self):
-        return(str(self.center))
 
 class ImgMain(Gtk.DrawingArea):
 
@@ -690,9 +678,9 @@ class ImgMain(Gtk.DrawingArea):
                 usleep(100)
 
             # Process data from flood
-            #uls = norm.flush_upleft(fparam.bounds, fparm.minx, fpar.miny)
-            #nbs = norm.scale_vectors(uls, norm.ARRLEN)
-            #nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
+            #uls = outline.flush_upleft(fparam.bounds, fparm.minx, fpar.miny)
+            #nbs = outline.scale_vectors(uls, outline.ARRLEN)
+            #nbounds = outline.scale_magnitude(nbs, outline.ARRLEN)
 
             # Save last
             coords = (fparam.minx, fparam.miny, fparam.maxx, fparam.maxy,)
@@ -752,15 +740,21 @@ class ImgMain(Gtk.DrawingArea):
         #print("nbounds end")
 
         # Process it
-        nbounds2 = norm.sort_by_angles(nbounds)
-        nbounds3 = norm.scale_vectors(nbounds2, 20)
+        nbounds2 = outline.sort_by_angles(nbounds)
+        nbounds3 = outline.scale_vectors(nbounds2, 16)
+        nbounds4 = outline.flush_upleft(nbounds3)
+
+        #print("nbouns4:", end = " ")
+        #for aa in nbounds4:
+        #    print(aa, end = " ")
+        #print()
 
         col = (0xff, 0xff, 0xff, 0xff)
         col2 = (0x00, 0x00, 0x0, 0xff)
 
         prev = list(nbounds3[0])
         org = list(nbounds3[0])
-        end  = list(nbounds3[len(nbounds3)-1])
+        end  = list(nbounds3[len(nbounds4)-1])
 
         for aa in nbounds3:
             #print(aa, end = " ")
@@ -788,18 +782,18 @@ class ImgMain(Gtk.DrawingArea):
         #usleep(10)
 
         # Show center
-        #ccc = norm.calc_center(norm.calc_bounds(nbounds))
+        #ccc = outline.calc_center(outline.calc_bounds(nbounds))
         #newcol = (0xff, 0x00, 0x00, 0xff)
         #self.xparent.simg2.drawcross(ccc[0], ccc[1], newcol)
 
         # Add to collection
-        islandx = cIsland(nbounds3)
+        islandx = island.cIsland(nbounds4)
         #islandx.dataorg = nbounds
         islandx.lenorg = len(nbounds)
-        islandx.bounds = norm.calc_bounds(nbounds3)
-        islandx.center = norm.calc_center(islandx.bounds)
+        islandx.bounds = outline.calc_bounds(nbounds)
+        islandx.center = nbounds2[0]
+        #islandx.center = outline.calc_center(islandx.bounds)
         self.islands.append(islandx)
-
 
     # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
@@ -881,7 +875,7 @@ class ImgMain(Gtk.DrawingArea):
         # Compare shape with saved ones
         cmp = []; coord = []
         for cc in self.xparent.shapes:
-            res = norm.cmp_arrays(cc[4], xarr)
+            res = outline.cmp_arrays(cc[4], xarr)
             #print("comp", res, cc[0])
             cmp.append( (res, cc[0]) )
             coord.append( (fbounds.minx, fbounds.miny, fbounds.mark,) )

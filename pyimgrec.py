@@ -175,7 +175,7 @@ class MainWin():
                 #self.load("images/IMG_0823.jpg")
                 #self.load("images/shapes.png")
                 #self.load("images/shapex.png")
-                self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/image_12.png")
+                self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/image_8.png")
                 #self.load("images/Untitled.png")
                 #self.load("images/line.png")
                 #self.load("images/star.png")
@@ -660,9 +660,18 @@ class MainWin():
         pass
 
     def load_image(self, arg, ww):
-        self.fname = ofd("Open Image File").result
-        if not self.fname:
+
+        old_dir = os.getcwd()
+        res = ofd("Open Image File", os.path.dirname(self.fname))
+        os.chdir(old_dir)
+        #print(old_dir)
+
+        if not res:
             return
+        if not res.result:
+            return
+
+        self.fname = res.result
         try:
             self.load(self.fname)
         except:
@@ -683,6 +692,8 @@ class MainWin():
 
     # Button_press event on small image
     def simg_button(self, win, eve):
+
+        return
 
         #print("simg_butt", int(eve.x), int(eve.y)) #, eve.state)
 
@@ -800,8 +811,41 @@ class MainWin():
             return
 
         ref =  self.area.sumx[0]
-        for aa in self.area.sumx[1:]:
-            print("compare:", ref, aa)
+        for aa in range(1, len(self.area.sumx)):
+            targ = self.area.sumx[aa]
+            #print("compare:", ref)
+            #print("to:     ", targ)
+            print("compare:", aa)
+            res = ref[aa].find_similar(ref[aa], targ[aa])
+            #print("res:", res)
+
+            # Ref - Targ
+            # ooooo
+            #   oooooo
+            #     eeeee
+            #         eeeee
+
+            for aa in res:
+                print(  aa[0], ":", ref[aa[0]].center,
+                        aa[1], ":", targ[aa[1]].center,
+                        "dx",  ref[aa[0]].center[0] - targ[aa[1]].center[0],
+                        "dy",  ref[aa[0]].center[1] - targ[aa[1]].center[1],
+                        )
+
+            ordx = []; matchx = []
+            for aa in res:
+                ang = aa
+                for bb in res:
+                    if aa == bb:
+                        continue
+                    deltax = ref[aa[0]].center[0] - targ[bb[1]].center[0]
+                    deltay = ref[aa[0]].center[1] - targ[bb[1]].center[1]
+                    if deltax not in ordx:
+                        ordx.append(deltax)
+                    else:
+                        matchx.append((deltax, aa, bb))
+            print("matchx", matchx)
+        print()
 
     def fractal_image(self, win, a3):
 
