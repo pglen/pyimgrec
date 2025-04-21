@@ -358,7 +358,6 @@ class MainWin():
         self.area.anal_image(0, 0)
 
 
-
         self.reenter = False
 
     def vspacer(self, vbox):
