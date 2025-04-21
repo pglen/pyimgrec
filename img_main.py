@@ -50,6 +50,7 @@ class ImgMain(Gtk.DrawingArea):
 
         Gtk.DrawingArea.__init__(self);
 
+        self.bpx = BPX
         self.fname = ""
         self.gl_dones = {};
         self.reanal = 0
@@ -57,7 +58,10 @@ class ImgMain(Gtk.DrawingArea):
         #self.wwww = wwww; self.hhhh = hhhh
         self.iww = wwww
         self.ihh = hhhh
+        self.divider = DIVIDER
 
+        self.stepx = float(self.iww)/self.divider;
+        self.stepy = float(self.ihh)/self.divider;
         self.pb = GdkPixbuf.Pixbuf.new \
                    (GdkPixbuf.Colorspace.RGB, True, 8,
                          MAG_SIZE / MAG_FACT , MAG_SIZE / MAG_FACT)
@@ -76,7 +80,7 @@ class ImgMain(Gtk.DrawingArea):
         self.islands = []
         self.mag = False
         self.event_x = self.event_y = 0
-        self.sumx = []
+        self.sumxx = []
         self.sumf = []
 
         self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
@@ -525,6 +529,7 @@ class ImgMain(Gtk.DrawingArea):
 
         #print("callb", xxx, yyy, kind);
         #print("callb", flood.str_enum(kind))
+
         #return
 
         bpx = self.xparent.simg.bpx
@@ -615,7 +620,6 @@ class ImgMain(Gtk.DrawingArea):
 
     def _anal_image_worker2(self, xxx, yyy, single, thresh, addx):
 
-        #self.sumx = []
         found = 0
         self.islands = []
 
@@ -683,7 +687,7 @@ class ImgMain(Gtk.DrawingArea):
             self.xparent.narr = [str(found), coords, fparam.mark,
                                                 fparam.body, fparam.bounds]
             # Save cummulative
-            #self.sumx.append(self.xparent.narr)
+            #self.sumxx.append(self.xparent.narr)
 
             # Compare with stock
             #sss = self.compare(nbounds, fparam)
@@ -692,7 +696,7 @@ class ImgMain(Gtk.DrawingArea):
 
             # Scan for results
             self.island(fparam.bounds)
-            if self.xparent.check2.get_active():
+            if hasattr(self.xparent, "check2") and self.xparent.check2.get_active():
                 if len(nbounds) == 0:
                     msg("No shape yet")
 
@@ -700,20 +704,20 @@ class ImgMain(Gtk.DrawingArea):
                 break
             #print()
 
-        #for aa in self.sumx:
+        #for aa in self.sumxx:
         #    print("aa", aa)
         #    try:
         #        print(aa[0:5], aa[5][0:3], aa[6], aa[7][:2], "...")
         #    except IndexError:
-        #        #print("exc sumx", sys.exc_info())
+        #        #print("exc sumxx", sys.exc_info())
         #        pass
         #    except:
-        #        print("exc sumx", sys.exc_info())
+        #        print("exc sumxx", sys.exc_info())
 
-        print("%d segments found." % found)
-
-        self.sumx.append(self.islands)
         self.sumf.append(self.fname)
+        print("%d segments found." % found)
+        self.sumxx.append(self.islands)
+        print("%d islands scanned." % len(self.islands))
 
         # Display results
         #for aa in self.islands:

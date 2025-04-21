@@ -1,23 +1,26 @@
 #!/usr/bin/env python
 
-import os, sys, getopt, signal, array, pickle
-import time, traceback, warnings, random
+import os, sys, getopt, pickle
+import time, warnings, random
+
+'''
+    Fingerprint scanner
+'''
+
+from timeit import Timer
 
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GLib
-from gi.repository import GObject
-from gi.repository import Pango
-from gi.repository import GdkPixbuf
+#from gi.repository import GObject
+#from gi.repository import GdkPixbuf
 
 gi.require_version('FPrint', '2.0')
 from gi.repository import FPrint
 
 import cairo
-
-from timeit import Timer
 
 from pyimgutils import *
 
@@ -100,7 +103,6 @@ class MainWin():
         self.window.connect("key-press-event", self.key_press_event)
         self.window.connect("configure-event", self.config_event)
         self.window.connect("focus-in-event", self.focus_event)
-        #self.window.connect("focus-out-event", self.focus_event2)
 
         self.pangolayout = self.window.create_pango_layout("a")
         try:
@@ -124,7 +126,8 @@ class MainWin():
 
         # Fall back to old means of getting screen w / h
         if self.dwww == 0 or self.dhhh == 0:
-            self.dwww = Gdk.screen_width(); self.dhhh = Gdk.screen_height();
+            self.dwww = Gdk.screen_width()
+            self.dhhh = Gdk.screen_height()
 
         #print("Window size", www, hhh)
         #if www / hhh > 2:
@@ -171,12 +174,19 @@ class MainWin():
         self.mainbox.pack_start(self.status, 0, 0, 4)
 
         self.simg  = Imagex(self, norm.ARRLEN, norm.ARRLEN)
+        self.simg2 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
+        #self.simg3 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
+
         self.simg.connect("button-press-event", self.simg_button)
 
         vbox2 = Gtk.VBox()
         self.tree = treehand.TreeHand(self.tree_sel_row)
         self.tree.stree.set_size_request(-1, 140)
         vbox2.pack_start(self.tree.stree, 0, 0, 0)
+
+        self.win2 = self.add_win()
+        self.win3 = self.add_win()
+        self.win4 = self.add_win()
 
         try:
             if args:
@@ -243,13 +253,13 @@ class MainWin():
         #self.img.set_from_stock(Gtk.STOCK_ABOUT, Gtk.IconSize.DIALOG)
 
         self.buttons2(self.hbox2, self.window)
-        #self.checks(self.hbox3, self.window)
+        self.checks(self.hbox3, self.window)
         #self.vspacer()
 
         self.spacer(self.hbox_s, False)
         self.spacer(self.hbox_s2, False)
 
-        self.vbox = Gtk.VBox();
+        self.vbox = Gtk.VBox()
 
         #self.vbox.pack_start(self.hbox_s, False, 0, 0)
         self.vbox.pack_start(self.mainbox, True, True, 4)
@@ -267,7 +277,7 @@ class MainWin():
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
 
-    def scanx(self):
+    def scanfunc(self):
 
         if self.reenter:
             return
@@ -284,18 +294,18 @@ class MainWin():
         assert d.has_feature(FPrint.DeviceFeature.IDENTIFY)
         assert d.has_feature(FPrint.DeviceFeature.VERIFY)
 
-        assert not d.has_feature(FPrint.DeviceFeature.DUPLICATES_CHECK)
-        assert not d.has_feature(FPrint.DeviceFeature.STORAGE)
-        assert not d.has_feature(FPrint.DeviceFeature.STORAGE_LIST)
-        assert not d.has_feature(FPrint.DeviceFeature.STORAGE_DELETE)
-        assert not d.has_feature(FPrint.DeviceFeature.STORAGE_CLEAR)
+        #assert not d.has_feature(FPrint.DeviceFeature.DUPLICATES_CHECK)
+        #assert not d.has_feature(FPrint.DeviceFeature.STORAGE)
+        #assert not d.has_feature(FPrint.DeviceFeature.STORAGE_LIST)
+        #assert not d.has_feature(FPrint.DeviceFeature.STORAGE_DELETE)
+        #assert not d.has_feature(FPrint.DeviceFeature.STORAGE_CLEAR)
 
         #del devices
         d.open_sync()
         if self.enrollx:
-            self.status.set_text("Please scan finger for enroll")
+            self.status.set_text("Please scan finger (for enroll):")
         else:
-            self.status.set_text("Please scan finger")
+            self.status.set_text("Please scan finger:")
 
         print("Please scan finger: ", end = " "); sys.stdout.flush()
         tryx = 0
@@ -321,7 +331,7 @@ class MainWin():
                 break
 
         d.close_sync()
-        del d;  del c; del ctx
+        del c; del d; del ctx
 
         # Output image
         width = img.get_width();  height = img.get_height()
@@ -343,6 +353,12 @@ class MainWin():
                 c_buf[y * c_rowstride + x * 4 + 3] = buf[y * width + x]
         del img
         self.area.invalidate()
+
+        # Process it
+        self.area.anal_image(0, 0)
+
+
+
         self.reenter = False
 
     def vspacer(self, vbox):
@@ -356,10 +372,6 @@ class MainWin():
         #self.win2.set_keep_above(False)
         pass
 
-    def focus_event2(self, win, event):
-        #print("focus_event2:", win, "in:", event.in_, event.type)
-        pass
-
     def add_win(self):
 
         winx =  Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
@@ -369,7 +381,7 @@ class MainWin():
 
         winx.set_title("Image Show")
         winx.simg = Imagex(self)
-        winx.ww = winx.simg.ww;
+        winx.ww = winx.simg.ww
         winx.hh = winx.simg.hh
         winx.set_size_request(winx.ww, winx.hh)
         winx.add(winx.simg)
@@ -394,7 +406,7 @@ class MainWin():
         #self.win3.move(10, yyy + 220)
         #self.win4.move(10, yyy + 420)
         self.unpickle_shapes()
-        self.scanx()
+        self.scanfunc()
 
     def set_small_text(self, txt):
         self.lab.set_text(txt)
@@ -438,11 +450,11 @@ class MainWin():
         self.check1.connect("clicked", self.check_hell, window)
         hbox.pack_start(self.check1, False, 0, 0)
 
-        self.spacer(hbox, False )
-
-        self.check2 = Gtk.CheckButton.new_with_mnemonic(" _Prompt for save Shape ")
-        self.check2.connect("clicked", self.check_hell, window)
-        hbox.pack_start(self.check2, False, 0, 0)
+        #self.spacer(hbox, False )
+        #
+        #self.check2 = Gtk.CheckButton.new_with_mnemonic(" _Prompt for save Shape ")
+        #self.check2.connect("clicked", self.check_hell, window)
+        #hbox.pack_start(self.check2, False, 0, 0)
 
         self.spacer(hbox, False )
 
@@ -587,15 +599,15 @@ class MainWin():
         #print( "Walk" #,butt, window)
         #self.area.walk_image(4, 4)
         self.enrollx = False
-        self.scanx()
+        self.scanfunc()
 
     def enroll(self, butt, window):
         self.status.set_text("Enrolling. Scan finger.")
         self.enrollx = True
-        self.scanx()
+        self.scanfunc()
 
     def spacer(self, hbox, flag = False ):
-        lab14 = Gtk.Label(label=" ");
+        lab14 = Gtk.Label(label=" ")
         hbox.pack_start(lab14, flag, 0, 0)
 
     def mark_image(self, area, a3):
@@ -638,7 +650,7 @@ class MainWin():
             if fname[-4:] != ".jpg":
                 fname += ".jpg"
             pix = self.area.image2.get_pixbuf()
-            pix.save(fname, "jpeg", {"quality":"100"});
+            pix.save(fname, "jpeg", {"quality":"100"})
         except:
             print( sys.exc_info())
             msg("Cannot save file:\n%s" % fname)
@@ -653,7 +665,7 @@ class MainWin():
         #for cnt, cc in enumerate(self.area.sumx[1]):
         #    print("sumx[1]", cnt, cc[:12])
 
-        if not (eve.state & Gdk.ModifierType.SHIFT_MASK):
+        if not eve.state & Gdk.ModifierType.SHIFT_MASK:
             self.simg2.clear()
             #self.simg3.clear()
             #self.merge = []
@@ -801,8 +813,8 @@ class MainWin():
         ''' see selection animated '''
 
         if self.reenter:
-           self.reenter = 0
-           return
+            self.reenter = 0
+            return
         self.reenter = 1
         #self.win3.simg.clear()
         for cnt, aa in enumerate(self.area.sumx):
@@ -836,8 +848,8 @@ class MainWin():
         #self.win3.simg.clear()
 
         if self.reenter:
-           self.reenter = 0
-           return
+            self.reenter = 0
+            return
         self.reenter = 1
         while True:
             if self.reenter == 0:
@@ -864,16 +876,16 @@ class MainWin():
                 #print("aa", aa[:5])
                 #for aaa in aa[7]:
 
-                for aaa in aa[8]:
-                    row = 4 * (aaa[1]) * 1 #self.win3.simg.ww
-                    col = 4 * (aaa[0])
+                for aaaa in aa[8]:
+                    row = 4 * (aaaa[1]) * 1 #self.win3.simg.ww
+                    col = 4 * (aaaa[0])
                     for cnt, cc in enumerate(newcol):
                         try:
                             #self.win3.simg.buf[cnt + row + col] = cc
                             pass
                         except:
                             print("win3 exc", "aa[:5] =", aa[:5], "aaa =",
-                                            aaa, sys.exc_info())
+                                            aaaa, sys.exc_info())
                 self.win3.simg.invalidate()
                 usleep(1)
 
@@ -1032,8 +1044,8 @@ class MainWin():
         global xstr
         sel = xtree.get_selection()
         xmodel, xiter = sel.get_selected_rows()
-        for aa in xiter:
-            xstr = xmodel.get_value(xmodel.get_iter(aa), 0)
+        for aaa in xiter:
+            xstr = xmodel.get_value(xmodel.get_iter(aaa), 0)
             break
 
     def key_press_event(self, win, event):
@@ -1086,7 +1098,7 @@ if __name__ == '__main__':
         if aa[0] == "-h": help();  exit(1)
 
     if xconfig.verbose > 1:
-            print("Verbose level:", xconfig.verbose)
+        print("Verbose level:", xconfig.verbose)
 
     if xconfig.verbose:
         print( "PyImgRec running on", "'" + os.name + "'",
