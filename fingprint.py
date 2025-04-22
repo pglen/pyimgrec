@@ -88,7 +88,7 @@ class MainWin():
         #stock(Gtk.DialogType.INFO, Gtk.GtkIconSize.BUTTON)
         self.window.set_icon(ic.get_pixbuf())
         self.reenter = False
-
+        self.ecount = 0
         #self.window.set_flags(Gtk.CAN_FOCUS | SENSITIVE)
         #self.window.set_events(  Gdk.POINTER_MOTION_MASK |
         #                    Gdk.POINTER_MOTION_HINT_MASK |
@@ -231,10 +231,9 @@ class MainWin():
         self.scale.set_value(220)
         self.scale.set_inverted(True)
         self.scale.set_tooltip_text("Mark value")
-        self.mainboxh.pack_start(self.scale, 0, 0, 0)
-        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
-                                                        0, 255, 1)
-        self.mainboxh.pack_start(self.scale2, 0, 0, 0)
+        #self.mainboxh.pack_start(self.scale, 0, 0, 0)
+        self.scale2 = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0, 255, 1)
+        #self.mainboxh.pack_start(self.scale2, 0, 0, 0)
         self.scale2.set_value(70)
         self.scale2.set_inverted(True)
         self.scale2.set_tooltip_text("Threshold diff")
@@ -277,28 +276,6 @@ class MainWin():
         self.window.add(self.vbox)
         GLib.timeout_add(100, self.after)
 
-    def postproc(self, width, height, c_buf):
-
-        stride = width * height
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_data(c_buf,
-                                        GdkPixbuf.Colorspace.RGB, False, 8,
-                                            width, height, stride )
-        print("pixbuf", pixbuf)
-        ximage = Gtk.Image.new_from_pixbuf(pixbuf)
-        print("ximage", ximage)
-
-        try:
-            #self.area.from_image(ximage)
-            self.area.from_pixbuf(pixbuf)
-        except:
-            print(sys.exc_info())
-
-        # Process it
-        #self.area.anal_image(0, 0)
-        #self.area.invalidate()
-
-
     def scanfunc(self):
 
         if self.reenter:
@@ -326,10 +303,10 @@ class MainWin():
         #del devices
         d.open_sync()
         if self.enrollx:
-            self.status.set_text("Please scan finger (for enroll):")
+            self.status.set_text("Please scan finger (for enroll)")
             print("Please scan finger (for enroll): ", end = " "); sys.stdout.flush()
         else:
-            self.status.set_text("Please scan finger:")
+            self.status.set_text("Please scan finger")
             print("Please scan finger: ", end = " "); sys.stdout.flush()
 
         tryx = 0; img = None
@@ -363,26 +340,54 @@ class MainWin():
 
         # Output image
         width = img.get_width();  height = img.get_height()
-        buf   = img.get_data()
-        print("Got:", len(buf), width, height)
-        self.c_buf = []
+        orgbuf   = img.get_data()
+        #print("Got:", len(buf), width, height)
+        buf = bytearray(width * height * 4)
+        rowstride = width * 4
         # Convert to RGBA
         for x in range(width):
             for y in range(height):
-                # The upper byte is don't care, but the location depends on endianness,
-                # so just set all of them.
-                #c_buf[y * c_rowstride + x * 4 + 0] = buf[y * width + x]
-                #c_buf[y * c_rowstride + x * 4 + 1] = buf[y * width + x]
-                #c_buf[y * c_rowstride + x * 4 + 2] = buf[y * width + x]
-                #c_buf[y * c_rowstride + x * 4 + 3] = 0xff #buf[y * width + x]
-                self.c_buf.append(buf[y * width + x])
-                self.c_buf.append(buf[y * width + x])
-                self.c_buf.append(buf[y * width + x])
-                self.c_buf.append(0xff)
+                buf[y * rowstride + x * 4 + 0] = orgbuf[y * width + x]
+                buf[y * rowstride + x * 4 + 1] = orgbuf[y * width + x]
+                buf[y * rowstride + x * 4 + 2] = orgbuf[y * width + x]
+                buf[y * rowstride + x * 4 + 3] = 0xff
 
-        GLib.timeout_add(100, self.postproc, width, height, self.c_buf)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_data(buf,
+                                        GdkPixbuf.Colorspace.RGB, True, 8,
+                                            width, height, rowstride )
+        #print("pixbuf", pixbuf)
+        try:
+            self.area.from_pixbuf(pixbuf)
+        except:
+            print(sys.exc_info())
+
+        # Process it
+        self.area.anal_image(0, 0)
+        self.area.invalidate()
+
+        if self.enrollx:
+            print("Enroll:", self.ecount)
+            self.ecount += 1
+            dat = [self.ecount, ]
+            #for aa in self.area.islands:
+                #dat += aa.center
+                #dat += aa.bounds
+                #dat += aa.data
+            self.save_enroll(self.area.islands)
 
         self.reenter = False
+
+    def save_enroll(self, data):
+
+        cnt = 0;
+        while True:
+            fname = "print_%d.dat" % cnt
+            if not os.path.isfile(fname):
+                fp = open(fname, "wb")
+                pickle.dump(data, fp)
+                fp.close()
+                break
+            cnt += 1
 
     def vspacer(self, vbox):
         vbox2 = Gtk.VBox()

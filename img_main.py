@@ -303,11 +303,12 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc, imgflood.Flood):
 
         pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
                         True, 8, self.iww, self.ihh)
+
+        pix.copy_area(0, 0, self.iww, self.ihh, pixbuf, 0, 0)
+        #return
+
         pixbuf2 = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
                         True, 8, self.iww, self.ihh)
-
-        #pix.copy_area(0, 0, self.iww, self.ihh, pixbuf, 0, 0)
-        #return
 
         self.image2.set_from_pixbuf(pixbuf)
 
@@ -349,6 +350,7 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc, imgflood.Flood):
         self.stepy = float(self.ihh)/self.divider;
 
         self.xparent.tree.append_treestore("Loaded: '%s'" % self.fname)
+        self.invalidate()
 
     def refresh(self):
         #pix = self.image.get_pixbuf()

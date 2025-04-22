@@ -5,12 +5,13 @@ import pyimgutils
 
 #import outline
 
-class cIsland():
+class IsLand():
     def __init__(self, data):
         self.data = data
         self.bounds = None
         self.center = None
         self.lenorg = 0
+        self.data = data
 
     def __str__(self):
         return((self.center))

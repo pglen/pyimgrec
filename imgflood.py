@@ -15,9 +15,12 @@ import cairo
 
 THRESH      = 20                 # Color diff for boundary
 MARKCOL     = 180                # Color counts as mark
-
+MAXFOUND    = 200
+MINFOUND    = 150
+MINMAXFACT  = 3
 MARKDIFF    = 30
-BPX         = 4                  # Bits per pixel
+
+BPX         = 4                  # Bytes per pixel
 
 from pyimgutils import *
 
@@ -37,6 +40,115 @@ from gi.repository import GdkPixbuf
 import imgrec.imgrec as imgrec
 
 class Flood():
+
+# --------------------------------------------------------------------
+    # Using an arrray to manipulate the underlying buffer
+
+    def anal_image(self, xxx, yyy, single = False, addx = False):
+
+        imgrec.verbose = 0
+        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
+
+        global MARKCOL, THRESH
+        MARKCOL = int(self.xparent.scale.get_value())
+        THRESH  = int(self.xparent.scale2.get_value())
+
+        #imgrec.verbose = 1
+        #avg = imgrec.average()
+        if xconfig.verbose:
+            print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
+                        "thresh", THRESH, "markcol", MARKCOL)
+            #print("divider", self.divider)
+
+
+        #imgrec.verbose = 0
+
+        self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
+
+        # Draw grid:
+        if self.xparent.check1.get_active():
+            try:
+                #print("Grid")
+                for xx in range(self.divider):
+                    hor = int(xx * self.stepx)
+                    imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
+                for yy in range(self.divider):
+                    ver = int(yy * self.stepy)
+                    imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
+
+                self.invalidate()
+                #usleep(10)
+            except:
+                print_exception("grid")
+
+        self.darr = {};
+
+        # Fill in 2D array
+        for yy in range(self.ihh):
+            offs = yy * self.iww * BPX
+            for xx in range(self.iww):
+                val = []
+                for cc in range(BPX):
+                    val.append(self.buf[offs + xx * BPX + cc])
+                self._add_to_dict(self.darr, xx, yy, val)
+
+        # TEST: Put it back to img
+        #imgrec.blank(color=0xff888888)
+        #for yy in range(self.ihh):
+        #    for xx in range(self.iww):
+        #        offs = yy * self.iww * 4
+        #        for cc in range(4):
+        #            try: buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
+        #            except: pass
+        #    self.invalidate(); usleep(.1)
+        #return
+
+        self.reanal += 1
+        if self.reanal > 1:
+            print("Stopping Anal .. please wait")
+            flood.gl_reenter += 1
+            self.reanal = 0
+            return
+
+        # See if repeated request for scanning the same image
+        if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
+            self.xparent.simg.clear()
+            #self.xparent.win2.simg.clear()
+            self.gl_dones = {}
+
+        self._anal_image_worker(xxx, yyy, single, addx)
+        self.reanal = 0
+
+    def compare(self, xarr, fbounds):
+
+        # Compare shape with saved ones
+        cmp = []; coord = []
+        for cc in self.xparent.shapes:
+            res = outline.cmp_arrays(cc[4], xarr)
+            #print("comp", res, cc[0])
+            cmp.append( (res, cc[0]) )
+            coord.append( (fbounds.minx, fbounds.miny, fbounds.mark,) )
+        if(len(cmp)):
+            cmp.sort()
+            #for aa in cmp:
+            #    print( "cmp %.2f %s" % (aa[0], aa[1]) )
+            #self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
+
+            strx = "%-8s x=%2d y=%2d col=%s cmp=%.f " % \
+                            (cmp[0][1], coord[0][0], coord[0][1],
+                                    coord[0][2], cmp[0][0], )
+            self.xparent.tree.append_treestore(strx)
+            print("compare:", strx)
+            return cmp[0][1], cmp[0][0]
+
+        return ("")
+
+        #self.aframe += self.bframe
+        ## Reference position
+        #self.aframe.append((xxx, yyy, 0xff8888ff))
+
+        # Display final image
+        #self.invalidate()
 
     def callb(self, xxx, yyy, kind, fparam):
 
@@ -76,7 +188,7 @@ class Flood():
             if newcol:
                 for cnt, aa in enumerate(newcol):
                     self.xparent.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
-                    self.buf[cnt + bpx * xxx + row] = newcol[cnt]
+                    #self.buf[cnt + bpx * xxx + row] = newcol[cnt]
                 pass
 
             if fparam.cnt % fparam.breath == 0:
@@ -93,13 +205,8 @@ class Flood():
 
         ''' Work until reasonable matche=s found '''
 
-        thresh = THRESH
         allcnt = 0
-
-        MAXFOUND    = 200
-        MINFOUND    = 150
-        MINMAXFACT  = 3
-
+        thresh = THRESH
         ttt = time.time()
 
         while True:
@@ -306,7 +413,7 @@ class Flood():
         #self.xparent.simg2.drawcross(ccc[0], ccc[1], newcol)
 
         # Add to collection
-        islandx = island.cIsland(nbounds4)
+        islandx = island.IsLand(nbounds4)
         #islandx.dataorg = nbounds
         islandx.lenorg = len(nbounds)
         islandx.bounds = outline.calc_bounds(nbounds)
@@ -314,113 +421,5 @@ class Flood():
         #islandx.center = outline.calc_center(islandx.bounds)
         self.islands.append(islandx)
 
-    # --------------------------------------------------------------------
-    # Using an arrray to manipulate the underlying buffer
-
-    def anal_image(self, xxx, yyy, single = False, addx = False):
-
-        imgrec.verbose = 0
-        imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
-
-        global MARKCOL, THRESH
-        MARKCOL = int(self.xparent.scale.get_value())
-        THRESH  = int(self.xparent.scale2.get_value())
-
-        #imgrec.verbose = 1
-        #avg = imgrec.average()
-        if xconfig.verbose:
-            print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
-                        "thresh", THRESH, "markcol", MARKCOL)
-            #print("divider", self.divider)
-
-
-        #imgrec.verbose = 0
-
-        self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
-
-        # Draw grid:
-        if self.xparent.check1.get_active():
-            try:
-                #print("Grid")
-                for xx in range(self.divider):
-                    hor = int(xx * self.stepx)
-                    imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
-                for yy in range(self.divider):
-                    ver = int(yy * self.stepy)
-                    imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
-
-                self.invalidate()
-                #usleep(10)
-            except:
-                print_exception("grid")
-
-        self.darr = {};
-
-        # Fill in 2D array
-        for yy in range(self.ihh):
-            offs = yy * self.iww * BPX
-            for xx in range(self.iww):
-                val = []
-                for cc in range(BPX):
-                    val.append(self.buf[offs + xx * BPX + cc])
-                self._add_to_dict(self.darr, xx, yy, val)
-
-        # TEST: Put it back to img
-        #imgrec.blank(color=0xff888888)
-        #for yy in range(self.ihh):
-        #    for xx in range(self.iww):
-        #        offs = yy * self.iww * 4
-        #        for cc in range(4):
-        #            try: buf[offs + xx * 4 + cc] = darr[yy][xx][cc]
-        #            except: pass
-        #    self.invalidate(); usleep(.1)
-        #return
-
-        self.reanal += 1
-        if self.reanal > 1:
-            print("Stopping Anal .. please wait")
-            flood.gl_reenter += 1
-            self.reanal = 0
-            return
-
-        # See if repeated request for scanning the same image
-        if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
-            self.xparent.simg.clear()
-            #self.xparent.win2.simg.clear()
-            self.gl_dones = {}
-
-        self._anal_image_worker(xxx, yyy, single, addx)
-        self.reanal = 0
-
-    def compare(self, xarr, fbounds):
-
-        # Compare shape with saved ones
-        cmp = []; coord = []
-        for cc in self.xparent.shapes:
-            res = outline.cmp_arrays(cc[4], xarr)
-            #print("comp", res, cc[0])
-            cmp.append( (res, cc[0]) )
-            coord.append( (fbounds.minx, fbounds.miny, fbounds.mark,) )
-        if(len(cmp)):
-            cmp.sort()
-            #for aa in cmp:
-            #    print( "cmp %.2f %s" % (aa[0], aa[1]) )
-            #self.xparent.set_small_text("Recognized shape: %s" % cmp[0][1])
-
-            strx = "%-8s x=%2d y=%2d col=%s cmp=%.f " % \
-                            (cmp[0][1], coord[0][0], coord[0][1],
-                                    coord[0][2], cmp[0][0], )
-            self.xparent.tree.append_treestore(strx)
-            print("compare:", strx)
-            return cmp[0][1], cmp[0][0]
-
-        return ("")
-
-        #self.aframe += self.bframe
-        ## Reference position
-        #self.aframe.append((xxx, yyy, 0xff8888ff))
-
-        # Display final image
-        #self.invalidate()
 
 # EOF
