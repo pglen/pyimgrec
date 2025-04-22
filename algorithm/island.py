@@ -16,6 +16,12 @@ class IsLand():
     def __str__(self):
         return((self.center))
 
+    def dump(self):
+        strx =  "cnt: %s " % str(self.center)
+        strx += "bnd: %s " % str(self.bounds)
+        strx += "dat: %s " % str(self.data[:4])
+        return strx
+
     def __repr__(self):
         return(str(self.center))
 

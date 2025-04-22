@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys, getopt, pickle
-import time, warnings, random
+import time, warnings, random, fnmatch
 
 '''
     Fingerprint scanner
@@ -26,6 +26,7 @@ from pyimgutils import *
 
 import  treehand, img_main
 import  algorithm.outline as norm
+import  algorithm.island as island
 
 try:
     import imgrec.imgrec as imgrec
@@ -74,6 +75,7 @@ class MainWin():
 
     def __init__(self, args):
 
+        self.rislands = []
         self.fname = ""
         self.curr = []
         self.reenter = 0
@@ -365,26 +367,68 @@ class MainWin():
         self.area.anal_image(0, 0)
         self.area.invalidate()
 
+        def addlist(aaa, lll):
+            for aa in lll:
+                enc = bytes(aa, 'utf-8')
+                print("enc", enc)
+                aaa += aa & 0xff
+            return aaa
+
         if self.enrollx:
             print("Enroll:", self.ecount)
             self.ecount += 1
-            dat = [self.ecount, ]
-            #for aa in self.area.islands:
-                #dat += aa.center
-                #dat += aa.bounds
-                #dat += aa.data
-            self.save_enroll(self.area.islands)
-
+            self.save_enroll()
         self.reenter = False
 
-    def save_enroll(self, data):
+    def load_enroll(self, win = None, ww = None):
 
-        cnt = 0;
+        #print("Load enroll")
+        cnt = 0
+        ddd = os.listdir(".")
+        for aa in ddd:
+            #if os.path.splitext(aa)[1] != ".dat":
+            #    continue
+            if not fnmatch.fnmatch(aa, "print_*.dat"):
+                continue
+            #print("filename", aa)
+            fp = open(aa, "rb")
+            count = pickle.load(fp)
+            while True:
+                try:
+                    center = pickle.load(fp)
+                except EOFError:
+                    break
+                #print("c", center)
+                bounds = pickle.load(fp)
+                #print("b", bounds)
+                data = pickle.load(fp)
+                #print("d", data)
+                dat = island.IsLand(data)
+                dat.bounds = bounds
+                dat.center = center
+                #print(dat.dump())
+                self.rislands.append(dat)
+                count -= 1
+            fp.close()
+
+            if count != 0:
+                print("unexpected record count", count)
+            cnt += 1
+        print(cnt, "files loaded.")
+
+    def save_enroll(self):
+
+        cnt = 0
         while True:
             fname = "print_%d.dat" % cnt
             if not os.path.isfile(fname):
                 fp = open(fname, "wb")
-                pickle.dump(data, fp)
+
+                pickle.dump(len(self.area.islands), fp)
+                for aa in self.area.islands:
+                    pickle.dump(aa.center, fp)
+                    pickle.dump(aa.bounds, fp)
+                    pickle.dump(aa.data, fp)
                 fp.close()
                 break
             cnt += 1
@@ -435,6 +479,7 @@ class MainWin():
         #self.win4.move(10, yyy + 420)
         self.unpickle_shapes()
         #self.scanfunc()
+        self.load_enroll()
 
     def set_small_text(self, txt):
         self.lab.set_text(txt)
@@ -574,6 +619,10 @@ class MainWin():
 
         butt92a = Gtk.Button.new_with_mnemonic(" _Analize ")
         butt92a.connect("clicked", self.analize, window)
+        hbox.pack_start(butt92a, False, 0 ,0)
+
+        butt92a = Gtk.Button.new_with_mnemonic(" loa_d enroll ")
+        butt92a.connect("clicked", self.load_enroll, window)
         hbox.pack_start(butt92a, False, 0 ,0)
 
         #self.spacer(hbox)
