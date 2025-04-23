@@ -933,13 +933,20 @@ class MainWin():
                 self.win3.simg.invalidate()
                 usleep(1)
 
-    def anal_image(self, win, a3):
-        self.clear_small_img()
-        self.win2.simg.clear()
-        self.win3.simg.clear()
+    def _anal_image(self):
 
         self.flooder = imgflood.Flooder()
         self.flooder.xparent = self
+        self.flooder.verbose = xconfig.verbose
+
+        # Get GUI params
+        self.flooder.grid = self.check1.get_active()
+        self.flooder.grey = self.check3.get_active()
+        self.flooder.animate = self.check4.get_active()
+        self.flooder.markcol = int(self.scale.get_value())
+        self.flooder.thresh  = int(self.scale2.get_value())
+
+        # The image to scan
         self.flooder.buf = self.area.buf
         self.flooder.iww = self.area.iww
         self.flooder.ihh = self.area.ihh
@@ -947,6 +954,11 @@ class MainWin():
 
         self.flooder.anal_image(0, 0)
 
+    def anal_image(self, win, a3):
+        self.clear_small_img()
+        self.win2.simg.clear()
+        self.win3.simg.clear()
+        self._anal_image()
         self.area.invalidate()
 
     def refr_image(self, arg, ww):

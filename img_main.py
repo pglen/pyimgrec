@@ -49,8 +49,6 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc):
 
         self.bpx = imgflood.BPX
         self.fname = ""
-        self.gl_dones = {};
-        self.reanal = 0
         self.xparent = xparent
         #self.wwww = wwww; self.hhhh = hhhh
         self.iww = wwww
@@ -246,12 +244,11 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc):
         addx = event.state & Gdk.ModifierType.SHIFT_MASK
         #print("mou", event.state)
 
-        fpar = imgflood.FloodParm()
-        fpar.xparent = self.xparent
-        fpar.markcol = int(self.xparent.scale.get_value())
-        fpar.thresh  = int(self.xparent.scale2.get_value())
-
-        self.flooder.anal_image(int(event.x), int(event.y), fpar)
+        #fpar = imgflood.FloodParm()
+        #fpar.xparent = self.xparent
+        #fpar.markcol = int(self.xparent.scale.get_value())
+        #fpar.thresh  = int(self.xparent.scale2.get_value())
+        #self.flooder.anal_image(int(event.x), int(event.y), fpar)
 
         self.get_window().set_cursor(None)
 

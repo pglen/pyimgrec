@@ -52,7 +52,10 @@ class Flooder():
     def __init__(self):
         self.markcol = None
         self.thresh = 60
-        self.drawgrid = False
+        self.grid = False
+        self.animate = False
+        self.verbose = 0
+        self.grey = False
         self.treestore = None
         self.xparent = None
         self.single = False
@@ -62,7 +65,6 @@ class Flooder():
         self.stepy = 1
         self.divider = DIVIDER
         self.islands = []
-        self.sumx = []
         pass
 
     # --------------------------------------------------------------------
@@ -74,10 +76,8 @@ class Flooder():
 
         # New output
         self.islands = []
-        self.sumx = []
 
-
-        imgrec.verbose = 0
+        imgrec.verbose = self.verbose
         imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
         self.stepx = float(self.iww)/self.divider;
@@ -85,30 +85,30 @@ class Flooder():
 
         #imgrec.verbose = 1
         #avg = imgrec.average()
-        if xconfig.verbose:
+        if self.verbose:
             print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
                         "thresh", self.thresh, "markcol", self.markcol)
             #print("divider", self.divider)
 
         #imgrec.verbose = 0
 
-        self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
+        if self.xparent:
+            self.xparent.tree.append_treestore("Anal image xxx: %d yyy: %d" % (xxx, yyy))
 
         # Draw grid:
-        if self.xparent.check1.get_active():
-            try:
-                #print("Grid")
-                for xx in range(self.divider):
-                    hor = int(xx * self.stepx)
-                    imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
-                for yy in range(self.divider):
-                    ver = int(yy * self.stepy)
-                    imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
-
-                self.invalidate()
-                #usleep(10)
-            except:
-                print_exception("grid")
+        #if self.grid:
+        #    try:
+        #        #print("Grid")
+        #        for xx in range(self.divider):
+        #            hor = int(xx * self.stepx)
+        #            imgrec.line(hor, 0, hor, self.ihh, 0xff888888)
+        #        for yy in range(self.divider):
+        #            ver = int(yy * self.stepy)
+        #            imgrec.line(0, ver, self.iww-1, ver, 0xff888888)
+        #        self.invalidate()
+        #        #usleep(10)
+        #    except:
+        #        print_exception("grid")
 
         self.darr = {};
 
@@ -195,9 +195,7 @@ class Flooder():
 
         #return
 
-        bpx = self.xparent.simg.bpx
-
-        row =  bpx * yyy * self.iww
+        row =  self.bpx * yyy * self.iww
         newcol = None
         try:
             if kind == flood.DOT_YES:
@@ -225,23 +223,25 @@ class Flooder():
                 pass
             if newcol:
                 for cnt, aa in enumerate(newcol):
-                    self.xparent.simg.buf[cnt + bpx * xxx + row] = newcol[cnt]
+                    if self.xparent:
+                        self.xparent.simg.buf[cnt + self.bpx * xxx + row] = newcol[cnt]
                     #self.buf[cnt + bpx * xxx + row] = newcol[cnt]
                 pass
 
             if fparam.cnt % fparam.breath == 0:
                 #self.xparent.win2.simg.invalidate()
                 #self.xparent.win3.simg.invalidate()
-                self.xparent.simg.invalidate()
-                if self.xparent.check4.get_active():
-                    usleep(1)
+                if self.xparent:
+                    self.xparent.simg.invalidate()
+                    if self.xparent.check4.get_active():
+                        usleep(1)
         except:
             print("callb", xxx, yyy, kind, sys.exc_info())
             print_exception("callb")
 
     def _anal_image_worker(self, xxx, yyy):
 
-        ''' Work until reasonable matche=s found '''
+        ''' Work until reasonable matche(s) found '''
 
         allcnt = 0
         ttt = time.time()
@@ -254,11 +254,11 @@ class Flooder():
 
             self.gl_dones = {}
             found = self._anal_image_worker2(xxx, yyy)
-            if xconfig.verbose:
+            if self.verbose:
                 print("worker2() found", found, "with thresh", self.thresh)
                 pass
 
-            # BREAK out, no dancing here
+            # BREAK out, no dancing here for now
             break
 
             # Image is too simple, break
@@ -294,7 +294,7 @@ class Flooder():
             fparam.thresh = self.thresh;
             fparam.markcol = MARKCOL
             fparam.breath = 30;
-            fparam.verbose = 0
+            fparam.verbose = self.verbose
             fparam.seekstep = self.iww // 50
 
             if not self.single:
@@ -313,7 +313,7 @@ class Flooder():
             if yyy >= self.ihh:
                 break
 
-            if self.xparent.check3.get_active():
+            if self.grey:
                 #print("Grey compare")
                 fparam.grey = True
 
@@ -335,7 +335,7 @@ class Flooder():
 
             #print("flood_one: %.2f ms" % (1000 * (time.time() - ttt)))
             found += 1
-            if self.xparent.check4.get_active():
+            if self.animate:
                 usleep(100)
 
             # Process data from flood
@@ -345,11 +345,10 @@ class Flooder():
 
             # Save last
             coords = (fparam.minx, fparam.miny, fparam.maxx, fparam.maxy,)
-            self.xparent.narr = [str(found), coords, fparam.mark,
-                                                fparam.body, fparam.bounds]
-            # Save cummulative
-            #self.sumxx.append(self.xparent.narr)
 
+            if self.xparent:
+                self.xparent.narr = [str(found), coords, fparam.mark,
+                                                fparam.body, fparam.bounds]
             # Compare with stock
             #sss = self.compare(nbounds, fparam)
             #if not addx:
@@ -365,29 +364,18 @@ class Flooder():
                 break
             #print()
 
-        #for aa in self.sumx:
-        #    print("aa", aa)
-        #    try:
-        #        print(aa[0:5], aa[5][0:3], aa[6], aa[7][:2], "...")
-        #    except IndexError:
-        #        #print("exc sumx", sys.exc_info())
-        #        pass
-        #    except:
-        #        print("exc sumx", sys.exc_info())
-
         # Display results
         lenx = 0
         for aa in self.islands:
             #print(aa.center, aa.bounds, aa.lenorg )
             lenx += len(aa.data)
         #print("lenx", lenx)
-
-        #self.sumf.append(self.fname)
         #print("%d segments found." % found)
-        self.sumx.append(self.islands)
         print("%d islands scanned. %d points" % (len(self.islands), lenx))
-        #for aa in self.islands:
-        #    print(aa.dump())
+
+        if self.verbose > 1:
+            for aa in self.islands:
+                print(aa.dump())
         return found
 
     def island(self, nbounds):
@@ -431,19 +419,20 @@ class Flooder():
             except:
                 #print("disp nbounds", prev, aa, sys.exc_info())
                 pass
-            self.xparent.simg2.invalidate()
-            if self.xparent.check4.get_active():
+            if self.xparent:
+                self.xparent.simg2.invalidate()
+            if self.animate:
                 usleep(10   )
             #prev[0] = aa[0]; prev[1] = aa[1]
             prev = list(aa)
 
         # Connect last to first
-        self.xparent.simg2.drawline(end[0], end[1], org[0], org[1], col)
-
-        col3 = (0xff, 0x00, 0x00, 0xff)
-        self.xparent.simg2.setcol(org[0], org[1], col3)
-        col4 = (0x00, 0xff, 0xff, 0xff)
-        self.xparent.simg2.setcol(end[0], end[1], col4)
+        if self.xparent:
+            self.xparent.simg2.drawline(end[0], end[1], org[0], org[1], col)
+            col3 = (0xff, 0x00, 0x00, 0xff)
+            self.xparent.simg2.setcol(org[0], org[1], col3)
+            col4 = (0x00, 0xff, 0xff, 0xff)
+            self.xparent.simg2.setcol(end[0], end[1], col4)
 
         #usleep(10)
 
