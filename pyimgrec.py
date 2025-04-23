@@ -20,6 +20,7 @@ from pyimgutils import *
 
 import  treehand, img_main
 import  algorithm.outline as norm
+import  imgflood
 
 try:
     import imgrec.imgrec as imgrec
@@ -491,13 +492,13 @@ class MainWin():
 
         self.spacer(hbox)
 
-        butt1 = Gtk.Button.new_with_mnemonic(" R_ecog ")
+        butt1 = Gtk.Button.new_with_mnemonic(" _Recog ")
         butt1.connect("clicked", self.recog_image, window)
         hbox.pack_start(butt1, False, 0, 0)
 
         self.spacer(hbox)
 
-        butt3 = Gtk.Button.new_with_mnemonic(" _Refresh ")
+        butt3 = Gtk.Button.new_with_mnemonic(" Refresh ")
         butt3.connect("clicked", self.refr_image, window)
         hbox.pack_start(butt3, False, 0, 0)
 
@@ -803,19 +804,21 @@ class MainWin():
     def recog_image(self, win, a3):
 
         ''' compare current with saved scans '''
-        print("Recog", len(self.area.sumx) )
 
-        if len(self.area.sumx) < 2:
+        #print("Recog", len(self.area.sumxx) )
+
+        if len(self.area.sumxx) < 2:
             print("Recog: must have more than one scan")
             return
 
-        ref =  self.area.sumx[0]
-        for aa in range(1, len(self.area.sumx)):
-            targ = self.area.sumx[aa]
+        ref =  self.area.sumxx[0]
+        for aa in range(1, len(self.area.sumxx)):
+            targ = self.area.sumxx[aa]
             #print("compare:", ref)
             #print("to:     ", targ)
+
             print("compare:", aa, self.area.sumf[aa])
-            res = ref[aa].find_similar(ref[aa], targ[aa], 2)
+            res = ref[aa].find_similar(targ[aa], 2)
             #print("res:", res)
 
             # Ref - Targ
@@ -824,14 +827,14 @@ class MainWin():
             #     eeeee
             #         eeeee
 
-            for aa in res:
-                print(  aa[0], ":", ref[aa[0]].center,
-                        aa[1], ":", targ[aa[1]].center,
-                        "dx",  ref[aa[0]].center[0] - targ[aa[1]].center[0],
-                        "dy",  ref[aa[0]].center[1] - targ[aa[1]].center[1],
-                        )
+            #for aa in res:
+                #print(  aa[0], ":", ref[aa[0]].center,
+                #        aa[1], ":", targ[aa[1]].center,
+                #        "dx",  ref[aa[0]].center[0] - targ[aa[1]].center[0],
+                #        "dy",  ref[aa[0]].center[1] - targ[aa[1]].center[1],
+                #        )
 
-            ordx = []; matchx = []
+            ordx = []; matchx = []; ordy = []; matchy = []
             for aa in res:
                 ang = aa
                 for bb in res:
@@ -843,7 +846,13 @@ class MainWin():
                         ordx.append(deltax)
                     else:
                         matchx.append((deltax, aa, bb))
-            print("matchx", matchx)
+
+                    if deltay not in ordy:
+                        ordy.append(deltay)
+                    else:
+                        matchy.append((deltay, aa, bb))
+
+            print("matchx len:", len(matchx), "matchy len:", len(matchy))
         print()
 
     def fractal_image(self, win, a3):
@@ -928,7 +937,16 @@ class MainWin():
         self.clear_small_img()
         self.win2.simg.clear()
         self.win3.simg.clear()
-        self.area.anal_image(0, 0)
+
+        self.flooder = imgflood.Flooder()
+        self.flooder.xparent = self
+        self.flooder.buf = self.area.buf
+        self.flooder.iww = self.area.iww
+        self.flooder.ihh = self.area.ihh
+        self.flooder.bpx = self.area.bpx
+
+        self.flooder.anal_image(0, 0)
+
         self.area.invalidate()
 
     def refr_image(self, arg, ww):

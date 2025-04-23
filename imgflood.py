@@ -13,6 +13,7 @@ import os, sys, getopt, signal, array, math
 import time, random
 import cairo
 
+DIVIDER     = 32                 # How many divisions, mostly for testing
 THRESH      = 20                 # Color diff for boundary
 MARKCOL     = 180                # Color counts as mark
 MAXFOUND    = 200
@@ -39,27 +40,55 @@ from gi.repository import GdkPixbuf
 
 import imgrec.imgrec as imgrec
 
-class Flood():
+# Parameters for the flooder
+#class FloodParm():
+#    def __init__(self):
+#        pass
 
-# --------------------------------------------------------------------
+class Flooder():
+
+    ''' Class to drive floodfill '''
+
+    def __init__(self):
+        self.markcol = None
+        self.thresh = 60
+        self.drawgrid = False
+        self.treestore = None
+        self.xparent = None
+        self.single = False
+        self.addx = False
+        self.reanal = False
+        self.stepx = 1
+        self.stepy = 1
+        self.divider = DIVIDER
+        self.islands = []
+        self.sumx = []
+        pass
+
+    # --------------------------------------------------------------------
     # Using an arrray to manipulate the underlying buffer
 
-    def anal_image(self, xxx, yyy, single = False, addx = False):
+    #def anal_image(self, xxx, yyy, single = False, addx = False):
+
+    def anal_image(self, xxx, yyy):
+
+        # New output
+        self.islands = []
+        self.sumx = []
+
 
         imgrec.verbose = 0
         imgrec.anchor(self.buf, shape=(self.iww, self.ihh, self.bpx))
 
-        global MARKCOL, THRESH
-        MARKCOL = int(self.xparent.scale.get_value())
-        THRESH  = int(self.xparent.scale2.get_value())
+        self.stepx = float(self.iww)/self.divider;
+        self.stepy = float(self.ihh)/self.divider;
 
         #imgrec.verbose = 1
         #avg = imgrec.average()
         if xconfig.verbose:
             print( "Anal image xxx:", xxx, "yyy:", yyy, "www", self.iww, "hhh", self.ihh,
-                        "thresh", THRESH, "markcol", MARKCOL)
+                        "thresh", self.thresh, "markcol", self.markcol)
             #print("divider", self.divider)
-
 
         #imgrec.verbose = 0
 
@@ -111,12 +140,12 @@ class Flood():
             return
 
         # See if repeated request for scanning the same image
-        if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
-            self.xparent.simg.clear()
-            #self.xparent.win2.simg.clear()
-            self.gl_dones = {}
+        #if not self.laststate & Gdk.ModifierType.SHIFT_MASK:
+        #    self.xparent.simg.clear()
+        #    #self.xparent.win2.simg.clear()
+        #    self.gl_dones = {}
 
-        self._anal_image_worker(xxx, yyy, single, addx)
+        self._anal_image_worker(xxx, yyy)
         self.reanal = 0
 
     def compare(self, xarr, fbounds):
@@ -149,6 +178,15 @@ class Flood():
 
         # Display final image
         #self.invalidate()
+
+    def _add_to_dict(self, xdic, xxx, yyy, val):
+        try:
+            xdic[yyy][xxx] = val
+        except KeyError:
+            xdic[yyy] = {}
+            xdic[yyy][xxx] = val
+        except:
+            print( "add to dict", sys.exc_info())
 
     def callb(self, xxx, yyy, kind, fparam):
 
@@ -201,12 +239,11 @@ class Flood():
             print("callb", xxx, yyy, kind, sys.exc_info())
             print_exception("callb")
 
-    def _anal_image_worker(self, xxx, yyy, single, addx):
+    def _anal_image_worker(self, xxx, yyy):
 
         ''' Work until reasonable matche=s found '''
 
         allcnt = 0
-        thresh = THRESH
         ttt = time.time()
 
         while True:
@@ -216,9 +253,9 @@ class Flood():
             allcnt += 1
 
             self.gl_dones = {}
-            found = self._anal_image_worker2(xxx, yyy, single, thresh, addx)
+            found = self._anal_image_worker2(xxx, yyy)
             if xconfig.verbose:
-                print("worker2() found", found, "with thresh", thresh)
+                print("worker2() found", found, "with thresh", self.thresh)
                 pass
 
             # BREAK out, no dancing here
@@ -234,16 +271,15 @@ class Flood():
                 break
 
             if found > MAXFOUND:
-                thresh += (found - MAXFOUND) // MINMAXFACT
+                self.thresh += (found - MAXFOUND) // MINMAXFACT
             else:
-                thresh -= (found - MINFOUND) // MINMAXFACT
+                self.thresh -= (found - MINFOUND) // MINMAXFACT
 
         print("anal time: %.2f ms" % ((time.time() - ttt) * 1000))
 
-    def _anal_image_worker2(self, xxx, yyy, single, thresh, addx):
+    def _anal_image_worker2(self, xxx, yyy):
 
         found = 0
-        self.islands = []
 
         # Iterate all shapes
         while True:
@@ -253,12 +289,15 @@ class Flood():
             # Set up flood fill parameters
             fparam = flood.floodParm(self.iww, self.ihh, self.darr)
             fparam.callb = self.callb
-            fparam.stepx = self.stepx; fparam.stepy = self.stepy
-            fparam.thresh = thresh;    fparam.markcol = MARKCOL
-            fparam.breath = 30;        fparam.verbose = 0
+            fparam.stepx = self.stepx;
+            fparam.stepy = self.stepy
+            fparam.thresh = self.thresh;
+            fparam.markcol = MARKCOL
+            fparam.breath = 30;
+            fparam.verbose = 0
             fparam.seekstep = self.iww // 50
 
-            if not single:
+            if not self.single:
                 # pre step, skip past dones
                 xxx += fparam.seekstep
                 if xxx >= fparam.iww:
@@ -322,19 +361,19 @@ class Flood():
                 if len(nbounds) == 0:
                     msg("No shape yet")
 
-            if single:
+            if self.single:
                 break
             #print()
 
-        #for aa in self.sumxx:
+        #for aa in self.sumx:
         #    print("aa", aa)
         #    try:
         #        print(aa[0:5], aa[5][0:3], aa[6], aa[7][:2], "...")
         #    except IndexError:
-        #        #print("exc sumxx", sys.exc_info())
+        #        #print("exc sumx", sys.exc_info())
         #        pass
         #    except:
-        #        print("exc sumxx", sys.exc_info())
+        #        print("exc sumx", sys.exc_info())
 
         # Display results
         lenx = 0
@@ -343,11 +382,12 @@ class Flood():
             lenx += len(aa.data)
         #print("lenx", lenx)
 
-        self.sumf.append(self.fname)
+        #self.sumf.append(self.fname)
         #print("%d segments found." % found)
-        self.sumxx.append(self.islands)
+        self.sumx.append(self.islands)
         print("%d islands scanned. %d points" % (len(self.islands), lenx))
-
+        #for aa in self.islands:
+        #    print(aa.dump())
         return found
 
     def island(self, nbounds):

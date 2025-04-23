@@ -41,7 +41,7 @@ MAG_FACT    = 2
 MAG_SIZE    = 300
 
 
-class ImgMain(Gtk.DrawingArea, imgproc.ImgProc, imgflood.Flood):
+class ImgMain(Gtk.DrawingArea, imgproc.ImgProc):
 
     def __init__(self, xparent, wwww = 100, hhhh = 100):
 
@@ -93,15 +93,6 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc, imgflood.Flood):
         self.xparent.labx.set_text("")
         self.xparent.laby.set_text("")
         self.xparent.labz.set_text("")
-
-    def _add_to_dict(self, xdic, xxx, yyy, val):
-        try:
-            xdic[yyy][xxx] = val
-        except KeyError:
-            xdic[yyy] = {}
-            xdic[yyy][xxx] = val
-        except:
-            print( "add to dict", sys.exc_info())
 
     def area_motion(self, area, event):
         #print(  event.x, event.y)
@@ -255,7 +246,12 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc, imgflood.Flood):
         addx = event.state & Gdk.ModifierType.SHIFT_MASK
         #print("mou", event.state)
 
-        self.anal_image(int(event.x), int(event.y), True, addx)
+        fpar = imgflood.FloodParm()
+        fpar.xparent = self.xparent
+        fpar.markcol = int(self.xparent.scale.get_value())
+        fpar.thresh  = int(self.xparent.scale2.get_value())
+
+        self.flooder.anal_image(int(event.x), int(event.y), fpar)
 
         self.get_window().set_cursor(None)
 
@@ -291,6 +287,7 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc, imgflood.Flood):
         try:
             self.image.set_from_file(fname)
             pix = self.image.get_pixbuf()
+            self.fname = fname
             self._create(pix)
         except:
             print("exc load", fname, sys.exc_info())

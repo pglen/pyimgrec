@@ -75,7 +75,8 @@ class MainWin():
 
     def __init__(self, args):
 
-        self.rislands = []
+        self.ref = None
+        self.sumx = []
         self.fname = ""
         self.curr = []
         self.reenter = 0
@@ -219,14 +220,14 @@ class MainWin():
         self.laby = Gtk.Label(label="")
         self.labz = Gtk.Label(label="")
         vimgbox = Gtk.VBox()
-        vimgbox.pack_start(self.labx, 0, 0, 0)
-        vimgbox.pack_start(self.laby, 0, 0, 0)
-        vimgbox.pack_start(self.labz, 0, 0, 0)
-        #vimgbox.pack_start(self.simg2, 0, 0, 2)
+        #vimgbox.pack_start(self.labx, 0, 0, 0)
+        #vimgbox.pack_start(self.laby, 0, 0, 0)
+        #vimgbox.pack_start(self.labz, 0, 0, 0)
+        vimgbox.pack_start(self.simg2, 0, 0, 2)
         #vimgbox.pack_start(self.simg3, 0, 0, 2)
         self.lab = Gtk.Label(label=" None ")
         vimgbox.pack_start(self.lab, 0, 0, 0)
-        #self.mainbox.pack_start(vimgbox, 0, 0, 4)
+        self.mainbox.pack_start(vimgbox, 0, 0, 4)
 
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL,
                                                         0, 255, 1)
@@ -283,6 +284,11 @@ class MainWin():
         if self.reenter:
             return
         self.reenter = True
+
+        #pixbuf = GdkPixbuf.Pixbuf.new_from_data(buf,
+        #                                GdkPixbuf.Colorspace.RGB, True, 8,
+        #                                    100, 100, 400 )
+        #self.area.from_pixbuf(pixbuf)
 
         ctx = GLib.main_context_default()
 
@@ -343,7 +349,7 @@ class MainWin():
         # Output image
         width = img.get_width();  height = img.get_height()
         orgbuf   = img.get_data()
-        #print("Got:", len(buf), width, height)
+        print("Got:", len(orgbuf), width, height)
         buf = bytearray(width * height * 4)
         rowstride = width * 4
         # Convert to RGBA
@@ -367,18 +373,32 @@ class MainWin():
         self.area.anal_image(0, 0)
         self.area.invalidate()
 
-        def addlist(aaa, lll):
-            for aa in lll:
-                enc = bytes(aa, 'utf-8')
-                print("enc", enc)
-                aaa += aa & 0xff
-            return aaa
-
         if self.enrollx:
             print("Enroll:", self.ecount)
             self.ecount += 1
-            self.save_enroll()
+            self.sumx.append(self.area.islands)
+            self.save_enroll(self.area.islands)
+        else:
+            #print("Enroll:", self.ecount)
+            self.ref = self.area.islands
+            #print("ref:", self.ref)
         self.reenter = False
+
+    def save_enroll(self, data):
+
+        cnt = 0
+        while True:
+            fname = "print_%d.dat" % cnt
+            if not os.path.isfile(fname):
+                fp = open(fname, "wb")
+                pickle.dump(len(data), fp)
+                for aa in data:
+                    pickle.dump(aa.center, fp)
+                    pickle.dump(aa.bounds, fp)
+                    pickle.dump(aa.data, fp)
+                fp.close()
+                break
+            cnt += 1
 
     def load_enroll(self, win = None, ww = None):
 
@@ -391,8 +411,10 @@ class MainWin():
             if not fnmatch.fnmatch(aa, "print_*.dat"):
                 continue
             #print("filename", aa)
+            islands = []
             fp = open(aa, "rb")
             count = pickle.load(fp)
+            #print("Loading count:", count)
             while True:
                 try:
                     center = pickle.load(fp)
@@ -406,32 +428,16 @@ class MainWin():
                 dat = island.IsLand(data)
                 dat.bounds = bounds
                 dat.center = center
-                #print(dat.dump())
-                self.rislands.append(dat)
+                #dat.dump())
+                islands.append(dat)
                 count -= 1
             fp.close()
-
             if count != 0:
                 print("unexpected record count", count)
             cnt += 1
+            #print(type(islands))
+            self.sumx.append(islands)
         print(cnt, "files loaded.")
-
-    def save_enroll(self):
-
-        cnt = 0
-        while True:
-            fname = "print_%d.dat" % cnt
-            if not os.path.isfile(fname):
-                fp = open(fname, "wb")
-
-                pickle.dump(len(self.area.islands), fp)
-                for aa in self.area.islands:
-                    pickle.dump(aa.center, fp)
-                    pickle.dump(aa.bounds, fp)
-                    pickle.dump(aa.data, fp)
-                fp.close()
-                break
-            cnt += 1
 
     def vspacer(self, vbox):
         vbox2 = Gtk.VBox()
@@ -621,8 +627,14 @@ class MainWin():
         butt92a.connect("clicked", self.analize, window)
         hbox.pack_start(butt92a, False, 0 ,0)
 
-        butt92a = Gtk.Button.new_with_mnemonic(" loa_d enroll ")
-        butt92a.connect("clicked", self.load_enroll, window)
+        #self.spacer(hbox)
+        #butt92a = Gtk.Button.new_with_mnemonic(" loa_d enroll ")
+        #butt92a.connect("clicked", self.load_enroll, window)
+        #hbox.pack_start(butt92a, False, 0 ,0)
+
+        self.spacer(hbox)
+        butt92a = Gtk.Button.new_with_mnemonic(" _Recog ")
+        butt92a.connect("clicked", self.recog_image, window)
         hbox.pack_start(butt92a, False, 0 ,0)
 
         #self.spacer(hbox)
@@ -811,19 +823,19 @@ class MainWin():
                         nbounds = norm.scale_magnitude(nbs, norm.ARRLEN)
                         self.merge.append(nbounds)
 
-                        #for aa in nbounds:
-                        #    #print(aa[0], aa[1])
-                        #    offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
-                        #    try:
-                        #        self.simg2.buf[offs]   = 0xff
-                        #        self.simg2.buf[offs+1] = 0xff
-                        #        self.simg2.buf[offs+2] = 0xff
-                        #        self.simg2.buf[offs+3] = 0xff
-                        #    except:
-                        #        #print("exc nbounds", aa[0], aa[1], sys.exc_info())
-                        #        pass
-                        #    self.simg2.invalidate()
-                        #    usleep(5)
+                        for aa in nbounds:
+                            #print(aa[0], aa[1])
+                            offs = 4 * (aa[0] + aa[1] * self.simg2.ww)
+                            try:
+                                self.simg2.buf[offs]   = 0xff
+                                self.simg2.buf[offs+1] = 0xff
+                                self.simg2.buf[offs+2] = 0xff
+                                self.simg2.buf[offs+3] = 0xff
+                            except:
+                                #print("exc nbounds", aa[0], aa[1], sys.exc_info())
+                                pass
+                            self.simg2.invalidate()
+                            usleep(5)
 
                         self.simg3.clear()
                         sss = []
@@ -844,50 +856,55 @@ class MainWin():
                                 self.simg3.invalidate()
                                 #usleep(5)
 
-    def recog_image(self, win, a3):
+    def recog_image(self, win = None, ww = None):
 
         ''' compare current with saved scans '''
-        print("Recog", len(self.area.sumx) )
+        print("Recog", len(self.sumx) )
 
-        if len(self.area.sumx) < 2:
-            print("Recog: must have more than one scan")
+        if not self.ref:
+            print("Must have ref scan.")
             return
 
-        ref =  self.area.sumx[0]
-        for aa in range(1, len(self.area.sumx)):
-            targ = self.area.sumx[aa]
-            #print("compare:", ref)
+        if len(self.sumx) < 2:
+            print("Recog: must have more than one enroll scan")
+            return
+
+        for aa in range(0, len(self.sumx)):
+            targ = self.sumx[aa]
+            #print("ref:", self.ref)
             #print("to:     ", targ)
-            print("compare:", aa)
-            res = ref[aa].find_similar(ref[aa], targ[aa])
-            #print("res:", res)
 
-            # Ref - Targ
-            # ooooo
-            #   oooooo
-            #     eeeee
-            #         eeeee
+            com = min(len(self.ref), len(targ))
+            for bb in range(com):
+                res = self.ref[bb].find_similar(targ[bb])
+                #for aaa in res:
+                #    print(  aaa[0], ":", self.ref[aaa[0]].center,
+                #            aaa[1], ":", targ[aaa[1]].center,
+                #            "dx",  self.ref[aaa[0]].center[0] - targ[aaa[1]].center[0],
+                #            "dy",  self.ref[aaa[0]].center[1] - targ[aaa[1]].center[1],
+                #            )
+                ordx = []; ordy = [] ; matchx = [] ; matchy = []
+                for cc in res:
+                    for dd in res:
+                        if dd == cc:
+                            continue
+                        deltax = self.ref[cc[0]].center[0] - targ[cc[1]].center[0]
+                        deltay = self.ref[cc[0]].center[1] - targ[cc[1]].center[1]
+                        print("deltas", deltax, deltay, end = " ")
+                        if deltax not in ordx:
+                            ordx.append(deltax)
+                        if deltay not in ordy:
+                            ordy.append(deltay)
 
-            for aa in res:
-                print(  aa[0], ":", ref[aa[0]].center,
-                        aa[1], ":", targ[aa[1]].center,
-                        "dx",  ref[aa[0]].center[0] - targ[aa[1]].center[0],
-                        "dy",  ref[aa[0]].center[1] - targ[aa[1]].center[1],
-                        )
-
-            ordx = []; matchx = []
-            for aa in res:
-                ang = aa
-                for bb in res:
-                    if aa == bb:
-                        continue
-                    deltax = ref[aa[0]].center[0] - targ[bb[1]].center[0]
-                    deltay = ref[aa[0]].center[1] - targ[bb[1]].center[1]
-                    if deltax not in ordx:
-                        ordx.append(deltax)
-                    else:
-                        matchx.append((deltax, aa, bb))
-            print("matchx", matchx)
+                        if deltax not in ordx and deltay not in ordy:
+                            pass
+                        else:
+                            matchx.append((deltax, cc, dd))
+                            matchy.append((deltay, cc, dd))
+                lenx = len(matchx)
+                if lenx > 1:
+                    print("Match at:", aa, lenx, "matches.")
+                print(aa, "matchx", matchx)
         print()
 
     def fractal_image(self, win, a3):
