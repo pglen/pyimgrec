@@ -262,24 +262,22 @@ class ofd():
 
     def __init__(self, msg = "Open File", startdir = "images",
                                         mode=Gtk.FileChooserAction.OPEN):
-        self.result = None
 
-        #global old_dir
-        #if not old_dir:
+        #print("ofd", startdir)
+        self.result = None
+        self.old = os.getcwd()
         try:
             os.chdir(startdir)
         except:
+            #print(sys.exc_info())
             pass
-        self.old = os.getcwd()
-        #old_dir = self.old
-
-        #print("old_dir:", old_dir)
+        #print(os.getcwd())
 
         fc = Gtk.FileChooserDialog( title = msg, transient_for = None,
                                         action = mode)
         butts =  ("OK", Gtk.ButtonsType.OK, "Cancel", Gtk.ButtonsType.CANCEL,)
         fc.add_buttons(*butts)
-        fc.set_current_folder(old_dir)
+        fc.set_current_folder(startdir)
 
         fc.connect("key-press-event", self.area_key, fc)
         fc.connect("key-release-event", self.area_key, fc)
@@ -302,7 +300,7 @@ class ofd():
                     msg("Must have filename")
                 else:
                     self.result = fname
-                old_dir = os.path.dirname(fname)
+                #old_dir = os.path.dirname(fname)
             except:
                 msg("Cannot open file", fname)
         win.destroy()

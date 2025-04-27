@@ -23,22 +23,21 @@ __doc__ = \
     The local list is copied to global at the end of every scan.
 '''
 
-#DOT_NO = 0
-#DOT_YES = 1
-#DOT_BOUND = 2
-#DOT_MARK = 3
-#DOT_POP = 4
-#DOT_INVALIDATE = 5
+DOT_NO = 0
+DOT_YES = 1
+DOT_BOUND = 2
+DOT_MARK = 3
+DOT_POP = 4
+DOT_INVALIDATE = 5
 
 # Results of compare, and more enums
-dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_MARK",
-                    "DOT_POP", "DOT_INVALIDATE")
-def str_enum(val):
-    return dot_strs[val]
-
-# Create enums
-create_enums(dot_strs, locals())
-
+#dot_strs = ("DOT_NO", "DOT_YES", "DOT_BOUND", "DOT_MARK",
+#                    "DOT_POP", "DOT_INVALIDATE")
+#def str_enum(val):
+#    return dot_strs[val]
+#
+## Create enums
+#create_enums(dot_strs, locals())
 # Verify enums
 #for aaa in dot_strs:
 #    print("%s=%d" % (aaa, locals().get(aaa)), end = " ")
@@ -66,11 +65,12 @@ class floodParm():
         private / reentrent data.
     '''
 
-    def __init__(self, iww, ihh, darr):
+    def __init__(self, iww, ihh, bpx, darr):
 
         self.darr = darr;       self.seekstep = 1
         self.iww = iww;         self.ihh = ihh
-        self.callb = None;
+        self.bpx = bpx
+        self.callb = None;      self.xparent = None
         self.mark = [0,0,0,0];  self.exit = 0
         self.cnt = 0;           self.ops = 0
         self.depth = 0;         self.verbose = 0;

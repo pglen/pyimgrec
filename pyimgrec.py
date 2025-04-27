@@ -19,8 +19,10 @@ from timeit import Timer
 from pyimgutils import *
 
 import  treehand, img_main
+
 import  algorithm.outline as norm
-import  imgflood
+import  algorithm.imgproc as imgproc
+import  algorithm.imgflood as imgflood
 
 try:
     import imgrec.imgrec as imgrec
@@ -68,6 +70,11 @@ class MainWin():
 
     def __init__(self, args):
 
+        self.flooder = imgflood.Flooder()
+        self.flooder.xparent = self
+        self.flooder.verbose = xconfig.verbose
+
+        self.fname = ""
         self.curr = []
         self.reenter = 0
         self.merge = []
@@ -155,6 +162,9 @@ class MainWin():
         self.simg2 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
         self.simg3 = Imagex(self, norm.ARRLEN, norm.ARRLEN)
 
+        self.simg2.clear(.6, .6, .6)
+        self.simg3.clear(.7, .7, .7)
+
         self.simg.connect("button-press-event", self.simg_button)
 
         vbox2 = Gtk.VBox()
@@ -175,13 +185,14 @@ class MainWin():
                 #self.load("images/IMG_0823.jpg")
                 #self.load("images/shapes.png")
                 #self.load("images/shapex.png")
-                self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/image_8.png")
+                self.load("/home/peterglen/pgsrc/fprint/libfprint/contrib/middle_4.png")
                 #self.load("images/Untitled.png")
                 #self.load("images/line.png")
                 #self.load("images/star.png")
                 #self.load("images/rect.png")
                 #self.load("images/IMG_0827.jpg")
                 #self.load("images/enrolled.pgm")
+                pass
         except:
             print_exception("Load Image")
             #msg("Cannot load file " + self.fname)
@@ -661,9 +672,10 @@ class MainWin():
 
     def load_image(self, arg, ww):
 
-        old_dir = os.getcwd()
+        #old_dir = os.getcwd()
+        #os.chdir(os.path.dirname(self.fname))
         res = ofd("Open Image File", os.path.dirname(self.fname))
-        os.chdir(old_dir)
+        #os.chdir(old_dir)
         #print(old_dir)
 
         if not res:
@@ -704,7 +716,7 @@ class MainWin():
             self.win3.simg.clear()
             self.win4.simg.clear()
             self.simg2.clear()
-            #self.simg3.clear()
+            self.simg3.clear()
             #self.merge = []
 
         for aa in self.area.sumx:
@@ -782,7 +794,7 @@ class MainWin():
                         #    self.simg2.invalidate()
                         #    usleep(5)
 
-                        self.simg3.clear()
+                        #self.simg3.clear()
                         sss = []
                         for mmm in self.merge:
                             sss = norm.merge_vectors(sss, mmm)
@@ -805,55 +817,8 @@ class MainWin():
 
         ''' compare current with saved scans '''
 
-        #print("Recog", len(self.area.sumxx) )
-
-        if len(self.area.sumxx) < 2:
-            print("Recog: must have more than one scan")
-            return
-
-        ref =  self.area.sumxx[0]
-        for aa in range(1, len(self.area.sumxx)):
-            targ = self.area.sumxx[aa]
-            #print("compare:", ref)
-            #print("to:     ", targ)
-
-            print("compare:", aa, self.area.sumf[aa])
-            res = ref[aa].find_similar(targ[aa], 2)
-            #print("res:", res)
-
-            # Ref - Targ
-            # ooooo
-            #   oooooo
-            #     eeeee
-            #         eeeee
-
-            #for aa in res:
-                #print(  aa[0], ":", ref[aa[0]].center,
-                #        aa[1], ":", targ[aa[1]].center,
-                #        "dx",  ref[aa[0]].center[0] - targ[aa[1]].center[0],
-                #        "dy",  ref[aa[0]].center[1] - targ[aa[1]].center[1],
-                #        )
-
-            ordx = []; matchx = []; ordy = []; matchy = []
-            for aa in res:
-                ang = aa
-                for bb in res:
-                    if aa == bb:
-                        continue
-                    deltax = ref[aa[0]].center[0] - targ[bb[1]].center[0]
-                    deltay = ref[aa[0]].center[1] - targ[bb[1]].center[1]
-                    if deltax not in ordx:
-                        ordx.append(deltax)
-                    else:
-                        matchx.append((deltax, aa, bb))
-
-                    if deltay not in ordy:
-                        ordy.append(deltay)
-                    else:
-                        matchy.append((deltay, aa, bb))
-
-            print("matchx len:", len(matchx), "matchy len:", len(matchy))
-        print()
+        #print("Recog", len(self.area.sumx) )
+        self.flooder.recog(self.area.sumx, self.area.sumf)
 
     def fractal_image(self, win, a3):
 
@@ -935,10 +900,6 @@ class MainWin():
 
     def _anal_image(self):
 
-        self.flooder = imgflood.Flooder()
-        self.flooder.xparent = self
-        self.flooder.verbose = xconfig.verbose
-
         # Get GUI params
         self.flooder.grid = self.check1.get_active()
         self.flooder.grey = self.check3.get_active()
@@ -953,13 +914,19 @@ class MainWin():
         self.flooder.bpx = self.area.bpx
 
         self.flooder.anal_image(0, 0)
+        self.area.sumx.append(self.flooder.islands)
+        self.area.sumf.append(self.area.fname)
 
     def anal_image(self, win, a3):
         self.clear_small_img()
         self.win2.simg.clear()
         self.win3.simg.clear()
+        self.win4.simg.clear()
         self._anal_image()
         self.area.invalidate()
+        self.win2.simg.invalidate()
+        self.win3.simg.invalidate()
+        self.win4.simg.invalidate()
 
     def refr_image(self, arg, ww):
         self.area.refresh()
@@ -979,18 +946,18 @@ class MainWin():
 
         '''
         # Test
-        for aa in range(4):
-            col = [ random.randint(0, 255),
-                    random.randint(0, 255),
-                    random.randint(0, 255),
-                    random.randint(0, 255)]
-            xx  = random.randint(0, norm.ARRLEN-1)
-            yy  = random.randint(0, norm.ARRLEN-1)
-            xx2 = random.randint(0, norm.ARRLEN-1)
-            yy2 = random.randint(0, norm.ARRLEN-1)
-            print(xx, yy, xx2, yy2)
-            self.simg2.drawline(xx, yy, xx2, yy2, col);
-            pass
+        #for aa in range(4):
+        #    col = [ random.randint(0, 255),
+        #            random.randint(0, 255),
+        #            random.randint(0, 255),
+        #            random.randint(0, 255)]
+        #    xx  = random.randint(0, norm.ARRLEN-1)
+        #    yy  = random.randint(0, norm.ARRLEN-1)
+        #    xx2 = random.randint(0, norm.ARRLEN-1)
+        #    yy2 = random.randint(0, norm.ARRLEN-1)
+        #    print(xx, yy, xx2, yy2)
+        #    self.simg2.drawline(xx, yy, xx2, yy2, col);
+        #    pass
         col = [0xff, 0xff, 0xff, 0xff, ]
         self.simg2.drawline(30, 40, 110, 120, col);
         self.simg2.drawline(100, 100, 20, 20, col);

@@ -380,6 +380,23 @@ def calc_bounds(bounds):
     #                            "maxx =",  maxx,  "maxy =", maxy)
     return (minx, miny, maxx, maxy)
 
+def find_extremes(bounds):
+
+    ''' Calculate which members make out boundaries '''
+
+    minx = miny = 0xffffffff;
+    maxx = maxy = 0
+    mems = [0, 0, 0, 0]
+    for aa in bounds:
+        #print( aa,)
+        if minx > aa[0]: mems[0] = minx = aa[0]
+        if miny > aa[1]: mems[1] = miny = aa[1]
+        if maxx < aa[0]: mems[2] = maxx = aa[0]
+        if maxy < aa[1]: mems[3] = maxy = aa[1]
+
+    #print("find_extremes()", mems)
+    return mems
+
 def calc_center(minmax):
     xx = minmax[0] + (minmax[2] - minmax[0]) // 2
     yy = minmax[1] + (minmax[3] - minmax[1]) // 2

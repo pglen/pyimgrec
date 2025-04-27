@@ -32,9 +32,8 @@ except:
 
 import  algorithm.flood  as flood
 import  algorithm.outline as outline
-import  algorithm.island as island
-
-import imgproc, imgflood
+import  algorithm.imgproc as imgproc
+import  algorithm.imgflood as imgflood
 
 DIVIDER     = 32                 # How many divisions, mostly for testing
 MAG_FACT    = 2
@@ -75,7 +74,7 @@ class ImgMain(Gtk.DrawingArea, imgproc.ImgProc):
         self.islands = []
         self.mag = False
         self.event_x = self.event_y = 0
-        self.sumxx = []
+        self.sumx = []
         self.sumf = []
 
         self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)

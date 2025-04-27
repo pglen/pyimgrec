@@ -23,18 +23,26 @@ class IsLand():
         strx += "dat: %s " % str(self.data[:3])
         return strx
 
+    def cmp_extents(self, isl2, diff = 1):
+        #print(self.bounds, isl2.bounds)
+        diff = 0
+        for aa in range(self.bounds):
+            diff += abs(self.bounds[aa] - isl2.bounds[aa])
+            #print("end")
+        return diff
+
     def _cmp_one(self, item1, item2):
         tmp   = item1[0] - item2[0]
         tmp2  = item1[1] - item2[1]
         return (tmp, tmp2)
 
-    #def cmp(self, isl1, isl2):
-    #    res = [0, 0]
-    #    for aa in range(len(self.data)):
-    #        tmp, tmp2  = self._cmp_one(isl1.data[aa], isl2.data[aa])
-    #        #print(self.data[aa], "->", isl2.data[aa], (tmp, tmp2), end = "   ")
-    #        res[0] += abs(tmp); res[1] += abs(tmp2)
-    #    return res
+    def cmp(self, isl2, diff = 1):
+        res = [0, 0]
+        for aa in range(len(self.data)):
+            tmp, tmp2  = self._cmp_one(self.data[aa], isl2.data[aa])
+            #print(self.data[aa], "->", isl2.data[aa], (tmp, tmp2), end = "   ")
+            res[0] += abs(tmp); res[1] += abs(tmp2)
+        return res
 
     def find_similar(self, isl2, diff = 1):
 
